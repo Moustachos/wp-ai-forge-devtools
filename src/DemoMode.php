@@ -50,22 +50,6 @@ class DemoMode
             return $provider;
         }, 10, 2);
 
-        // Localized Data - add demo mode info for frontend
-        add_filter('aiforge_localized_data', function ($data) {
-            $data['isDemoMode'] = self::isEnabled();
-            $data['isDemoAvailable'] = self::isAvailable();
-            return $data;
-        });
-    }
-
-    /**
-     * Check if demo mode is available.
-     *
-     * Demo mode is available whenever this plugin (devtools) is active.
-     */
-    public static function isAvailable(): bool
-    {
-        return true;
     }
 
     /**

@@ -12,7 +12,7 @@ use WP_REST_Server;
 
 class DemoModeController extends WP_REST_Controller
 {
-    protected $namespace = 'aiforge/v1';
+    protected $namespace = 'aiforge-dev/v1';
     protected $rest_base = 'demo-mode';
 
     // =========================================================================
@@ -62,7 +62,6 @@ class DemoModeController extends WP_REST_Controller
         return new WP_REST_Response([
             'success' => true,
             'data' => [
-                'available' => DemoMode::isAvailable(),
                 'enabled' => DemoMode::isEnabled(),
             ],
         ]);

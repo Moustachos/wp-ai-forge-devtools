@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AIForge;
 
+use AIForge\Admin\DevAssetLoader;
 use AIForge\REST\DemoModeController;
 
 /**
@@ -45,6 +46,7 @@ class DevTools
 
         DemoMode::register();
         $this->registerRest();
+        $this->registerAdminAssets();
     }
 
     /**
@@ -74,5 +76,14 @@ class DevTools
             $demoModeController = new DemoModeController();
             $demoModeController->register_routes();
         });
+    }
+
+    /**
+     * Register admin assets.
+     */
+    private function registerAdminAssets(): void
+    {
+        $assets = new DevAssetLoader($this->pluginFile);
+        $assets->register();
     }
 }
