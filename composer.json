@@ -1,0 +1,26 @@
+{
+  "name": "wpforge/ai-forge-devtools",
+  "type": "wordpress-plugin",
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "AIForge\\": "src/"
+    }
+  },
+  "require-dev": {
+    "wpforge/ai-forge": "*"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../ai-forge"
+    }
+  ],
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}
