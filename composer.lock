@@ -4,12 +4,39 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5846b2282b40e4317e01694546cf19f",
+    "content-hash": "f25e398025b984666551c905200a0a96",
     "packages": [],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "wpforge/ai-forge",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../wp-ai-forge",
+                "reference": "dac2fe2f387b2c0bbef22edaf31cd192417c0af2"
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "type": "wordpress-plugin",
+            "autoload": {
+                "psr-4": {
+                    "AIForge\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        }
+    ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "wpforge/ai-forge": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

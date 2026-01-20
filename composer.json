@@ -11,12 +11,12 @@
     }
   },
   "require-dev": {
-    "wpforge/ai-forge": "*"
+    "wpforge/ai-forge": "dev-main"
   },
   "repositories": [
     {
       "type": "path",
-      "url": "../ai-forge"
+      "url": "../wp-ai-forge"
     }
   ],
   "config": {
