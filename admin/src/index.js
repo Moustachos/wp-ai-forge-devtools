@@ -1,24 +1,48 @@
 /**
  * AI Forge Dev Tools - Admin Entry Point
  *
- * Registers WordPress hooks to inject demo mode components
+ * Registers WordPress hooks to inject devtools components
  * into the main AI Forge admin interface.
  *
  * @package AIForgeDevTools
  */
 
-import { addFilter } from '@wordpress/hooks';
+import { addFilter, addAction } from '@wordpress/hooks';
 import DemoToggle from './components/DemoToggle';
+import DevToggle from './components/DevToggle';
 import DemoNotice from './components/DemoNotice';
+import PromptDebugger from './components/PromptDebugger';
 import './styles/demo-mode.scss';
+import './styles/prompt-debugger.scss';
+
+// Initialize global state for devtools
+window.aiforgeDevState = window.aiforgeDevState || {};
 
 /**
- * Inject the demo toggle into the app header.
+ * Listen for agent results and store debug info (prompt).
+ */
+addAction(
+    'aiforge.agent.result',
+    'aiforge-devtools/store-prompt',
+    (data) => {
+        if (data?.meta?.debug?.prompt) {
+            window.aiforgeDevState.lastPrompt = data.meta.debug.prompt;
+        }
+    }
+);
+
+/**
+ * Inject the toggles into the app header.
  */
 addFilter(
     'aiforge.app.headerTools',
-    'aiforge-devtools/demo-toggle',
-    () => <DemoToggle />
+    'aiforge-devtools/header-toggles',
+    () => (
+        <div className="aiforge-devtools-toggles">
+            <DemoToggle />
+            <DevToggle />
+        </div>
+    )
 );
 
 /**
@@ -36,6 +60,26 @@ addFilter(
             <>
                 <DemoNotice />
                 {content}
+            </>
+        );
+    }
+);
+
+/**
+ * Inject the prompt debugger after screen content (only on content-integrator in dev mode).
+ */
+addFilter(
+    'aiforge.screen.afterContent',
+    'aiforge-devtools/prompt-debugger',
+    (content, context) => {
+        const isDevMode = window.aiforgeDevData?.isDevMode ?? false;
+        if (!isDevMode || context?.screen !== 'content-integrator') {
+            return content;
+        }
+        return (
+            <>
+                {content}
+                <PromptDebugger />
             </>
         );
     }

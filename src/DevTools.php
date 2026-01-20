@@ -6,12 +6,14 @@ namespace AIForge;
 
 use AIForge\Admin\DevAssetLoader;
 use AIForge\REST\DemoModeController;
+use AIForge\REST\DevModeController;
 
 /**
  * AI Forge Dev Tools main class.
  *
  * Provides development features for AI Forge:
  * - Demo mode: simulate AI responses without API keys
+ * - Dev mode: debug tools (prompt inspection, etc.)
  */
 class DevTools
 {
@@ -45,6 +47,7 @@ class DevTools
         }
 
         DemoMode::register();
+        DevMode::register();
         $this->registerRest();
         $this->registerAdminAssets();
     }
@@ -73,8 +76,8 @@ class DevTools
     private function registerRest(): void
     {
         add_action('rest_api_init', function () {
-            $demoModeController = new DemoModeController();
-            $demoModeController->register_routes();
+            (new DemoModeController())->register_routes();
+            (new DevModeController())->register_routes();
         });
     }
 

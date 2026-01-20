@@ -1,14 +1,15 @@
 // ==========================================================================
-// Demo Mode Components - AI Forge Dev Tools
+// Dev Tools Components - AI Forge Dev Tools
 // ==========================================================================
 
-.aiforge-demo-toggle {
+.aiforge-devtools-toggles {
     position: fixed;
     top: 40px;
     right: 20px;
     z-index: 99999;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 4px;
     padding: 6px 12px;
     background: #fff;
     border: 1px solid var(--aiforge-border, #ddd);

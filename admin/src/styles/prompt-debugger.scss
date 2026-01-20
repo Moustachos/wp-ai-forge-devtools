@@ -1,0 +1,42 @@
+// ==========================================================================
+// Prompt Debugger Component - AI Forge Dev Tools
+// ==========================================================================
+
+.aiforge-prompt-debugger {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f6f7f7;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+
+        h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    }
+
+    &__code {
+        margin: 0;
+        padding: 12px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-x: auto;
+        max-height: 400px;
+        white-space: pre-wrap;
+        word-break: break-word;
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+    }
+}

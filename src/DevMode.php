@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AIForge;
+
+/**
+ * Dev mode management.
+ *
+ * When enabled, exposes debug information like prompts sent to LLMs.
+ * Independent from demo mode - both can be enabled simultaneously.
+ */
+class DevMode
+{
+    private const CAPABILITY = 'manage_options';
+    private const USER_META_KEY = 'aiforge_dev_mode';
+
+    /**
+     * Register all dev mode hooks.
+     */
+    public static function register(): void
+    {
+        // Agent Result Meta - add debug info (prompt) when dev mode is enabled
+        add_filter('aiforge_agent_result_meta', function (array $meta, array $context) {
+            if (self::isEnabled() && isset($context['prompt'])) {
+                $meta['debug'] = [
+                    'prompt' => $context['prompt'],
+                ];
+            }
+            return $meta;
+        }, 10, 2);
+    }
+
+    /**
+     * Check if dev mode is currently enabled.
+     *
+     * Enabled when:
+     * - User is logged in
+     * - User has manage_options capability
+     * - User has enabled it (default: disabled)
+     */
+    public static function isEnabled(): bool
+    {
+        $userId = get_current_user_id();
+        if ($userId === 0 || !current_user_can(self::CAPABILITY)) {
+            return false;
+        }
+
+        $userPref = get_user_meta($userId, self::USER_META_KEY, true);
+
+        // Default to disabled if no preference set
+        return $userPref === '1';
+    }
+
+    /**
+     * Set the dev mode enabled state.
+     */
+    public static function setEnabled(bool $enabled): bool
+    {
+        $userId = get_current_user_id();
+        if ($userId === 0) {
+            return false;
+        }
+
+        return update_user_meta($userId, self::USER_META_KEY, $enabled ? '1' : '0') !== false;
+    }
+}

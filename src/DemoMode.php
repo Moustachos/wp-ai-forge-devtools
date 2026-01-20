@@ -49,7 +49,6 @@ class DemoMode
             }
             return $provider;
         }, 10, 2);
-
     }
 
     /**

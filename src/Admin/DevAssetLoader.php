@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AIForge\Admin;
 
 use AIForge\DemoMode;
+use AIForge\DevMode;
 
 /**
  * Asset loader for AI Forge Dev Tools.
@@ -77,6 +78,7 @@ class DevAssetLoader
             'apiUrl' => rest_url('aiforge-dev/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
             'isDemoMode' => DemoMode::isEnabled(),
+            'isDevMode' => DevMode::isEnabled(),
         ];
     }
 

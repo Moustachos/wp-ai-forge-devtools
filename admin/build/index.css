@@ -1,23 +1,24 @@
 /*!**************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/styles/demo-mode.scss ***!
   \**************************************************************************************************************************************************************************************************************************************************/
-.aiforge-demo-toggle {
+.aiforge-devtools-toggles {
   position: fixed;
   top: 40px;
   right: 20px;
   z-index: 99999;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
   padding: 6px 12px;
   background: #fff;
   border: 1px solid var(--aiforge-border, #ddd);
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-.aiforge-demo-toggle .components-toggle-control {
+.aiforge-devtools-toggles .components-toggle-control {
   margin: 0;
 }
-.aiforge-demo-toggle .components-base-control__label {
+.aiforge-devtools-toggles .components-base-control__label {
   font-size: 12px;
   font-weight: 500;
 }
@@ -39,6 +40,43 @@
   font-size: 18px;
   width: 18px;
   height: 18px;
+}
+/*!********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/styles/prompt-debugger.scss ***!
+  \********************************************************************************************************************************************************************************************************************************************************/
+.aiforge-prompt-debugger {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f6f7f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.aiforge-prompt-debugger__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.aiforge-prompt-debugger__header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.aiforge-prompt-debugger__code {
+  margin: 0;
+  padding: 12px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 400px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.aiforge-prompt-debugger__code code {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 }
 
 /*# sourceMappingURL=index.css.map*/

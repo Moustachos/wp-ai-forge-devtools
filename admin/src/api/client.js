@@ -45,6 +45,14 @@ export const api = {
             method: 'POST',
             body: JSON.stringify({ enabled }),
         }),
+
+    getDevMode: () => request('/dev-mode'),
+
+    setDevMode: (enabled) =>
+        request('/dev-mode', {
+            method: 'POST',
+            body: JSON.stringify({ enabled }),
+        }),
 };
 
 export default api;
