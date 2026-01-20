@@ -2,6 +2,7 @@
 
 /**
 * Plugin Name: AI Forge Dev Tools
+* Requires Plugins: wp-ai-forge
 * Description: Developper only add-on for AI Forge
 * Version: 0.1.0
 * Author: Christophe Barrilliez
