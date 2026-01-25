@@ -56,8 +56,8 @@ class DemoProviderDecorator implements ProviderInterface
 
     public function complete(string $prompt, array $options = []): CompletionResult
     {
-        // Simulate network latency (5-10 seconds)
-        usleep(random_int(5000000, 10000000));
+        // Simulate network latency (15-20 seconds)
+        usleep(random_int(15000000, 20000000));
 
         return $this->mockGenerator->generate($prompt, $options);
     }

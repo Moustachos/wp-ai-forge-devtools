@@ -7,6 +7,7 @@
  * @package AIForgeDevTools
  */
 
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import CopyButton from './CopyButton';
@@ -177,6 +178,33 @@ export function addTaskDetailTabs(tabs, context) {
 }
 
 /**
+ * Copy Prompt Button Component
+ */
+function CopyPromptButton({ prompt }) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(prompt);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (error) {
+			console.error('Failed to copy prompt:', error);
+		}
+	};
+
+	return (
+		<Button
+			variant="secondary"
+			icon={copied ? 'yes' : 'clipboard'}
+			onClick={handleCopy}
+		>
+			{copied ? __('Copié !', 'ai-forge-devtools') : __('Copier le prompt', 'ai-forge-devtools')}
+		</Button>
+	);
+}
+
+/**
  * Add "Copy Prompt" button to TaskDetailModal footer
  */
 export function addTaskDetailFooterActions(actions, context) {
@@ -197,9 +225,9 @@ export function addTaskDetailFooterActions(actions, context) {
 		return actions;
 	}
 
-	// Add "Copy Prompt" button
+	// Add "Copy Prompt" button with explicit label
 	actions.push(
-		<CopyButton key="copy-prompt" content={prompt} className="copy-prompt-button" />
+		<CopyPromptButton key="copy-prompt" prompt={prompt} />
 	);
 
 	return actions;
