@@ -1,0 +1,122 @@
+// ==========================================================================
+// Task Detail Modal Extension (DevTools)
+// ==========================================================================
+
+// Empty state
+.task-detail-modal__empty {
+	padding: 32px;
+	text-align: center;
+	color: #8c8f94;
+	font-style: italic;
+
+	p {
+		margin: 0;
+	}
+}
+
+// Logs
+.task-detail-modal__logs {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.task-log {
+	padding: 12px;
+	border-radius: 4px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 13px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	background: #f9f9f9;
+
+	&--error {
+		background: #ffebee;
+		color: #c62828;
+	}
+
+	&--warning {
+		background: #fff3e0;
+		color: #ef6c00;
+	}
+
+	&--info {
+		background: #e3f2fd;
+		color: #1565c0;
+	}
+
+	&--debug {
+		background: #f5f5f5;
+		color: #616161;
+	}
+}
+
+.task-log__level {
+	font-weight: 600;
+	text-transform: uppercase;
+	font-size: 11px;
+}
+
+.task-log__message {
+	flex: 1;
+}
+
+.task-log__time {
+	color: #787c82;
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+// Payloads
+.task-detail-modal__payloads {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+// Meta table
+.task-detail-modal__meta {
+	overflow-x: auto;
+}
+
+.task-meta-table {
+	width: 100%;
+	border-collapse: collapse;
+
+	tbody {
+		tr {
+			border-bottom: 1px solid #f0f0f1;
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+}
+
+.task-meta-table__key {
+	padding: 12px;
+	font-weight: 600;
+	color: #50575e;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 13px;
+	width: 200px;
+	vertical-align: top;
+}
+
+.task-meta-table__value {
+	padding: 12px;
+	color: #1e1e1e;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 13px;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+// Copy prompt button specific styling
+.copy-prompt-button {
+	&.components-button {
+		gap: 6px;
+	}
+}

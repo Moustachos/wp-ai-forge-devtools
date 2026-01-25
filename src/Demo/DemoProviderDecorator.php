@@ -42,10 +42,22 @@ class DemoProviderDecorator implements ProviderInterface
         return true;
     }
 
+    public function setModel(string $model): void
+    {
+        // Delegate to wrapped provider
+        $this->provider->setModel($model);
+    }
+
+    public function setOptions(array $options): void
+    {
+        // Delegate to wrapped provider
+        $this->provider->setOptions($options);
+    }
+
     public function complete(string $prompt, array $options = []): CompletionResult
     {
-        // Simulate network latency (1-2 seconds)
-        usleep(random_int(1000000, 2000000));
+        // Simulate network latency (5-10 seconds)
+        usleep(random_int(5000000, 10000000));
 
         return $this->mockGenerator->generate($prompt, $options);
     }

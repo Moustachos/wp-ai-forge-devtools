@@ -67,6 +67,70 @@ const api = {
 
 /***/ },
 
+/***/ "./src/components/CopyButton.jsx"
+/*!***************************************!*\
+  !*** ./src/components/CopyButton.jsx ***!
+  \***************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__);
+
+/**
+ * Copy Button Component (DevTools)
+ *
+ * Reusable copy button for code blocks
+ *
+ * @package AIForgeDevTools
+ */
+
+
+
+
+
+/**
+ * Copy button component for code blocks
+ *
+ * @param {Object} props
+ * @param {string} props.content - Content to copy
+ * @param {string} props.className - Additional CSS class
+ */
+function CopyButton({
+  content,
+  className = ''
+}) {
+  const [copied, setCopied] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
+    variant: "secondary",
+    size: "small",
+    onClick: handleCopy,
+    className: `copy-button ${className}`,
+    icon: copied ? 'yes' : 'clipboard'
+  }, copied ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Copié !', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Copier', 'ai-forge-devtools'));
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CopyButton);
+
+/***/ },
+
 /***/ "./src/components/DemoNotice.jsx"
 /*!***************************************!*\
   !*** ./src/components/DemoNotice.jsx ***!
@@ -291,6 +355,219 @@ function PromptDebugger() {
 
 /***/ },
 
+/***/ "./src/components/TaskDetailExtension.jsx"
+/*!************************************************!*\
+  !*** ./src/components/TaskDetailExtension.jsx ***!
+  \************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addTaskDetailFooterActions: () => (/* binding */ addTaskDetailFooterActions),
+/* harmony export */   addTaskDetailTabs: () => (/* binding */ addTaskDetailTabs)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _CopyButton__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./CopyButton */ "./src/components/CopyButton.jsx");
+
+/**
+ * Task Detail Modal Extension (DevTools)
+ *
+ * Adds Logs/Payloads/Metadata tabs and "Copy Prompt" button to TaskDetailModal
+ * Only visible when dev mode is enabled.
+ *
+ * @package AIForgeDevTools
+ */
+
+
+
+
+
+/**
+ * Get LLM child task for a markdown_to_gutenberg task
+ */
+function getLlmChildTask(task) {
+  if (!task.children || task.children.length === 0) {
+    return null;
+  }
+  return task.children.find(child => child.task_type === 'llm_generate');
+}
+
+/**
+ * Get prompt payload from LLM task
+ */
+function getPromptFromTask(task) {
+  const llmTask = getLlmChildTask(task);
+  if (!llmTask || !llmTask.payloads) {
+    return null;
+  }
+  const promptPayload = llmTask.payloads.find(p => p.type === 'prompt_snapshot_full');
+  return promptPayload ? promptPayload.payload : null;
+}
+
+/**
+ * Format date for logs
+ */
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+/**
+ * Render Logs tab content
+ */
+function renderLogsTab(task) {
+  const llmTask = getLlmChildTask(task);
+  const logs = llmTask?.logs || task.logs || [];
+  if (logs.length === 0) {
+    return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+      className: "task-detail-modal__empty"
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Aucun log disponible', 'ai-forge-devtools')));
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "task-detail-modal__logs"
+  }, logs.map((log, index) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    key: index,
+    className: `task-log task-log--${log.level}`
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: "task-log__level"
+  }, "[", log.level, "]"), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: "task-log__message"
+  }, log.message), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: "task-log__time"
+  }, formatDate(log.created_at)))));
+}
+
+/**
+ * Render Payloads tab content
+ */
+function renderPayloadsTab(task) {
+  const llmTask = getLlmChildTask(task);
+  const payloads = llmTask?.payloads || task.payloads || [];
+  if (payloads.length === 0) {
+    return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+      className: "task-detail-modal__empty"
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Aucun payload disponible', 'ai-forge-devtools')));
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "task-detail-modal__payloads"
+  }, payloads.map((payload, index) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    key: index,
+    className: "task-detail-modal__code-block"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "task-detail-modal__code-header"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, payload.type), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_CopyButton__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    content: payload.payload
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", {
+    className: "task-detail-modal__code"
+  }, payload.payload))));
+}
+
+/**
+ * Render Metadata tab content
+ */
+function renderMetadataTab(task) {
+  const llmTask = getLlmChildTask(task);
+  const meta = llmTask?.meta || task.meta || {};
+  if (Object.keys(meta).length === 0) {
+    return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+      className: "task-detail-modal__empty"
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Aucune métadonnée disponible', 'ai-forge-devtools')));
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "task-detail-modal__meta"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", {
+    className: "task-meta-table"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, Object.entries(meta).map(([key, value]) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
+    key: key
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+    className: "task-meta-table__key"
+  }, key), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+    className: "task-meta-table__value"
+  }, typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)))))));
+}
+
+/**
+ * Add tabs to TaskDetailModal
+ */
+function addTaskDetailTabs(tabs, context) {
+  var _window$aiforgeDevDat;
+  const isDevMode = (_window$aiforgeDevDat = window.aiforgeDevData?.isDevMode) !== null && _window$aiforgeDevDat !== void 0 ? _window$aiforgeDevDat : false;
+  if (!isDevMode) {
+    return tabs;
+  }
+  const {
+    task
+  } = context;
+
+  // Add Logs tab
+  tabs.push({
+    name: 'logs',
+    title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Logs', 'ai-forge-devtools'),
+    content: renderLogsTab(task)
+  });
+
+  // Add Payloads tab
+  tabs.push({
+    name: 'payloads',
+    title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Payloads', 'ai-forge-devtools'),
+    content: renderPayloadsTab(task)
+  });
+
+  // Add Metadata tab
+  tabs.push({
+    name: 'meta',
+    title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Métadonnées', 'ai-forge-devtools'),
+    content: renderMetadataTab(task)
+  });
+  return tabs;
+}
+
+/**
+ * Add "Copy Prompt" button to TaskDetailModal footer
+ */
+function addTaskDetailFooterActions(actions, context) {
+  var _window$aiforgeDevDat2;
+  const isDevMode = (_window$aiforgeDevDat2 = window.aiforgeDevData?.isDevMode) !== null && _window$aiforgeDevDat2 !== void 0 ? _window$aiforgeDevDat2 : false;
+  if (!isDevMode) {
+    return actions;
+  }
+  const {
+    task
+  } = context;
+
+  // Only for markdown_to_gutenberg tasks
+  if (task.task_type !== 'markdown_to_gutenberg') {
+    return actions;
+  }
+  const prompt = getPromptFromTask(task);
+  if (!prompt) {
+    return actions;
+  }
+
+  // Add "Copy Prompt" button
+  actions.push((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_CopyButton__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    key: "copy-prompt",
+    content: prompt,
+    className: "copy-prompt-button"
+  }));
+  return actions;
+}
+
+/***/ },
+
 /***/ "./src/styles/demo-mode.scss"
 /*!***********************************!*\
   !*** ./src/styles/demo-mode.scss ***!
@@ -307,6 +584,18 @@ __webpack_require__.r(__webpack_exports__);
 /*!*****************************************!*\
   !*** ./src/styles/prompt-debugger.scss ***!
   \*****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ },
+
+/***/ "./src/styles/task-detail-extension.scss"
+/*!***********************************************!*\
+  !*** ./src/styles/task-detail-extension.scss ***!
+  \***********************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
@@ -454,8 +743,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_DevToggle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/DevToggle */ "./src/components/DevToggle.jsx");
 /* harmony import */ var _components_DemoNotice__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/DemoNotice */ "./src/components/DemoNotice.jsx");
 /* harmony import */ var _components_PromptDebugger__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/PromptDebugger */ "./src/components/PromptDebugger.jsx");
-/* harmony import */ var _styles_demo_mode_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./styles/demo-mode.scss */ "./src/styles/demo-mode.scss");
-/* harmony import */ var _styles_prompt_debugger_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./styles/prompt-debugger.scss */ "./src/styles/prompt-debugger.scss");
+/* harmony import */ var _components_TaskDetailExtension__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/TaskDetailExtension */ "./src/components/TaskDetailExtension.jsx");
+/* harmony import */ var _styles_demo_mode_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./styles/demo-mode.scss */ "./src/styles/demo-mode.scss");
+/* harmony import */ var _styles_prompt_debugger_scss__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./styles/prompt-debugger.scss */ "./src/styles/prompt-debugger.scss");
+/* harmony import */ var _styles_task_detail_extension_scss__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./styles/task-detail-extension.scss */ "./src/styles/task-detail-extension.scss");
 
 /**
  * AI Forge Dev Tools - Admin Entry Point
@@ -465,6 +756,8 @@ __webpack_require__.r(__webpack_exports__);
  *
  * @package AIForgeDevTools
  */
+
+
 
 
 
@@ -516,6 +809,16 @@ window.aiforgeDevState = window.aiforgeDevState || {};
   }
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, content, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_PromptDebugger__WEBPACK_IMPORTED_MODULE_5__["default"], null));
 });
+
+/**
+ * Add tabs (Logs/Payloads/Metadata) to TaskDetailModal (in dev mode).
+ */
+(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_1__.addFilter)('aiforge.taskDetailModal.tabs', 'aiforge-devtools/task-detail-tabs', _components_TaskDetailExtension__WEBPACK_IMPORTED_MODULE_6__.addTaskDetailTabs);
+
+/**
+ * Add "Copy Prompt" button to TaskDetailModal footer (in dev mode).
+ */
+(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_1__.addFilter)('aiforge.taskDetailModal.footerActions', 'aiforge-devtools/task-detail-footer-actions', _components_TaskDetailExtension__WEBPACK_IMPORTED_MODULE_6__.addTaskDetailFooterActions);
 })();
 
 /******/ })()

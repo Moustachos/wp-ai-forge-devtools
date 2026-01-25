@@ -12,8 +12,10 @@ import DemoToggle from './components/DemoToggle';
 import DevToggle from './components/DevToggle';
 import DemoNotice from './components/DemoNotice';
 import PromptDebugger from './components/PromptDebugger';
+import { addTaskDetailTabs, addTaskDetailFooterActions } from './components/TaskDetailExtension';
 import './styles/demo-mode.scss';
 import './styles/prompt-debugger.scss';
+import './styles/task-detail-extension.scss';
 
 // Initialize global state for devtools
 window.aiforgeDevState = window.aiforgeDevState || {};
@@ -83,4 +85,22 @@ addFilter(
             </>
         );
     }
+);
+
+/**
+ * Add tabs (Logs/Payloads/Metadata) to TaskDetailModal (in dev mode).
+ */
+addFilter(
+    'aiforge.taskDetailModal.tabs',
+    'aiforge-devtools/task-detail-tabs',
+    addTaskDetailTabs
+);
+
+/**
+ * Add "Copy Prompt" button to TaskDetailModal footer (in dev mode).
+ */
+addFilter(
+    'aiforge.taskDetailModal.footerActions',
+    'aiforge-devtools/task-detail-footer-actions',
+    addTaskDetailFooterActions
 );
