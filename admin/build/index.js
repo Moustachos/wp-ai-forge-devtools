@@ -374,7 +374,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _CopyButton__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./CopyButton */ "./src/components/CopyButton.jsx");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _CopyButton__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./CopyButton */ "./src/components/CopyButton.jsx");
 
 /**
  * Task Detail Modal Extension (DevTools)
@@ -389,6 +391,28 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+/**
+ * Provider options for prompt copy dropdown
+ */
+const PROVIDER_OPTIONS = [{
+  id: null,
+  label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Sans addenda', 'ai-forge-devtools'),
+  icon: 'editor-code'
+}, {
+  id: 'gemini',
+  label: 'Gemini',
+  icon: 'cloud'
+}, {
+  id: 'openai',
+  label: 'OpenAI',
+  icon: 'cloud'
+}, {
+  id: 'anthropic',
+  label: 'Anthropic',
+  icon: 'cloud'
+}];
 
 /**
  * Get LLM child task for a markdown_to_gutenberg task
@@ -471,7 +495,7 @@ function renderPayloadsTab(task) {
     className: "task-detail-modal__code-block"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "task-detail-modal__code-header"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, payload.type), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_CopyButton__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, payload.type), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_CopyButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
     content: payload.payload
   })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", {
     className: "task-detail-modal__code"
@@ -539,30 +563,66 @@ function addTaskDetailTabs(tabs, context) {
 }
 
 /**
- * Copy Prompt Button Component
+ * Copy Prompt Dropdown Component
+ *
+ * Allows copying the prompt with different provider addenda.
  */
-function CopyPromptButton({
-  prompt
+function CopyPromptDropdown({
+  taskId
 }) {
+  const [loading, setLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [copied, setCopied] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
-  const handleCopy = async () => {
+  const [copiedProvider, setCopiedProvider] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
+  const handleCopyPrompt = async (providerId, onClose) => {
+    setLoading(true);
+    setCopiedProvider(providerId);
     try {
-      await navigator.clipboard.writeText(prompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const params = providerId ? `?provider=${providerId}` : '';
+      const response = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
+        path: `/aiforge/v1/tasks/${taskId}/prompt${params}`
+      });
+      if (response.success && response.data?.prompt) {
+        await navigator.clipboard.writeText(response.data.prompt);
+        setCopied(true);
+        setTimeout(() => {
+          setCopied(false);
+          setCopiedProvider(null);
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Failed to copy prompt:', error);
+      console.error('Failed to fetch/copy prompt:', error);
+    } finally {
+      setLoading(false);
+      onClose();
     }
   };
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
-    variant: "secondary",
-    icon: copied ? 'yes' : 'clipboard',
-    onClick: handleCopy
-  }, copied ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Copié !', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Copier le prompt', 'ai-forge-devtools'));
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Dropdown, {
+    popoverProps: {
+      placement: 'bottom-end'
+    },
+    renderToggle: ({
+      isOpen,
+      onToggle
+    }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
+      variant: "secondary",
+      icon: copied ? 'yes' : 'clipboard',
+      onClick: onToggle,
+      "aria-expanded": isOpen,
+      disabled: loading
+    }, copied ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Copié !', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Copier le prompt', 'ai-forge-devtools')),
+    renderContent: ({
+      onClose
+    }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.MenuGroup, null, PROVIDER_OPTIONS.map(option => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.MenuItem, {
+      key: option.id || 'base',
+      icon: option.icon,
+      onClick: () => handleCopyPrompt(option.id, onClose),
+      disabled: loading && copiedProvider === option.id
+    }, option.label)))
+  });
 }
 
 /**
- * Add "Copy Prompt" button to TaskDetailModal footer
+ * Add "Copy Prompt" dropdown to TaskDetailModal footer
  */
 function addTaskDetailFooterActions(actions, context) {
   var _window$aiforgeDevDat2;
@@ -578,15 +638,17 @@ function addTaskDetailFooterActions(actions, context) {
   if (task.task_type !== 'markdown_to_gutenberg') {
     return actions;
   }
-  const prompt = getPromptFromTask(task);
-  if (!prompt) {
+
+  // Check if we have the necessary payloads (via LLM child task)
+  const llmTask = getLlmChildTask(task);
+  if (!llmTask) {
     return actions;
   }
 
-  // Add "Copy Prompt" button with explicit label
-  actions.push((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CopyPromptButton, {
+  // Add "Copy Prompt" dropdown
+  actions.push((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CopyPromptDropdown, {
     key: "copy-prompt",
-    prompt: prompt
+    taskId: task.id
   }));
   return actions;
 }
@@ -626,6 +688,16 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
+
+/***/ },
+
+/***/ "@wordpress/api-fetch"
+/*!**********************************!*\
+  !*** external ["wp","apiFetch"] ***!
+  \**********************************/
+(module) {
+
+module.exports = window["wp"]["apiFetch"];
 
 /***/ },
 

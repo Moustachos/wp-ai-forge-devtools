@@ -9,8 +9,19 @@
 
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 import CopyButton from './CopyButton';
+
+/**
+ * Provider options for prompt copy dropdown
+ */
+const PROVIDER_OPTIONS = [
+	{ id: null, label: __('Sans addenda', 'ai-forge-devtools'), icon: 'editor-code' },
+	{ id: 'gemini', label: 'Gemini', icon: 'cloud' },
+	{ id: 'openai', label: 'OpenAI', icon: 'cloud' },
+	{ id: 'anthropic', label: 'Anthropic', icon: 'cloud' },
+];
 
 /**
  * Get LLM child task for a markdown_to_gutenberg task
@@ -178,34 +189,77 @@ export function addTaskDetailTabs(tabs, context) {
 }
 
 /**
- * Copy Prompt Button Component
+ * Copy Prompt Dropdown Component
+ *
+ * Allows copying the prompt with different provider addenda.
  */
-function CopyPromptButton({ prompt }) {
+function CopyPromptDropdown({ taskId }) {
+	const [loading, setLoading] = useState(false);
 	const [copied, setCopied] = useState(false);
+	const [copiedProvider, setCopiedProvider] = useState(null);
 
-	const handleCopy = async () => {
+	const handleCopyPrompt = async (providerId, onClose) => {
+		setLoading(true);
+		setCopiedProvider(providerId);
+
 		try {
-			await navigator.clipboard.writeText(prompt);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			const params = providerId ? `?provider=${providerId}` : '';
+			const response = await apiFetch({
+				path: `/aiforge/v1/tasks/${taskId}/prompt${params}`,
+			});
+
+			if (response.success && response.data?.prompt) {
+				await navigator.clipboard.writeText(response.data.prompt);
+				setCopied(true);
+				setTimeout(() => {
+					setCopied(false);
+					setCopiedProvider(null);
+				}, 2000);
+			}
 		} catch (error) {
-			console.error('Failed to copy prompt:', error);
+			console.error('Failed to fetch/copy prompt:', error);
+		} finally {
+			setLoading(false);
+			onClose();
 		}
 	};
 
 	return (
-		<Button
-			variant="secondary"
-			icon={copied ? 'yes' : 'clipboard'}
-			onClick={handleCopy}
-		>
-			{copied ? __('Copié !', 'ai-forge-devtools') : __('Copier le prompt', 'ai-forge-devtools')}
-		</Button>
+		<Dropdown
+			popoverProps={{ placement: 'bottom-end' }}
+			renderToggle={({ isOpen, onToggle }) => (
+				<Button
+					variant="secondary"
+					icon={copied ? 'yes' : 'clipboard'}
+					onClick={onToggle}
+					aria-expanded={isOpen}
+					disabled={loading}
+				>
+					{copied
+						? __('Copié !', 'ai-forge-devtools')
+						: __('Copier le prompt', 'ai-forge-devtools')}
+				</Button>
+			)}
+			renderContent={({ onClose }) => (
+				<MenuGroup>
+					{PROVIDER_OPTIONS.map((option) => (
+						<MenuItem
+							key={option.id || 'base'}
+							icon={option.icon}
+							onClick={() => handleCopyPrompt(option.id, onClose)}
+							disabled={loading && copiedProvider === option.id}
+						>
+							{option.label}
+						</MenuItem>
+					))}
+				</MenuGroup>
+			)}
+		/>
 	);
 }
 
 /**
- * Add "Copy Prompt" button to TaskDetailModal footer
+ * Add "Copy Prompt" dropdown to TaskDetailModal footer
  */
 export function addTaskDetailFooterActions(actions, context) {
 	const isDevMode = window.aiforgeDevData?.isDevMode ?? false;
@@ -220,14 +274,15 @@ export function addTaskDetailFooterActions(actions, context) {
 		return actions;
 	}
 
-	const prompt = getPromptFromTask(task);
-	if (!prompt) {
+	// Check if we have the necessary payloads (via LLM child task)
+	const llmTask = getLlmChildTask(task);
+	if (!llmTask) {
 		return actions;
 	}
 
-	// Add "Copy Prompt" button with explicit label
+	// Add "Copy Prompt" dropdown
 	actions.push(
-		<CopyPromptButton key="copy-prompt" prompt={prompt} />
+		<CopyPromptDropdown key="copy-prompt" taskId={task.id} />
 	);
 
 	return actions;
