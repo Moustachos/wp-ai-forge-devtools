@@ -20,7 +20,7 @@ const PROVIDER_OPTIONS = [
 	{ id: null, label: __('Sans addenda', 'ai-forge-devtools'), icon: 'editor-code' },
 	{ id: 'gemini', label: 'Gemini', icon: 'cloud' },
 	{ id: 'openai', label: 'OpenAI', icon: 'cloud' },
-	{ id: 'anthropic', label: 'Anthropic', icon: 'cloud' },
+	{ id: 'anthropic', label: 'Claude', icon: 'cloud' },
 ];
 
 /**

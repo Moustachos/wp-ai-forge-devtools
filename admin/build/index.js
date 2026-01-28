@@ -410,7 +410,7 @@ const PROVIDER_OPTIONS = [{
   icon: 'cloud'
 }, {
   id: 'anthropic',
-  label: 'Anthropic',
+  label: 'Claude',
   icon: 'cloud'
 }];
 
