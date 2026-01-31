@@ -221,6 +221,18 @@ function SanitizerResult({ result }) {
 		if (change.type === 'attribute_added') {
 			return `${change.block} : ajout attribut "${change.attribute}"`;
 		}
+		if (change.type === 'heading_attrs_normalized') {
+			return __('Heading : attributs et classes réordonnés', 'ai-forge-devtools');
+		}
+		if (change.type === 'cover_dim_class_added') {
+			return __('Cover : classe has-background-dim ajoutée', 'ai-forge-devtools');
+		}
+		if (change.type === 'empty_containers_removed') {
+			return `${change.count} ${change.count > 1 ? __('conteneurs vides supprimés', 'ai-forge-devtools') : __('conteneur vide supprimé', 'ai-forge-devtools')}`;
+		}
+		if (change.type === 'orphaned_tags_cleaned') {
+			return `${change.count} ${change.count > 1 ? __('balises orphelines nettoyées', 'ai-forge-devtools') : __('balise orpheline nettoyée', 'ai-forge-devtools')}`;
+		}
 		return JSON.stringify(change);
 	};
 
