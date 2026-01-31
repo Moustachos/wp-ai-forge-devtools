@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace AIForge;
 
 use AIForge\Admin\DevAssetLoader;
+use AIForge\Admin\DeveloperPage;
 use AIForge\REST\DemoModeController;
 use AIForge\REST\DevModeController;
+use AIForge\REST\SanitizerController;
 
 /**
  * AI Forge Dev Tools main class.
@@ -50,6 +52,13 @@ class DevTools
         DevMode::register();
         $this->registerRest();
         $this->registerAdminAssets();
+        $this->registerDeveloperPage();
+    }
+
+    private function registerDeveloperPage(): void
+    {
+        $page = new DeveloperPage();
+        $page->register();
     }
 
     /**
@@ -78,6 +87,7 @@ class DevTools
         add_action('rest_api_init', function () {
             (new DemoModeController())->register_routes();
             (new DevModeController())->register_routes();
+            (new SanitizerController())->register_routes();
         });
     }
 

@@ -17,6 +17,7 @@ use AIForge\DevMode;
 class DevAssetLoader
 {
     private const HANDLE = 'aiforge-devtools-admin';
+    private const HANDLE_DEVELOPER = 'aiforge-devtools-developer';
 
     private string $pluginUrl;
     private string $pluginPath;
@@ -30,6 +31,7 @@ class DevAssetLoader
     public function register(): void
     {
         add_action('admin_enqueue_scripts', $this->enqueueAdminAssets(...));
+        add_action('admin_enqueue_scripts', $this->enqueueDeveloperPageAssets(...));
     }
 
     public function enqueueAdminAssets(string $hookSuffix): void
@@ -85,5 +87,44 @@ class DevAssetLoader
     private function isPluginPage(string $hookSuffix): bool
     {
         return $hookSuffix === 'toplevel_page_ai-forge';
+    }
+
+    private function isDeveloperPage(string $hookSuffix): bool
+    {
+        return $hookSuffix === 'ai-forge_page_ai-forge-developer';
+    }
+
+    public function enqueueDeveloperPageAssets(string $hookSuffix): void
+    {
+        if (!$this->isDeveloperPage($hookSuffix)) {
+            return;
+        }
+
+        $assetFile = $this->pluginPath . 'admin/build/developer.asset.php';
+        if (!file_exists($assetFile)) {
+            return;
+        }
+
+        $asset = require $assetFile;
+
+        wp_enqueue_script(
+            self::HANDLE_DEVELOPER,
+            $this->pluginUrl . 'admin/build/developer.js',
+            $asset['dependencies'],
+            $asset['version'],
+            true
+        );
+
+        $cssFile = $this->pluginPath . 'admin/build/developer.css';
+        if (file_exists($cssFile)) {
+            wp_enqueue_style(
+                self::HANDLE_DEVELOPER,
+                $this->pluginUrl . 'admin/build/developer.css',
+                ['wp-components'],
+                $asset['version']
+            );
+        }
+
+        wp_localize_script(self::HANDLE_DEVELOPER, 'aiforgeDevData', $this->getLocalizedData());
     }
 }

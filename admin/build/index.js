@@ -61,6 +61,13 @@ const api = {
     body: JSON.stringify({
       enabled
     })
+  }),
+  testSanitizer: (markdown, content) => request('/sanitizer/test', {
+    method: 'POST',
+    body: JSON.stringify({
+      markdown,
+      content
+    })
   })
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);

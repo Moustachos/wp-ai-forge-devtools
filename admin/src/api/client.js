@@ -53,6 +53,12 @@ export const api = {
             method: 'POST',
             body: JSON.stringify({ enabled }),
         }),
+
+    testSanitizer: (markdown, content) =>
+        request('/sanitizer/test', {
+            method: 'POST',
+            body: JSON.stringify({ markdown, content }),
+        }),
 };
 
 export default api;
