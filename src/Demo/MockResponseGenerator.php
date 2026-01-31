@@ -12,7 +12,7 @@ class MockResponseGenerator
     /**
      * Failure probability for testing (0-100)
      */
-    private int $failureProbability = 25;
+    private int $failureProbability = 0;
 
     public function generate(string $prompt, array $options = []): CompletionResult
     {
