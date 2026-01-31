@@ -9,8 +9,29 @@ use AIForge\AI\ResponseType;
 
 class MockResponseGenerator
 {
+    /**
+     * Failure probability for testing (0-100)
+     */
+    private int $failureProbability = 25;
+
     public function generate(string $prompt, array $options = []): CompletionResult
     {
+        // Simulate random failures for testing error UI
+        if ($this->failureProbability > 0 && random_int(1, 100) <= $this->failureProbability) {
+            $errors = [
+                'API rate limit exceeded. Please try again later.',
+                'The model is currently overloaded. Please retry.',
+                'Invalid API key or authentication failed.',
+                'Request timeout after 30 seconds.',
+                'Content policy violation detected in the response.',
+            ];
+
+            return CompletionResult::failure(
+                $errors[array_rand($errors)],
+                ['mock' => true, 'simulated_failure' => true]
+            );
+        }
+
         $responseType = $options['responseType'] ?? ResponseType::GutenbergBlocks;
 
         $content = match ($responseType) {
