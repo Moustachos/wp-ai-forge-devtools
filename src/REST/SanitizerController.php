@@ -32,6 +32,11 @@ class SanitizerController extends WP_REST_Controller
                         'type' => 'string',
                         'required' => true,
                     ],
+                    'template' => [
+                        'type' => 'string',
+                        'required' => false,
+                        'default' => '',
+                    ],
                 ],
             ],
         ]);
@@ -46,12 +51,17 @@ class SanitizerController extends WP_REST_Controller
     {
         $markdown = $request->get_param('markdown');
         $content = $request->get_param('content');
+        $template = $request->get_param('template');
 
         $markdownSanitizer = new MarkdownSanitizer();
         $sanitizedMarkdown = $markdownSanitizer->sanitize($markdown);
 
+        $templateHasH1 = $template
+            ? (bool) preg_match('/<!-- wp:heading \{"level":1[,}]/', $template)
+            : false;
+
         $gutenbergSanitizer = new GutenbergSanitizer();
-        $sanitized = $gutenbergSanitizer->sanitize($content, $sanitizedMarkdown);
+        $sanitized = $gutenbergSanitizer->sanitize($content, $sanitizedMarkdown, $templateHasH1);
 
         $changes = $this->calculateChanges($content, $sanitized);
 

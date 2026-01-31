@@ -1,5 +1,5 @@
-import { useState } from '@wordpress/element';
-import { Button, Notice, Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import { Button, Notice, SelectControl, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import api from '../api/client';
 import CopyButton from './CopyButton';
@@ -7,9 +7,46 @@ import CopyButton from './CopyButton';
 function SanitizerTester() {
 	const [markdown, setMarkdown] = useState('');
 	const [content, setContent] = useState('');
+	const [template, setTemplate] = useState('');
+	const [templates, setTemplates] = useState([]);
+	const [selectedTemplateId, setSelectedTemplateId] = useState('');
+	const [loadingTemplate, setLoadingTemplate] = useState(false);
 	const [result, setResult] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
+
+	// Fetch templates on mount
+	useEffect(() => {
+		const fetchTemplates = async () => {
+			try {
+				const response = await api.getTemplates();
+				setTemplates(response.data || []);
+			} catch (err) {
+				// Silently fail - templates are optional
+			}
+		};
+		fetchTemplates();
+	}, []);
+
+	// Load template content when selection changes
+	const handleTemplateSelect = async (templateId) => {
+		setSelectedTemplateId(templateId);
+
+		if (!templateId) {
+			return;
+		}
+
+		setLoadingTemplate(true);
+		try {
+			const response = await api.getTemplate(templateId);
+			const templateContent = response.data?.content || response.data?.neutralized_content || '';
+			setTemplate(templateContent);
+		} catch (err) {
+			setError(__('Erreur lors du chargement du template.', 'ai-forge-devtools'));
+		} finally {
+			setLoadingTemplate(false);
+		}
+	};
 
 	const handleSubmit = async () => {
 		if (!content.trim()) {
@@ -27,7 +64,7 @@ function SanitizerTester() {
 		setResult(null);
 
 		try {
-			const response = await api.testSanitizer(markdown, content);
+			const response = await api.testSanitizer(markdown, content, template);
 			setResult(response.data);
 		} catch (err) {
 			setError(err.message || __('Une erreur est survenue.', 'ai-forge-devtools'));
@@ -39,6 +76,8 @@ function SanitizerTester() {
 	const handleClear = () => {
 		setMarkdown('');
 		setContent('');
+		setTemplate('');
+		setSelectedTemplateId('');
 		setResult(null);
 		setError(null);
 	};
@@ -83,6 +122,40 @@ function SanitizerTester() {
 							onChange={(e) => setContent(e.target.value)}
 							placeholder={__('Collez le contenu Gutenberg généré ici...', 'ai-forge-devtools')}
 							disabled={isLoading}
+						/>
+					</div>
+				</div>
+
+				<div className="sanitizer-tester__panel sanitizer-tester__panel--optional">
+					<div className="sanitizer-tester__panel-header">
+						<span className="dashicons dashicons-layout"></span>
+						<span>{__('Template (optionnel)', 'ai-forge-devtools')}</span>
+						{loadingTemplate && <Spinner />}
+					</div>
+					<div className="sanitizer-tester__panel-body">
+						{templates.length > 0 && (
+							<SelectControl
+								value={selectedTemplateId}
+								options={[
+									{ value: '', label: __('— Sélectionner un template —', 'ai-forge-devtools') },
+									...templates.map((t) => ({
+										value: String(t.id),
+										label: t.title,
+									})),
+								]}
+								onChange={handleTemplateSelect}
+								disabled={isLoading || loadingTemplate}
+								__nextHasNoMarginBottom
+							/>
+						)}
+						<textarea
+							value={template}
+							onChange={(e) => {
+								setTemplate(e.target.value);
+								setSelectedTemplateId('');
+							}}
+							placeholder={__('Collez le template Gutenberg pour tester le shift down des titres...', 'ai-forge-devtools')}
+							disabled={isLoading || loadingTemplate}
 						/>
 					</div>
 				</div>

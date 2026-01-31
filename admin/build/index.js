@@ -22,12 +22,14 @@ __webpack_require__.r(__webpack_exports__);
 const getConfig = () => {
   return window.aiforgeDevData || {
     apiUrl: '/wp-json/aiforge-dev/v1',
+    mainApiUrl: '/wp-json/aiforge/v1',
     nonce: ''
   };
 };
-const request = async (endpoint, options = {}) => {
+const request = async (endpoint, options = {}, useMainApi = false) => {
   const config = getConfig();
-  const url = `${config.apiUrl}${endpoint}`;
+  const baseUrl = useMainApi ? config.mainApiUrl : config.apiUrl;
+  const url = `${baseUrl}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
     'X-WP-Nonce': config.nonce,
@@ -62,13 +64,17 @@ const api = {
       enabled
     })
   }),
-  testSanitizer: (markdown, content) => request('/sanitizer/test', {
+  testSanitizer: (markdown, content, template = '') => request('/sanitizer/test', {
     method: 'POST',
     body: JSON.stringify({
       markdown,
-      content
+      content,
+      template
     })
-  })
+  }),
+  // Main plugin API (templates)
+  getTemplates: () => request('/ci-templates', {}, true),
+  getTemplate: id => request(`/ci-templates/${id}`, {}, true)
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);
 

@@ -74,10 +74,23 @@
 		.copy-button {
 			margin-left: auto;
 		}
+
+		.components-spinner {
+			margin-left: auto;
+		}
 	}
 
 	&__panel-body {
 		padding: 0;
+
+		.components-select-control {
+			padding: 12px 16px;
+			border-bottom: 1px solid #dcdcde;
+
+			select {
+				width: 100%;
+			}
+		}
 
 		textarea {
 			width: 100%;

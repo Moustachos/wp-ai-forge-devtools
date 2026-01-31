@@ -22,12 +22,14 @@ __webpack_require__.r(__webpack_exports__);
 const getConfig = () => {
   return window.aiforgeDevData || {
     apiUrl: '/wp-json/aiforge-dev/v1',
+    mainApiUrl: '/wp-json/aiforge/v1',
     nonce: ''
   };
 };
-const request = async (endpoint, options = {}) => {
+const request = async (endpoint, options = {}, useMainApi = false) => {
   const config = getConfig();
-  const url = `${config.apiUrl}${endpoint}`;
+  const baseUrl = useMainApi ? config.mainApiUrl : config.apiUrl;
+  const url = `${baseUrl}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
     'X-WP-Nonce': config.nonce,
@@ -62,13 +64,17 @@ const api = {
       enabled
     })
   }),
-  testSanitizer: (markdown, content) => request('/sanitizer/test', {
+  testSanitizer: (markdown, content, template = '') => request('/sanitizer/test', {
     method: 'POST',
     body: JSON.stringify({
       markdown,
-      content
+      content,
+      template
     })
-  })
+  }),
+  // Main plugin API (templates)
+  getTemplates: () => request('/ci-templates', {}, true),
+  getTemplate: id => request(`/ci-templates/${id}`, {}, true)
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);
 
@@ -167,9 +173,44 @@ __webpack_require__.r(__webpack_exports__);
 function SanitizerTester() {
   const [markdown, setMarkdown] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('');
   const [content, setContent] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('');
+  const [template, setTemplate] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('');
+  const [templates, setTemplates] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [selectedTemplateId, setSelectedTemplateId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('');
+  const [loadingTemplate, setLoadingTemplate] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [result, setResult] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
   const [isLoading, setIsLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [error, setError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
+
+  // Fetch templates on mount
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await _api_client__WEBPACK_IMPORTED_MODULE_4__["default"].getTemplates();
+        setTemplates(response.data || []);
+      } catch (err) {
+        // Silently fail - templates are optional
+      }
+    };
+    fetchTemplates();
+  }, []);
+
+  // Load template content when selection changes
+  const handleTemplateSelect = async templateId => {
+    setSelectedTemplateId(templateId);
+    if (!templateId) {
+      return;
+    }
+    setLoadingTemplate(true);
+    try {
+      const response = await _api_client__WEBPACK_IMPORTED_MODULE_4__["default"].getTemplate(templateId);
+      const templateContent = response.data?.content || response.data?.neutralized_content || '';
+      setTemplate(templateContent);
+    } catch (err) {
+      setError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Erreur lors du chargement du template.', 'ai-forge-devtools'));
+    } finally {
+      setLoadingTemplate(false);
+    }
+  };
   const handleSubmit = async () => {
     if (!content.trim()) {
       setError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Le contenu Gutenberg est requis.', 'ai-forge-devtools'));
@@ -183,7 +224,7 @@ function SanitizerTester() {
     setError(null);
     setResult(null);
     try {
-      const response = await _api_client__WEBPACK_IMPORTED_MODULE_4__["default"].testSanitizer(markdown, content);
+      const response = await _api_client__WEBPACK_IMPORTED_MODULE_4__["default"].testSanitizer(markdown, content, template);
       setResult(response.data);
     } catch (err) {
       setError(err.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Une erreur est survenue.', 'ai-forge-devtools'));
@@ -194,6 +235,8 @@ function SanitizerTester() {
   const handleClear = () => {
     setMarkdown('');
     setContent('');
+    setTemplate('');
+    setSelectedTemplateId('');
     setResult(null);
     setError(null);
   };
@@ -235,6 +278,34 @@ function SanitizerTester() {
     onChange: e => setContent(e.target.value),
     placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Collez le contenu Gutenberg généré ici...', 'ai-forge-devtools'),
     disabled: isLoading
+  }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "sanitizer-tester__panel sanitizer-tester__panel--optional"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "sanitizer-tester__panel-header"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: "dashicons dashicons-layout"
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Template (optionnel)', 'ai-forge-devtools')), loadingTemplate && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, null)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "sanitizer-tester__panel-body"
+  }, templates.length > 0 && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+    value: selectedTemplateId,
+    options: [{
+      value: '',
+      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('— Sélectionner un template —', 'ai-forge-devtools')
+    }, ...templates.map(t => ({
+      value: String(t.id),
+      label: t.title
+    }))],
+    onChange: handleTemplateSelect,
+    disabled: isLoading || loadingTemplate,
+    __nextHasNoMarginBottom: true
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("textarea", {
+    value: template,
+    onChange: e => {
+      setTemplate(e.target.value);
+      setSelectedTemplateId('');
+    },
+    placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Collez le template Gutenberg pour tester le shift down des titres...', 'ai-forge-devtools'),
+    disabled: isLoading || loadingTemplate
   })))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "sanitizer-tester__actions"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {

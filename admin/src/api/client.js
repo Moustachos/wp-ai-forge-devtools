@@ -7,13 +7,15 @@
 const getConfig = () => {
     return window.aiforgeDevData || {
         apiUrl: '/wp-json/aiforge-dev/v1',
+        mainApiUrl: '/wp-json/aiforge/v1',
         nonce: '',
     };
 };
 
-const request = async (endpoint, options = {}) => {
+const request = async (endpoint, options = {}, useMainApi = false) => {
     const config = getConfig();
-    const url = `${config.apiUrl}${endpoint}`;
+    const baseUrl = useMainApi ? config.mainApiUrl : config.apiUrl;
+    const url = `${baseUrl}${endpoint}`;
 
     const headers = {
         'Content-Type': 'application/json',
@@ -54,11 +56,15 @@ export const api = {
             body: JSON.stringify({ enabled }),
         }),
 
-    testSanitizer: (markdown, content) =>
+    testSanitizer: (markdown, content, template = '') =>
         request('/sanitizer/test', {
             method: 'POST',
-            body: JSON.stringify({ markdown, content }),
+            body: JSON.stringify({ markdown, content, template }),
         }),
+
+    // Main plugin API (templates)
+    getTemplates: () => request('/ci-templates', {}, true),
+    getTemplate: (id) => request(`/ci-templates/${id}`, {}, true),
 };
 
 export default api;

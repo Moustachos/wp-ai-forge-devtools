@@ -78,6 +78,7 @@ class DevAssetLoader
     {
         return [
             'apiUrl' => rest_url('aiforge-dev/v1'),
+            'mainApiUrl' => rest_url('aiforge/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
             'isDemoMode' => DemoMode::isEnabled(),
             'isDevMode' => DevMode::isEnabled(),
