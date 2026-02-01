@@ -6,6 +6,7 @@ namespace AIForge\REST;
 
 use AIForge\Agent\ContentIntegrator\GutenbergSanitizer;
 use AIForge\Agent\ContentIntegrator\MarkdownSanitizer;
+use AIForge\Agent\ContentIntegrator\TemplateMetaRegistrar;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -56,9 +57,7 @@ class SanitizerController extends WP_REST_Controller
         $markdownSanitizer = new MarkdownSanitizer();
         $sanitizedMarkdown = $markdownSanitizer->sanitize($markdown);
 
-        $templateHasH1 = $template
-            ? (bool) preg_match('/<!-- wp:heading \{"level":1[,}]/', $template)
-            : false;
+        $templateHasH1 = TemplateMetaRegistrar::contentHasH1($template);
 
         $gutenbergSanitizer = new GutenbergSanitizer();
         $sanitized = $gutenbergSanitizer->sanitize($content, $sanitizedMarkdown, $templateHasH1);
