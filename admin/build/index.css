@@ -130,6 +130,14 @@
   font-size: 11px;
 }
 
+.task-log__task-type {
+  font-size: 11px;
+  color: #787c82;
+  background: #e8e8e8;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
 .task-log__message {
   flex: 1;
 }

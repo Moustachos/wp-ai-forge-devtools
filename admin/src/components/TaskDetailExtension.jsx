@@ -63,11 +63,60 @@ function formatDate(dateString) {
 }
 
 /**
+ * Aggregate logs from parent task and all children, sorted by date
+ */
+function aggregateLogs(task) {
+	const allLogs = [];
+
+	// Add parent logs with task context
+	if (task.logs && task.logs.length > 0) {
+		task.logs.forEach((log) => {
+			allLogs.push({
+				...log,
+				taskType: task.task_type,
+				taskId: task.id,
+			});
+		});
+	}
+
+	// Add children logs with task context
+	if (task.children && task.children.length > 0) {
+		task.children.forEach((child) => {
+			if (child.logs && child.logs.length > 0) {
+				child.logs.forEach((log) => {
+					allLogs.push({
+						...log,
+						taskType: child.task_type,
+						taskId: child.id,
+					});
+				});
+			}
+		});
+	}
+
+	// Sort by created_at ascending
+	allLogs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+	return allLogs;
+}
+
+/**
+ * Get task type short label for logs
+ */
+function getTaskTypeShortLabel(taskType) {
+	const labels = {
+		markdown_to_gutenberg: 'M→G',
+		llm_generate: 'LLM',
+		wp_create_draft: 'Draft',
+	};
+	return labels[taskType] || taskType;
+}
+
+/**
  * Render Logs tab content
  */
 function renderLogsTab(task) {
-	const llmTask = getLlmChildTask(task);
-	const logs = llmTask?.logs || task.logs || [];
+	const logs = aggregateLogs(task);
 
 	if (logs.length === 0) {
 		return (
@@ -82,6 +131,7 @@ function renderLogsTab(task) {
 			{logs.map((log, index) => (
 				<div key={index} className={`task-log task-log--${log.level}`}>
 					<span className="task-log__level">[{log.level}]</span>
+					<span className="task-log__task-type">[{getTaskTypeShortLabel(log.taskType)}]</span>
 					<span className="task-log__message">{log.message}</span>
 					<span className="task-log__time">{formatDate(log.created_at)}</span>
 				</div>

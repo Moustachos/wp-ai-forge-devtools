@@ -29,6 +29,11 @@ class DevMode
             }
             return $meta;
         }, 10, 2);
+
+        // Include dev data (logs, children payloads) in task API responses
+        add_filter('aiforge_task_include_extra_data', function (bool $include) {
+            return $include || self::isEnabled();
+        });
     }
 
     /**
