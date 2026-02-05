@@ -230,6 +230,9 @@ function SanitizerResult({ result }) {
 		if (change.type === 'column_width_synced') {
 			return `Column : flex-basis:${change.width} synchronisé`;
 		}
+		if (change.type === 'figcaption_class_fixed') {
+			return __('Image : figcaption class corrigée', 'ai-forge-devtools');
+		}
 		if (change.type === 'empty_containers_removed') {
 			return `${change.count} ${change.count > 1 ? __('conteneurs vides supprimés', 'ai-forge-devtools') : __('conteneur vide supprimé', 'ai-forge-devtools')}`;
 		}
