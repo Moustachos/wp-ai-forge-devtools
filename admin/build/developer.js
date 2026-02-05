@@ -362,6 +362,9 @@ function SanitizerResult({
     if (change.type === 'cover_dim_class_added') {
       return (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Cover : classe has-background-dim ajoutée', 'ai-forge-devtools');
     }
+    if (change.type === 'column_width_synced') {
+      return `Column : flex-basis:${change.width} synchronisé`;
+    }
     if (change.type === 'empty_containers_removed') {
       return `${change.count} ${change.count > 1 ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('conteneurs vides supprimés', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('conteneur vide supprimé', 'ai-forge-devtools')}`;
     }

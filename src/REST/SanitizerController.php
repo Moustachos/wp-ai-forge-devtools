@@ -62,7 +62,11 @@ class SanitizerController extends WP_REST_Controller
         $gutenbergSanitizer = new GutenbergSanitizer();
         $sanitized = $gutenbergSanitizer->sanitize($content, $sanitizedMarkdown, $templateHasH1);
 
-        $changes = $this->calculateChanges($content, $sanitized);
+        // Get changes from sanitizer + calculated changes
+        $changes = array_merge(
+            $gutenbergSanitizer->getChanges(),
+            $this->calculateChanges($content, $sanitized)
+        );
 
         return new WP_REST_Response([
             'success' => true,
