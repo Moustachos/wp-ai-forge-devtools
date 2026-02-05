@@ -239,6 +239,9 @@ function SanitizerResult({ result }) {
 		if (change.type === 'orphaned_tags_cleaned') {
 			return `${change.count} ${change.count > 1 ? __('balises orphelines nettoyées', 'ai-forge-devtools') : __('balise orpheline nettoyée', 'ai-forge-devtools')}`;
 		}
+		if (change.type === 'missing_tags_added') {
+			return `${change.count} ${change.count > 1 ? __('balises manquantes ajoutées', 'ai-forge-devtools') : __('balise manquante ajoutée', 'ai-forge-devtools')}`;
+		}
 		return JSON.stringify(change);
 	};
 

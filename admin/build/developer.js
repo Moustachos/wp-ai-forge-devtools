@@ -374,6 +374,9 @@ function SanitizerResult({
     if (change.type === 'orphaned_tags_cleaned') {
       return `${change.count} ${change.count > 1 ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('balises orphelines nettoyées', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('balise orpheline nettoyée', 'ai-forge-devtools')}`;
     }
+    if (change.type === 'missing_tags_added') {
+      return `${change.count} ${change.count > 1 ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('balises manquantes ajoutées', 'ai-forge-devtools') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('balise manquante ajoutée', 'ai-forge-devtools')}`;
+    }
     return JSON.stringify(change);
   };
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
