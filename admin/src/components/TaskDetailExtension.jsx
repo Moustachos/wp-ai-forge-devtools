@@ -105,6 +105,7 @@ function aggregateLogs(task) {
  */
 function getTaskTypeShortLabel(taskType) {
 	const labels = {
+		batch_markdown_to_gutenberg: 'Batch',
 		markdown_to_gutenberg: 'M→G',
 		llm_generate: 'LLM',
 		wp_create_draft: 'Draft',
