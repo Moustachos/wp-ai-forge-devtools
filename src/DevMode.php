@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AIForge;
 
+use AIForge\Agent\MediaSuggestion\MediaIndexRepository;
+
 /**
  * Dev mode management.
  *
@@ -34,6 +36,48 @@ class DevMode
         add_filter('aiforge_task_include_extra_data', function (bool $include) {
             return $include || self::isEnabled();
         });
+
+        // Add debug column in media library
+        add_filter('manage_media_columns', function (array $columns) {
+            if (self::isEnabled()) {
+                $columns['aiforge_media_info'] = __('Infos média index', AIFORGE_DEV_TEXT_DOMAIN);
+            }
+
+            return $columns;
+        }, 11);
+
+        // Fill debug column info
+        add_action('manage_media_custom_column', function (string $columnName, int $postId) {
+            if (!self::isEnabled()) {
+                return;
+            }
+
+            if ($columnName !== 'aiforge_media_info') {
+                return;
+            }
+
+            if (!wp_attachment_is_image($postId)) {
+                echo '—';
+                return;
+            }
+
+            global $wpdb;
+            $repository = new MediaIndexRepository($wpdb);
+            $entry = $repository->findByAttachmentId($postId);
+
+            if ($entry === null) {
+                echo '—';
+                return;
+            }
+
+            if (!empty($entry['keywords'])) {
+                echo '<br><small>' . esc_html($entry['keywords']) . '</small>';
+            }
+
+            if (!empty($entry['description'])) {
+                echo '<br><small>' . esc_html($entry['description']) . '</small>';
+            }
+        }, 11, 2);
     }
 
     /**
