@@ -6,8 +6,6 @@ namespace AIForge;
 
 use AIForge\Demo\DemoConfigRepository;
 use AIForge\Demo\DemoProviderDecorator;
-use AIForge\Demo\DemoTemplateLoader;
-use AIForge\Demo\DemoTemplateService;
 use AIForge\Demo\MockResponseGenerator;
 
 /**
@@ -32,14 +30,6 @@ class DemoMode
                 return new DemoConfigRepository();
             }
             return $config;
-        });
-
-        // Template Service - decorate with demo support
-        add_filter('aiforge_template_service', function ($service) {
-            if (self::isEnabled()) {
-                return new DemoTemplateService($service, new DemoTemplateLoader());
-            }
-            return $service;
         });
 
         // Provider Instance - decorate with mock responses
