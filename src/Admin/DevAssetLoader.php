@@ -82,6 +82,7 @@ class DevAssetLoader
             'nonce' => wp_create_nonce('wp_rest'),
             'isDemoMode' => DemoMode::isEnabled(),
             'isDevMode' => DevMode::isEnabled(),
+            'canManage' => current_user_can('manage_options'),
         ];
     }
 

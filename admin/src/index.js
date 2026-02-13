@@ -34,18 +34,20 @@ addAction(
 );
 
 /**
- * Inject the toggles into the app header.
+ * Inject the toggles into the app header (admin only).
  */
-addFilter(
-    'aiforge.app.headerTools',
-    'aiforge-devtools/header-toggles',
-    () => (
-        <div className="aiforge-devtools-toggles">
-            <DemoToggle />
-            <DevToggle />
-        </div>
-    )
-);
+if (window.aiforgeDevData?.canManage) {
+    addFilter(
+        'aiforge.app.headerTools',
+        'aiforge-devtools/header-toggles',
+        () => (
+            <div className="aiforge-devtools-toggles">
+                <DemoToggle />
+                <DevToggle />
+            </div>
+        )
+    );
+}
 
 /**
  * Inject the demo notice before services tab content.

@@ -941,11 +941,13 @@ window.aiforgeDevState = window.aiforgeDevState || {};
 });
 
 /**
- * Inject the toggles into the app header.
+ * Inject the toggles into the app header (admin only).
  */
-(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_1__.addFilter)('aiforge.app.headerTools', 'aiforge-devtools/header-toggles', () => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-  className: "aiforge-devtools-toggles"
-}, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_DemoToggle__WEBPACK_IMPORTED_MODULE_2__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_DevToggle__WEBPACK_IMPORTED_MODULE_3__["default"], null)));
+if (window.aiforgeDevData?.canManage) {
+  (0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_1__.addFilter)('aiforge.app.headerTools', 'aiforge-devtools/header-toggles', () => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "aiforge-devtools-toggles"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_DemoToggle__WEBPACK_IMPORTED_MODULE_2__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_DevToggle__WEBPACK_IMPORTED_MODULE_3__["default"], null)));
+}
 
 /**
  * Inject the demo notice before services tab content.
