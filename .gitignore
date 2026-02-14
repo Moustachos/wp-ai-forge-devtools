@@ -1,4 +1,7 @@
-.claude
-CLAUDE.md
+.claude/*.local.*
+.claude/**/*.local.*
+*.local
+*.local.*
 admin/node_modules/
+dist/
 vendor/
