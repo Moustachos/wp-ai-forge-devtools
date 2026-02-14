@@ -8,6 +8,7 @@ use AIForge\Admin\DevAssetLoader;
 use AIForge\Admin\DeveloperPage;
 use AIForge\REST\DemoModeController;
 use AIForge\REST\DevModeController;
+use AIForge\REST\LicenseScenarioController;
 use AIForge\REST\SanitizerController;
 
 /**
@@ -50,6 +51,7 @@ class DevTools
 
         DemoMode::register();
         DevMode::register();
+        Demo\DemoLicenseProvider::register();
         $this->registerRest();
         $this->registerAdminAssets();
         $this->registerDeveloperPage();
@@ -88,6 +90,7 @@ class DevTools
             (new DemoModeController())->register_routes();
             (new DevModeController())->register_routes();
             (new SanitizerController())->register_routes();
+            (new LicenseScenarioController())->register_routes();
         });
     }
 

@@ -83,11 +83,15 @@ function SanitizerTester() {
 	};
 
 	return (
-		<div className="sanitizer-tester">
-			<div className="sanitizer-tester__section-title">
-				<span className="dashicons dashicons-admin-tools"></span>
-				{__('Test du GutenbergSanitizer', 'ai-forge-devtools')}
+		<section className="aiforge-dev-section">
+			<div className="aiforge-dev-section__header">
+				<span className="dashicons dashicons-admin-tools" />
+				<div>
+					<h2>{__('Test du GutenbergSanitizer', 'ai-forge-devtools')}</h2>
+					<p>{__('Testez la sanitization du contenu Gutenberg avec le markdown source.', 'ai-forge-devtools')}</p>
+				</div>
 			</div>
+			<div className="aiforge-dev-section__body sanitizer-tester">
 
 			{error && (
 				<Notice status="error" isDismissible onDismiss={() => setError(null)}>
@@ -98,7 +102,7 @@ function SanitizerTester() {
 			<div className="sanitizer-tester__inputs">
 				<div className="sanitizer-tester__panel">
 					<div className="sanitizer-tester__panel-header">
-						<span className="dashicons dashicons-editor-code"></span>
+						<span className="dashicons dashicons-editor-code" />
 						<span>{__('Source Markdown', 'ai-forge-devtools')}</span>
 					</div>
 					<div className="sanitizer-tester__panel-body">
@@ -113,7 +117,7 @@ function SanitizerTester() {
 
 				<div className="sanitizer-tester__panel">
 					<div className="sanitizer-tester__panel-header">
-						<span className="dashicons dashicons-html"></span>
+						<span className="dashicons dashicons-html" />
 						<span>{__('Contenu Gutenberg', 'ai-forge-devtools')}</span>
 					</div>
 					<div className="sanitizer-tester__panel-body">
@@ -128,7 +132,7 @@ function SanitizerTester() {
 
 				<div className="sanitizer-tester__panel sanitizer-tester__panel--optional">
 					<div className="sanitizer-tester__panel-header">
-						<span className="dashicons dashicons-layout"></span>
+						<span className="dashicons dashicons-layout" />
 						<span>{__('Template (optionnel)', 'ai-forge-devtools')}</span>
 						{loadingTemplate && <Spinner />}
 					</div>
@@ -186,7 +190,9 @@ function SanitizerTester() {
 			</div>
 
 			{result && <SanitizerResult result={result} />}
-		</div>
+
+			</div>
+		</section>
 	);
 }
 

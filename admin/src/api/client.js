@@ -62,6 +62,15 @@ export const api = {
             body: JSON.stringify({ markdown, content, template }),
         }),
 
+    // License scenario
+    getLicenseScenario: () => request('/license-scenario'),
+
+    setLicenseScenario: (scenario) =>
+        request('/license-scenario', {
+            method: 'POST',
+            body: JSON.stringify({ scenario }),
+        }),
+
     // Main plugin API (templates)
     getTemplates: () => request('/ci-templates', {}, true),
     getTemplate: (id) => request(`/ci-templates/${id}`, {}, true),
