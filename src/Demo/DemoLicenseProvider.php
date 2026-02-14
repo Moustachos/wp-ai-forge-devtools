@@ -10,6 +10,7 @@ class DemoLicenseProvider
     private const DEFAULT_SCENARIO = 'valid';
 
     private const SCENARIOS = [
+        'passthrough',
         'valid',
         'expired',
         'invalid',
@@ -48,6 +49,10 @@ class DemoLicenseProvider
     public static function interceptRequest(?array $response, string $endpoint, array $body): ?array
     {
         $scenario = self::getScenario();
+
+        if ($scenario === 'passthrough') {
+            return null;
+        }
 
         return match ($endpoint) {
             '/licenses/activate' => self::mockActivate($scenario, $body),
