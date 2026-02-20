@@ -9,8 +9,11 @@ class DemoLicenseProvider
     private const OPTION_KEY = 'aiforge_dev_license_scenario';
     private const DEFAULT_SCENARIO = 'valid';
 
+    private const LOCAL_SERVER_URL = 'http://host.docker.internal/api/v1';
+
     private const SCENARIOS = [
         'passthrough',
+        'local_server',
         'valid',
         'expired',
         'invalid',
@@ -20,6 +23,18 @@ class DemoLicenseProvider
     public static function register(): void
     {
         add_filter('aiforge_license_api_request', [self::class, 'interceptRequest'], 10, 3);
+
+        // Redirect API calls to local Laravel server when scenario is "local_server"
+        add_filter('aiforge_license_api_url', [self::class, 'filterApiUrl']);
+    }
+
+    public static function filterApiUrl(string $url): string
+    {
+        if (self::getScenario() === 'local_server') {
+            return self::LOCAL_SERVER_URL;
+        }
+
+        return $url;
     }
 
     public static function getScenario(): string
@@ -50,7 +65,7 @@ class DemoLicenseProvider
     {
         $scenario = self::getScenario();
 
-        if ($scenario === 'passthrough') {
+        if ($scenario === 'passthrough' || $scenario === 'local_server') {
             return null;
         }
 

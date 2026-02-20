@@ -13,6 +13,7 @@ import api from '../api/client';
 
 const SCENARIO_LABELS = {
 	passthrough: __('Passthrough (serveur réel)', 'ai-forge-devtools'),
+	local_server: __('Serveur local (Laravel)', 'ai-forge-devtools'),
 	valid: __('Licence valide', 'ai-forge-devtools'),
 	expired: __('Licence expirée', 'ai-forge-devtools'),
 	invalid: __('Clé invalide', 'ai-forge-devtools'),
