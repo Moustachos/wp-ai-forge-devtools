@@ -12,17 +12,13 @@ import { __ } from '@wordpress/i18n';
 import api from '../api/client';
 
 const SCENARIO_LABELS = {
-	passthrough: __('Passthrough (serveur réel)', 'ai-forge-devtools'),
+	passthrough: __('Production (serveur réel)', 'ai-forge-devtools'),
 	local_server: __('Serveur local (Laravel)', 'ai-forge-devtools'),
-	valid: __('Licence valide', 'ai-forge-devtools'),
-	expired: __('Licence expirée', 'ai-forge-devtools'),
-	invalid: __('Clé invalide', 'ai-forge-devtools'),
-	update_available: __('Mise à jour disponible', 'ai-forge-devtools'),
 };
 
 export default function LicenseScenarioSelector() {
-	const [scenario, setScenario] = useState('valid');
-	const [pending, setPending] = useState('valid');
+	const [scenario, setScenario] = useState('passthrough');
+	const [pending, setPending] = useState('passthrough');
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 
@@ -64,7 +60,7 @@ export default function LicenseScenarioSelector() {
 				<span className="dashicons dashicons-shield" />
 				<div>
 					<h2>{__('Scénario licence', 'ai-forge-devtools')}</h2>
-					<p>{__('Simule les réponses du serveur de licence pour tester les différents états.', 'ai-forge-devtools')}</p>
+					<p>{__('Choisissez le serveur de licence cible pour les requêtes API.', 'ai-forge-devtools')}</p>
 				</div>
 			</div>
 			<div className="aiforge-dev-section__body">
