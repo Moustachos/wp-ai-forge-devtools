@@ -147,14 +147,27 @@ if [[ -d "admin/build" ]]; then
     cp -r admin/build/* "$BUILD_DIR/admin/build/"
 fi
 
-# Vendor autoloader only (skip dev packages)
-if [[ -f "vendor/autoload.php" ]]; then
-    mkdir -p "$BUILD_DIR/vendor"
-    cp vendor/autoload.php "$BUILD_DIR/vendor/"
-    cp -r vendor/composer "$BUILD_DIR/vendor/composer"
-else
-    warn "No vendor/autoload.php — run 'composer install' first"
-fi
+# Vendor autoloader (production only — no dev dependencies)
+# The plugin has zero production composer packages, so we generate a minimal
+# PSR-4 autoloader instead of copying the dev-polluted vendor/ directory.
+step "Generating production autoloader"
+mkdir -p "$BUILD_DIR/vendor"
+cat > "$BUILD_DIR/vendor/autoload.php" <<'AUTOLOADER'
+<?php
+
+spl_autoload_register(function (string $class): void {
+    $prefix = 'AIForge\\';
+    if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+        return;
+    }
+    $relative = substr($class, strlen($prefix));
+    $file = __DIR__ . '/../src/' . str_replace('\\', '/', $relative) . '.php';
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+AUTOLOADER
+info "Minimal PSR-4 autoloader generated"
 
 # Optional directories
 for dir in languages; do
