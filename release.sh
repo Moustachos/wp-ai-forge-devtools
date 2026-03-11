@@ -67,6 +67,8 @@ create_zip() {
 
     if command -v zip &>/dev/null; then
         (cd "$DIST_DIR" && zip -rq "$(basename "$zip_file")" "$SLUG")
+    elif [[ -x "/c/Program Files/7-Zip/7z.exe" ]]; then
+        (cd "$DIST_DIR" && "/c/Program Files/7-Zip/7z.exe" a -tzip -bso0 -bsp0 "$(cygpath -w "$(pwd)/$(basename "$zip_file")")" "$SLUG")
     elif command -v powershell.exe &>/dev/null; then
         local win_source win_zip
         win_source=$(cygpath -w "$source_dir" 2>/dev/null || echo "$source_dir")
@@ -74,7 +76,7 @@ create_zip() {
         powershell.exe -NoProfile -Command \
             "Compress-Archive -Path '$win_source' -DestinationPath '$win_zip' -Force"
     else
-        error "Neither 'zip' nor PowerShell available"
+        error "Neither 'zip', '7z', nor PowerShell available"
     fi
 }
 
