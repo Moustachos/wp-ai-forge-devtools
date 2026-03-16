@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AIForge;
 
-use AIForge\Agent\MediaSuggestion\MediaIndexRepository;
+use AIForge\Agent\MediaIntelligence\MediaIndexRepository;
 
 /**
  * Dev mode management.
@@ -40,7 +40,7 @@ class DevMode
         // Add debug column in media library
         add_filter('manage_media_columns', function (array $columns) {
             if (self::isEnabled()) {
-                $columns['aiforge_media_info'] = __('Infos média index', AIFORGE_DEV_TEXT_DOMAIN);
+                $columns['aiforge_media_info'] = __('Infos index IA', AIFORGE_DEV_TEXT_DOMAIN);
             }
 
             return $columns;
@@ -71,11 +71,11 @@ class DevMode
             }
 
             if (!empty($entry['keywords'])) {
-                echo '<br><small>' . esc_html($entry['keywords']) . '</small>';
+                echo '<br><small><strong>Mots clés</strong> : ' . esc_html($entry['keywords']) . '</small>';
             }
 
             if (!empty($entry['description'])) {
-                echo '<br><small>' . esc_html($entry['description']) . '</small>';
+                echo '<br><small><strong>Description</strong> : ' . esc_html($entry['description']) . '</small>';
             }
         }, 11, 2);
     }
