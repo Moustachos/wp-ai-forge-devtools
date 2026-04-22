@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import CopyButton from './CopyButton';
+import { QualityGateButton } from './QualityGateButton';
 
 /**
  * Provider options for prompt copy dropdown
@@ -319,6 +320,12 @@ export function addTaskDetailFooterActions(actions, context) {
 	}
 
 	const { task } = context;
+
+	// Quality Gate verdict button (available on any task carrying QG meta,
+	// directly or via an llm_generate child).
+	actions.unshift(
+		<QualityGateButton key="quality-gate" task={task} />
+	);
 
 	// Only for markdown_to_gutenberg tasks
 	if (task.task_type !== 'markdown_to_gutenberg') {
