@@ -34,8 +34,16 @@ function extractQualityData(meta) {
 		return null;
 	}
 
-	const verdict = meta.quality_gate_verdict;
+	// Reject partial data: some tasks (e.g. a pipeline parent) mirror the
+	// verdict without storing the full score payload. In that case we want
+	// findQualityMeta() to keep walking down to the task that actually owns
+	// the complete report.
 	const globalScore = parseInt(meta.quality_score_global, 10);
+	if (!Number.isFinite(globalScore)) {
+		return null;
+	}
+
+	const verdict = meta.quality_gate_verdict;
 
 	const subscores = {};
 	SUBSCORE_KEYS.forEach((key) => {
@@ -141,13 +149,15 @@ function QualityGatePopover({ data }) {
 }
 
 function findQualityMeta(task) {
-	const direct = extractQualityData(task?.meta);
+	if (!task) return null;
+
+	const direct = extractQualityData(task.meta);
 	if (direct) return direct;
 
-	if (task?.children) {
+	if (Array.isArray(task.children)) {
 		for (const child of task.children) {
-			const childData = extractQualityData(child.meta);
-			if (childData) return childData;
+			const nested = findQualityMeta(child);
+			if (nested) return nested;
 		}
 	}
 

@@ -1,28 +1,15 @@
 /**
  * Task Detail Modal Extension (DevTools)
  *
- * Adds Logs/Payloads/Metadata tabs and "Copy Prompt" button to TaskDetailModal
+ * Adds Logs/Payloads/Metadata tabs and a Quality Gate badge to TaskDetailModal.
  * Only visible when dev mode is enabled.
  *
  * @package AIForgeDevTools
  */
 
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
-import apiFetch from '@wordpress/api-fetch';
 import CopyButton from './CopyButton';
 import { QualityGateButton } from './QualityGateButton';
-
-/**
- * Provider options for prompt copy dropdown
- */
-const PROVIDER_OPTIONS = [
-	{ id: null, label: __('Sans addenda', 'ai-forge-devtools'), icon: 'editor-code' },
-	{ id: 'gemini', label: 'Gemini', icon: 'cloud' },
-	{ id: 'openai', label: 'OpenAI', icon: 'cloud' },
-	{ id: 'anthropic', label: 'Claude', icon: 'cloud' },
-];
 
 /**
  * Get LLM child task for a markdown_to_gutenberg task
@@ -32,19 +19,6 @@ function getLlmChildTask(task) {
 		return null;
 	}
 	return task.children.find((child) => child.task_type === 'llm_generate');
-}
-
-/**
- * Get prompt payload from LLM task
- */
-function getPromptFromTask(task) {
-	const llmTask = getLlmChildTask(task);
-	if (!llmTask || !llmTask.payloads) {
-		return null;
-	}
-
-	const promptPayload = llmTask.payloads.find((p) => p.type === 'prompt_snapshot_full');
-	return promptPayload ? promptPayload.payload : null;
 }
 
 /**
@@ -241,77 +215,7 @@ export function addTaskDetailTabs(tabs, context) {
 }
 
 /**
- * Copy Prompt Dropdown Component
- *
- * Allows copying the prompt with different provider addenda.
- */
-function CopyPromptDropdown({ taskId }) {
-	const [loading, setLoading] = useState(false);
-	const [copied, setCopied] = useState(false);
-	const [copiedProvider, setCopiedProvider] = useState(null);
-
-	const handleCopyPrompt = async (providerId, onClose) => {
-		setLoading(true);
-		setCopiedProvider(providerId);
-
-		try {
-			const params = providerId ? `?provider=${providerId}` : '';
-			const response = await apiFetch({
-				path: `/aiforge/v1/tasks/${taskId}/prompt${params}`,
-			});
-
-			if (response.success && response.data?.prompt) {
-				await navigator.clipboard.writeText(response.data.prompt);
-				setCopied(true);
-				setTimeout(() => {
-					setCopied(false);
-					setCopiedProvider(null);
-				}, 2000);
-			}
-		} catch (error) {
-			console.error('Failed to fetch/copy prompt:', error);
-		} finally {
-			setLoading(false);
-			onClose();
-		}
-	};
-
-	return (
-		<Dropdown
-			popoverProps={{ placement: 'bottom-end' }}
-			renderToggle={({ isOpen, onToggle }) => (
-				<Button
-					variant="secondary"
-					icon={copied ? 'yes' : 'clipboard'}
-					onClick={onToggle}
-					aria-expanded={isOpen}
-					disabled={loading}
-				>
-					{copied
-						? __('Copié !', 'ai-forge-devtools')
-						: __('Copier le prompt', 'ai-forge-devtools')}
-				</Button>
-			)}
-			renderContent={({ onClose }) => (
-				<MenuGroup>
-					{PROVIDER_OPTIONS.map((option) => (
-						<MenuItem
-							key={option.id || 'base'}
-							icon={option.icon}
-							onClick={() => handleCopyPrompt(option.id, onClose)}
-							disabled={loading && copiedProvider === option.id}
-						>
-							{option.label}
-						</MenuItem>
-					))}
-				</MenuGroup>
-			)}
-		/>
-	);
-}
-
-/**
- * Add "Copy Prompt" dropdown to TaskDetailModal footer
+ * Add the Quality Gate badge to the TaskDetailModal footer.
  */
 export function addTaskDetailFooterActions(actions, context) {
 	const isDevMode = window.aiforgeDevData?.isDevMode ?? false;
@@ -321,26 +225,8 @@ export function addTaskDetailFooterActions(actions, context) {
 
 	const { task } = context;
 
-	// Quality Gate verdict button (available on any task carrying QG meta,
-	// directly or via an llm_generate child).
 	actions.unshift(
 		<QualityGateButton key="quality-gate" task={task} />
-	);
-
-	// Only for markdown_to_gutenberg tasks
-	if (task.task_type !== 'markdown_to_gutenberg') {
-		return actions;
-	}
-
-	// Check if we have the necessary payloads (via LLM child task)
-	const llmTask = getLlmChildTask(task);
-	if (!llmTask) {
-		return actions;
-	}
-
-	// Add "Copy Prompt" dropdown
-	actions.push(
-		<CopyPromptDropdown key="copy-prompt" taskId={task.id} />
 	);
 
 	return actions;
