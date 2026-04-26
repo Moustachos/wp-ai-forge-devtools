@@ -1,7 +1,7 @@
 /**
  * Task Detail Modal Extension (DevTools)
  *
- * Adds Logs/Payloads/Metadata tabs and a Quality Gate badge to TaskDetailModal.
+ * Adds Logs/Payloads/Metadata tabs to TaskDetailModal.
  * Only visible when dev mode is enabled.
  *
  * @package AIForgeDevTools
@@ -9,7 +9,6 @@
 
 import { __ } from '@wordpress/i18n';
 import CopyButton from './CopyButton';
-import { QualityGateButton } from './QualityGateButton';
 
 /**
  * Get LLM child task for a markdown_to_gutenberg task
@@ -214,20 +213,3 @@ export function addTaskDetailTabs(tabs, context) {
 	return tabs;
 }
 
-/**
- * Add the Quality Gate badge to the TaskDetailModal footer.
- */
-export function addTaskDetailFooterActions(actions, context) {
-	const isDevMode = window.aiforgeDevData?.isDevMode ?? false;
-	if (!isDevMode) {
-		return actions;
-	}
-
-	const { task } = context;
-
-	actions.unshift(
-		<QualityGateButton key="quality-gate" task={task} />
-	);
-
-	return actions;
-}
