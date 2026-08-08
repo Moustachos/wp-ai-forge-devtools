@@ -488,7 +488,7 @@ use AIForge\DevTools\Tests\Unit\TestCase;
 
 class CampaignReportTest extends TestCase
 {
-    private function run(
+    private function makeRun(
         int $taskId,
         string $comboKey,
         string $verdict,
@@ -519,20 +519,20 @@ class CampaignReportTest extends TestCase
 
     public function testPassAndWarningsArePublishable(): void
     {
-        $this->assertTrue($this->run(1, 'a:b:c', 'pass', 95)->isPublishable());
-        $this->assertTrue($this->run(2, 'a:b:c', 'warnings', 85)->isPublishable());
+        $this->assertTrue($this->makeRun(1, 'a:b:c', 'pass', 95)->isPublishable());
+        $this->assertTrue($this->makeRun(2, 'a:b:c', 'warnings', 85)->isPublishable());
     }
 
     public function testFailAndUnknownAreNotPublishable(): void
     {
-        $this->assertFalse($this->run(3, 'a:b:c', 'fail', 40)->isPublishable());
-        $this->assertFalse($this->run(4, 'a:b:c', 'unknown', 0)->isPublishable());
+        $this->assertFalse($this->makeRun(3, 'a:b:c', 'fail', 40)->isPublishable());
+        $this->assertFalse($this->makeRun(4, 'a:b:c', 'unknown', 0)->isPublishable());
     }
 
     public function testSubscoreReturnsZeroForUnknownAxis(): void
     {
-        $this->assertSame(0, $this->run(5, 'a:b:c', 'pass', 95)->subscore('nonexistent'));
-        $this->assertSame(80, $this->run(6, 'a:b:c', 'pass', 95)->subscore('signature'));
+        $this->assertSame(0, $this->makeRun(5, 'a:b:c', 'pass', 95)->subscore('nonexistent'));
+        $this->assertSame(80, $this->makeRun(6, 'a:b:c', 'pass', 95)->subscore('signature'));
     }
 
     // --- Per-combo aggregation ---
@@ -540,10 +540,10 @@ class CampaignReportTest extends TestCase
     public function testComboStatsComputePublishableRateAndMeans(): void
     {
         $report = new CampaignReport('test', 100, 2, [
-            $this->run(1, 'gemini:balanced:showcase', 'pass', 96, 92, 0.08),
-            $this->run(2, 'gemini:balanced:showcase', 'warnings', 88, 60, 0.08),
-            $this->run(3, 'gemini:balanced:showcase', 'fail', 40, 30, 0.08),
-            $this->run(4, 'gemini:balanced:showcase', 'pass', 92, 90, 0.08),
+            $this->makeRun(1, 'gemini:balanced:showcase', 'pass', 96, 92, 0.08),
+            $this->makeRun(2, 'gemini:balanced:showcase', 'warnings', 88, 60, 0.08),
+            $this->makeRun(3, 'gemini:balanced:showcase', 'fail', 40, 30, 0.08),
+            $this->makeRun(4, 'gemini:balanced:showcase', 'pass', 92, 90, 0.08),
         ]);
 
         $stats = $report->comboStats('gemini:balanced:showcase');
@@ -561,9 +561,9 @@ class CampaignReportTest extends TestCase
     public function testMeansAreRoundedToOneDecimal(): void
     {
         $report = new CampaignReport('test', 100, 1, [
-            $this->run(1, 'a:b:c', 'pass', 95),
-            $this->run(2, 'a:b:c', 'pass', 96),
-            $this->run(3, 'a:b:c', 'pass', 98),
+            $this->makeRun(1, 'a:b:c', 'pass', 95),
+            $this->makeRun(2, 'a:b:c', 'pass', 96),
+            $this->makeRun(3, 'a:b:c', 'pass', 98),
         ]);
 
         // (95 + 96 + 98) / 3 = 96.333...
@@ -586,9 +586,9 @@ class CampaignReportTest extends TestCase
     public function testComboKeysPreserveInsertionOrder(): void
     {
         $report = new CampaignReport('test', 100, 1, [
-            $this->run(1, 'z:balanced:one', 'pass', 90),
-            $this->run(2, 'a:balanced:two', 'pass', 90),
-            $this->run(3, 'z:balanced:one', 'pass', 90),
+            $this->makeRun(1, 'z:balanced:one', 'pass', 90),
+            $this->makeRun(2, 'a:balanced:two', 'pass', 90),
+            $this->makeRun(3, 'z:balanced:one', 'pass', 90),
         ]);
 
         $this->assertSame(['z:balanced:one', 'a:balanced:two'], $report->comboKeys());
@@ -599,8 +599,8 @@ class CampaignReportTest extends TestCase
     public function testTotalsAggregateAcrossCombos(): void
     {
         $report = new CampaignReport('test', 100, 1, [
-            $this->run(1, 'gemini:balanced:showcase', 'pass', 100, 90, 0.05),
-            $this->run(2, 'openai:economic:manifesto', 'fail', 50, 40, 0.15),
+            $this->makeRun(1, 'gemini:balanced:showcase', 'pass', 100, 90, 0.05),
+            $this->makeRun(2, 'openai:economic:manifesto', 'fail', 50, 40, 0.15),
         ]);
 
         $totals = $report->totals();
@@ -626,10 +626,10 @@ class CampaignReportTest extends TestCase
     public function testFlaggedTaskIdsListNonPublishableRuns(): void
     {
         $report = new CampaignReport('test', 100, 1, [
-            $this->run(11, 'a:b:c', 'pass', 95),
-            $this->run(12, 'a:b:c', 'fail', 40),
-            $this->run(13, 'a:b:c', 'unknown', 0),
-            $this->run(14, 'a:b:c', 'warnings', 85),
+            $this->makeRun(11, 'a:b:c', 'pass', 95),
+            $this->makeRun(12, 'a:b:c', 'fail', 40),
+            $this->makeRun(13, 'a:b:c', 'unknown', 0),
+            $this->makeRun(14, 'a:b:c', 'warnings', 85),
         ]);
 
         $this->assertSame([12, 13], $report->flaggedTaskIds());
@@ -640,7 +640,7 @@ class CampaignReportTest extends TestCase
     public function testToArrayCarriesHeaderCombosAndTotals(): void
     {
         $report = new CampaignReport('v038-revalidation', 6168, 2, [
-            $this->run(1, 'gemini:balanced:showcase', 'pass', 96, 92, 0.08),
+            $this->makeRun(1, 'gemini:balanced:showcase', 'pass', 96, 92, 0.08),
         ]);
 
         $array = $report->toArray();
@@ -655,7 +655,7 @@ class CampaignReportTest extends TestCase
 
     public function testToArrayIsJsonSerialisable(): void
     {
-        $report = new CampaignReport('test', 1, 1, [$this->run(1, 'a:b:c', 'pass', 90)]);
+        $report = new CampaignReport('test', 1, 1, [$this->makeRun(1, 'a:b:c', 'pass', 90)]);
 
         $json = json_encode($report->toArray());
 
@@ -666,7 +666,7 @@ class CampaignReportTest extends TestCase
     public function testMarkdownContainsComboRowsAndTotals(): void
     {
         $report = new CampaignReport('test', 100, 1, [
-            $this->run(4251, 'openai:balanced:case-study', 'fail', 69, 26, 0.27, 'gpt-5.6-sol'),
+            $this->makeRun(4251, 'openai:balanced:case-study', 'fail', 69, 26, 0.27, 'gpt-5.6-sol'),
         ]);
 
         $markdown = $report->toMarkdown();
