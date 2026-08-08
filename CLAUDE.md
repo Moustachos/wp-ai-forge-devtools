@@ -23,7 +23,14 @@ npm run lint:js     # Lint JavaScript
 npm run lint:css    # Lint CSS
 ```
 
-No testing infrastructure is currently set up.
+### Tests
+```bash
+cd ../.. && npx wp-env run tests-cli --env-cwd=wp-content/plugins/wp-ai-forge-devtools vendor/bin/phpunit --testsuite=Unit
+```
+
+PHPUnit + Brain Monkey cover the pure campaign logic in `src/Campaign/`. The
+WordPress glue (REST creation, polling, meta collection) and the WP-CLI command
+are verified by running a real campaign.
 
 ## Architecture
 
@@ -37,6 +44,35 @@ add_action('plugins_loaded', function () {
 ```
 
 The `DevTools` class in `src/DevTools.php` is the core service class that should orchestrate all functionality.
+
+### QG campaign runner
+
+```bash
+cd ../.. && npx wp-env run cli -- wp aiforge-dev qg-campaign \
+  --combos=gemini:balanced:article-de-blog-2,openai:balanced:article-de-blog-2 \
+  --source-batch=6223 --files=2 --label=my-campaign
+```
+
+Runs a provider × preset × template matrix, prints a Quality Gate table and
+writes a JSON report to `wp-content/uploads/aiforge-dev/`. Pass
+`--baseline=<report.json>` for per-combo deltas against a previous run.
+
+Three things that will bite you:
+
+- **The main plugin caps a user at 5 active root tasks** (HTTP 429), so combos
+  are launched through a sliding window of `CampaignRunner::MAX_IN_FLIGHT` (4),
+  not all at once. Spacing creations in time does not help.
+- **Template slugs are French** on this install (`article-de-blog-2`,
+  `page-datterrissage`, `cas-client`…). List them with
+  `wp post list --post_type=aiforge_ci_tpl --fields=ID,post_title,post_name`.
+- **Always pass `--source-batch`** when you care about the file count.
+  Auto-resolution skips campaign-produced batches, but any 1-file batch left by
+  other tooling will silently become the corpus (the command warns when it has
+  to clamp `--files`).
+
+From Git Bash, an absolute `--baseline=/var/www/...` path gets mangled by MSYS
+into `C:/Program Files/Git/var/www/...`. Use a WordPress-root-relative path
+(`wp-content/uploads/...`) or prefix the command with `MSYS_NO_PATHCONV=1`.
 
 ### Relationship to Main Plugin
 This plugin extends the main `wp-ai-forge` plugin. Reference patterns from:
