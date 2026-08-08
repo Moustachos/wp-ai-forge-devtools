@@ -6,6 +6,7 @@ namespace AIForge;
 
 use AIForge\Admin\DevAssetLoader;
 use AIForge\Admin\DeveloperPage;
+use AIForge\Cli\QgCampaignCommand;
 use AIForge\REST\DemoModeController;
 use AIForge\REST\DevModeController;
 use AIForge\REST\LicenseScenarioController;
@@ -55,6 +56,19 @@ class DevTools
         $this->registerRest();
         $this->registerAdminAssets();
         $this->registerDeveloperPage();
+        $this->registerCli();
+    }
+
+    /**
+     * Register WP-CLI commands.
+     */
+    private function registerCli(): void
+    {
+        if (!\defined('WP_CLI') || !WP_CLI) {
+            return;
+        }
+
+        \WP_CLI::add_command('aiforge-dev qg-campaign', QgCampaignCommand::class);
     }
 
     private function registerDeveloperPage(): void
