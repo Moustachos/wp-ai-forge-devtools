@@ -154,7 +154,9 @@ class CampaignReportTest extends TestCase
             $this->makeRun(14, 'a:b:c', 'warnings', 85),
         ]);
 
-        $this->assertSame([12, 13], $report->flaggedTaskIds());
+        // 13 has no verdict: that is a dead run, not a quality problem.
+        $this->assertSame([12], $report->flaggedTaskIds());
+        $this->assertSame([13], $report->failedTaskIds());
     }
 
     // --- Serialisation ---
@@ -184,6 +186,91 @@ class CampaignReportTest extends TestCase
 
         $this->assertIsString($json);
         $this->assertSame(JSON_ERROR_NONE, json_last_error());
+    }
+
+    // --- Technical failures must not be read as bad scores ---
+    //
+    // A run that never executed (provider 503, timeout) has no verdict and no
+    // model. Averaging it as zero made three dead runs look like a model
+    // collapsing to 0.0 signature, which is the opposite of what happened.
+
+    private function failedRun(int $taskId, string $comboKey): RunResult
+    {
+        return new RunResult(
+            taskId: $taskId,
+            comboKey: $comboKey,
+            modelId: 'unknown',
+            verdict: 'unknown',
+            globalScore: 0,
+            subscores: [],
+            cost: 0.0,
+            failed: true,
+        );
+    }
+
+    public function testFailedRunsAreCountedApartFromScoredOnes(): void
+    {
+        $report = new CampaignReport('test', 100, 1, [
+            $this->makeRun(1, 'a:b:c', 'pass', 96, 92),
+            $this->failedRun(2, 'a:b:c'),
+        ]);
+
+        $stats = $report->comboStats('a:b:c');
+
+        $this->assertSame(1, $stats['runs'], 'Only scored runs count as runs');
+        $this->assertSame(1, $stats['failed']);
+    }
+
+    public function testFailedRunsDoNotDragTheAveragesDown(): void
+    {
+        $report = new CampaignReport('test', 100, 1, [
+            $this->makeRun(1, 'a:b:c', 'pass', 96, 92),
+            $this->failedRun(2, 'a:b:c'),
+        ]);
+
+        $stats = $report->comboStats('a:b:c');
+
+        // Averaging the dead run in would give 48.0 and 46.0.
+        $this->assertSame(96.0, $stats['mean_global']);
+        $this->assertSame(92.0, $stats['mean_signature']);
+        $this->assertSame(100.0, $stats['publishable_rate']);
+    }
+
+    public function testAllRunsFailedReportsZeroScoredNotZeroQuality(): void
+    {
+        $report = new CampaignReport('test', 100, 1, [
+            $this->failedRun(1, 'a:b:c'),
+            $this->failedRun(2, 'a:b:c'),
+        ]);
+
+        $stats = $report->comboStats('a:b:c');
+
+        $this->assertSame(0, $stats['runs']);
+        $this->assertSame(2, $stats['failed']);
+        $this->assertSame(0.0, $stats['publishable_rate']);
+    }
+
+    public function testFailedRunsAreListedForFollowUp(): void
+    {
+        $report = new CampaignReport('test', 100, 1, [
+            $this->makeRun(1, 'a:b:c', 'pass', 96),
+            $this->failedRun(2, 'a:b:c'),
+        ]);
+
+        $this->assertSame([2], $report->failedTaskIds());
+        $this->assertSame([], $report->flaggedTaskIds(), 'A dead run is not a quality flag');
+    }
+
+    public function testMarkdownSurfacesFailuresExplicitly(): void
+    {
+        $report = new CampaignReport('test', 100, 1, [
+            $this->makeRun(1, 'a:b:c', 'pass', 96),
+            $this->failedRun(2, 'a:b:c'),
+        ]);
+
+        $markdown = $report->toMarkdown();
+
+        $this->assertStringContainsString('failed', $markdown);
     }
 
     public function testMarkdownContainsComboRowsAndTotals(): void

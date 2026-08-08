@@ -15,6 +15,10 @@ final class RunResult
 
     /**
      * @param array<string, int> $subscores
+     * @param bool $failed The generation never ran (provider outage, timeout).
+     *                     Such a run carries no verdict and must stay out of
+     *                     every average: scoring it as zero makes an outage
+     *                     look like a model collapsing.
      */
     public function __construct(
         public readonly int $taskId,
@@ -24,12 +28,21 @@ final class RunResult
         public readonly int $globalScore,
         public readonly array $subscores,
         public readonly float $cost,
+        public readonly bool $failed = false,
     ) {
+    }
+
+    /**
+     * True when the run produced a Quality Gate verdict worth aggregating.
+     */
+    public function isScored(): bool
+    {
+        return !$this->failed && $this->verdict !== 'unknown';
     }
 
     public function isPublishable(): bool
     {
-        return \in_array($this->verdict, self::PUBLISHABLE_VERDICTS, true);
+        return $this->isScored() && \in_array($this->verdict, self::PUBLISHABLE_VERDICTS, true);
     }
 
     public function subscore(string $axis): int
