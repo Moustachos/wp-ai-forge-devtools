@@ -40,6 +40,16 @@ Consequence: a fixed sleep between creations does not help. On a 7-combo campaig
 
 `wp-includes/cron.php:904` bails out of `spawn_cron()` when `isset($_GET['doing_wp_cron'])`, so the command sets that key before creating anything. The campaign drives execution itself through `drain()`, so losing the cron spawn costs nothing. Setting `DOING_CRON` would work too but flips `wp_doing_cron()` globally, which could change executor behavior; the `$_GET` key is scoped to `spawn_cron()` alone.
 
+## Third gotcha: campaigns cannibalise their own batches (found 2026-08-08)
+
+A campaign creates `batch_markdown_to_gutenberg` tasks that complete carrying their own markdown snapshots. `resolveSourceBatch()` picks the most recent completed batch with snapshots, so the **previous campaign becomes the next one's source** — and since each campaign copies only `--files` snapshots, the corpus shrinks every run. The first full campaign silently ran 7 combos × **1** file instead of × 2, because the smoke test had just become its source.
+
+`min(--files, available)` clamping in silence is what hid it. Fixed three ways: campaign batches carry a `qg_campaign` meta and are excluded from resolution; `--files` clamping emits a warning naming the offending batch; `CampaignRunner::fileCount()` is a tested pure helper. Pass `--source-batch` explicitly whenever the file count matters.
+
+## Fourth gotcha: MSYS mangles absolute --baseline paths
+
+From Git Bash, `--baseline=/var/www/html/wp-content/...` reaches the container as `C:/Program Files/Git/var/www/html/...`. Use a WordPress-root-relative path (`wp-content/uploads/aiforge-dev/<file>.json`) or prefix the invocation with `MSYS_NO_PATHCONV=1`. The command degrades gracefully (warning + skipped comparison) rather than failing.
+
 ## Template slugs are French on this install
 
 The spec's examples use English slugs (`showcase`, `blog-article`, `landing-page`). The real `aiforge_ci_tpl` slugs are: `article-de-blog-2`, `page-datterrissage`, `cas-client`, `page-de-service`, `showcase-2`, `manifesto`, `dossier`, `smde`. Check with `wp post list --post_type=aiforge_ci_tpl --fields=ID,post_title,post_name` before composing a matrix.
