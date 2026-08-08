@@ -49,4 +49,28 @@ class CampaignRunnerTest extends TestCase
         // The main plugin rejects creation at 5 active roots per user (HTTP 429).
         $this->assertSame(4, CampaignRunner::MAX_IN_FLIGHT);
     }
+
+    // --- File count ---
+
+    public function testNoRequestedCountUsesEverythingAvailable(): void
+    {
+        $this->assertSame(2, CampaignRunner::fileCount(null, 2));
+    }
+
+    public function testRequestedCountIsHonouredWhenAvailable(): void
+    {
+        $this->assertSame(2, CampaignRunner::fileCount(2, 5));
+    }
+
+    public function testRequestedCountIsClampedToWhatTheBatchHolds(): void
+    {
+        // The caller is warned about this; it must never pass silently.
+        $this->assertSame(1, CampaignRunner::fileCount(2, 1));
+    }
+
+    public function testNonPositiveRequestFallsBackToAvailable(): void
+    {
+        $this->assertSame(3, CampaignRunner::fileCount(0, 3));
+        $this->assertSame(3, CampaignRunner::fileCount(-1, 3));
+    }
 }

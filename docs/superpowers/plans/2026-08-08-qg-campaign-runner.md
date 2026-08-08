@@ -34,6 +34,16 @@ if ($activeTasks >= 5) { return $this->errorResponse('too_many_tasks', ..., 429)
 
 Consequence: a fixed sleep between creations does not help. On a 7-combo campaign, combos 6 and 7 are rejected with HTTP 429 regardless of delay, because the first 5 are still running for minutes. This plan implements a **windowed scheduler** (`MAX_IN_FLIGHT = 4`, one slot left for the human) instead of the prescribed sleep. The spec's acceptance criterion ("7+ combos created reliably in one invocation") is met by that.
 
+## Second gotcha, found while running (2026-08-08)
+
+`TaskController::createTask()` ends with `triggerImmediateExecution()`, which calls `spawn_cron()`. This wp-env install defines `ALTERNATE_WP_CRON`, and that branch of `spawn_cron()` does `require_once ABSPATH . 'wp-cron.php'` **in-process** — a file that ends in `die()`. The campaign therefore died right after launching its first combo, before writing any report. The task itself completed fine, which makes the failure look like a reporting bug rather than a control-flow one.
+
+`wp-includes/cron.php:904` bails out of `spawn_cron()` when `isset($_GET['doing_wp_cron'])`, so the command sets that key before creating anything. The campaign drives execution itself through `drain()`, so losing the cron spawn costs nothing. Setting `DOING_CRON` would work too but flips `wp_doing_cron()` globally, which could change executor behavior; the `$_GET` key is scoped to `spawn_cron()` alone.
+
+## Template slugs are French on this install
+
+The spec's examples use English slugs (`showcase`, `blog-article`, `landing-page`). The real `aiforge_ci_tpl` slugs are: `article-de-blog-2`, `page-datterrissage`, `cas-client`, `page-de-service`, `showcase-2`, `manifesto`, `dossier`, `smde`. Check with `wp post list --post_type=aiforge_ci_tpl --fields=ID,post_title,post_name` before composing a matrix.
+
 ---
 
 ## File Structure
@@ -2079,7 +2089,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 This spends real API credits. Confirm with the user before running.
 
 ```
-cd "e:/Travaux/Travaux Web/wp-lab" && npx wp-env run cli wp aiforge-dev qg-campaign --combos=gemini:economic:blog-article --files=1 --label=smoke
+cd "e:/Travaux/Travaux Web/wp-lab" && npx wp-env run cli wp aiforge-dev qg-campaign --combos=gemini:economic:article-de-blog-2 --files=1 --label=smoke
 ```
 
 Expected: one task launched, polling messages, a markdown table with one run, a JSON file under `wp-content/uploads/aiforge-dev/`, and either "No flagged runs." or a `/qg-audit <id>` hint.
@@ -2090,7 +2100,7 @@ This is the spec's acceptance criterion. Confirm the cost with the user first; i
 
 ```
 cd "e:/Travaux/Travaux Web/wp-lab" && npx wp-env run cli wp aiforge-dev qg-campaign \
-  --combos=gemini:economic:blog-article,gemini:balanced:blog-article,gemini:performance:landing-page,openai:economic:blog-article,openai:balanced:blog-article,openai:performance:landing-page,anthropic:balanced:blog-article \
+  --combos=gemini:economic:article-de-blog-2,gemini:balanced:article-de-blog-2,gemini:performance:page-datterrissage,openai:economic:article-de-blog-2,openai:balanced:article-de-blog-2,openai:performance:page-datterrissage,anthropic:balanced:article-de-blog-2 \
   --files=2 --label=v038-revalidation --timeout=5400
 ```
 
@@ -2104,11 +2114,11 @@ Re-run one combo against the report written in Step 2. Step 2 printed the exact 
 
 ```
 cd "e:/Travaux/Travaux Web/wp-lab" && npx wp-env run cli wp aiforge-dev qg-campaign \
-  --combos=gemini:balanced:blog-article --files=2 --label=recheck \
+  --combos=gemini:balanced:article-de-blog-2 --files=2 --label=recheck \
   --baseline=<paste the path printed by Step 2>
 ```
 
-Expected: a "Comparison against baseline" table listing `gemini:balanced:blog-article` with deltas, and the other six combos as `missing`.
+Expected: a "Comparison against baseline" table listing `gemini:balanced:article-de-blog-2` with deltas, and the other six combos as `missing`.
 
 - [ ] **Step 4: Bump the version**
 

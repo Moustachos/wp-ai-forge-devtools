@@ -81,10 +81,21 @@ final class QgCampaignCommand
                 WP_CLI::error("Batch {$sourceBatch} has no markdown snapshots.");
             }
 
-            $files = isset($assoc['files']) ? min((int) $assoc['files'], $available) : $available;
+            $requested = isset($assoc['files']) ? (int) $assoc['files'] : null;
+            $files = CampaignRunner::fileCount($requested, $available);
         } catch (Throwable $e) {
             WP_CLI::error($e->getMessage());
             return;
+        }
+
+        if ($requested !== null && $files < $requested) {
+            WP_CLI::warning(\sprintf(
+                'Asked for %d file(s) but batch %d only holds %d. Running %d. Pass --source-batch to pick a richer corpus.',
+                $requested,
+                $sourceBatch,
+                $available,
+                $files
+            ));
         }
 
         WP_CLI::log(\sprintf(

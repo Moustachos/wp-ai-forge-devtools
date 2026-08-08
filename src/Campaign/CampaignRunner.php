@@ -21,7 +21,27 @@ final class CampaignRunner
     /** One slot below the main plugin's per-user active-root cap. */
     public const MAX_IN_FLIGHT = 4;
 
+    /**
+     * Marks a batch as produced by a campaign. Those batches complete with
+     * their own markdown snapshots, so without this marker every campaign
+     * would pick its predecessor as source and inherit its file count.
+     */
+    public const CAMPAIGN_META_KEY = 'qg_campaign';
+
     private const SNAPSHOT_PROBE_LIMIT = 50;
+
+    /**
+     * How many files to run, given what the user asked for and what the
+     * source batch actually holds.
+     */
+    public static function fileCount(?int $requested, int $available): int
+    {
+        if ($requested === null || $requested <= 0) {
+            return $available;
+        }
+
+        return min($requested, $available);
+    }
 
     public function __construct(
         private readonly wpdb $wpdb
@@ -41,11 +61,19 @@ final class CampaignRunner
      */
     public function resolveSourceBatch(): int
     {
-        $ids = $this->wpdb->get_col(
-            "SELECT id FROM {$this->wpdb->prefix}aiforge_tasks
-             WHERE task_type = 'batch_markdown_to_gutenberg' AND status = 'completed'
-             ORDER BY id DESC LIMIT 20"
-        );
+        // Campaign-produced batches are excluded: they complete with their own
+        // snapshots and would otherwise become the next campaign's source,
+        // silently shrinking the file count run after run.
+        $ids = $this->wpdb->get_col($this->wpdb->prepare(
+            "SELECT t.id FROM {$this->wpdb->prefix}aiforge_tasks t
+             WHERE t.task_type = 'batch_markdown_to_gutenberg' AND t.status = 'completed'
+             AND NOT EXISTS (
+                 SELECT 1 FROM {$this->wpdb->prefix}aiforge_task_meta m
+                 WHERE m.task_id = t.id AND m.meta_key = %s
+             )
+             ORDER BY t.id DESC LIMIT 20",
+            self::CAMPAIGN_META_KEY
+        ));
 
         foreach ($ids as $id) {
             if ($this->countMarkdownSnapshots((int) $id) > 0) {
@@ -161,6 +189,7 @@ final class CampaignRunner
                 'file_count' => $files,
                 'create_draft' => false,
                 'files_meta' => wp_json_encode($filesMeta),
+                self::CAMPAIGN_META_KEY => '1',
             ],
             'payloads' => $payloads,
         ]));
