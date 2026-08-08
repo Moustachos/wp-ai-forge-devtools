@@ -38,7 +38,7 @@ final class CampaignReport
     }
 
     /**
-     * @return array{runs: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
+     * @return array{runs: int, failed: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
      */
     public function comboStats(string $comboKey): array
     {
@@ -46,7 +46,7 @@ final class CampaignReport
     }
 
     /**
-     * @return array{runs: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
+     * @return array{runs: int, failed: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
      */
     public function totals(): array
     {
@@ -61,7 +61,23 @@ final class CampaignReport
         $ids = [];
 
         foreach ($this->runs as $run) {
-            if (!$run->isPublishable()) {
+            if ($run->isScored() && !$run->isPublishable()) {
+                $ids[] = $run->taskId;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return int[] Task IDs whose generation never ran.
+     */
+    public function failedTaskIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->runs as $run) {
+            if (!$run->isScored()) {
                 $ids[] = $run->taskId;
             }
         }
@@ -88,6 +104,7 @@ final class CampaignReport
             // moves to 'run_count'; comboStats() keeps 'runs' as the count.
             $combos[$key] = [
                 'run_count' => $stats['runs'],
+                'failed_count' => $stats['failed'],
                 'publishable_rate' => $stats['publishable_rate'],
                 'mean_global' => $stats['mean_global'],
                 'mean_signature' => $stats['mean_signature'],
@@ -111,16 +128,29 @@ final class CampaignReport
         $lines[] = '## QG campaign — ' . $this->label;
         $lines[] = '';
         $lines[] = \sprintf(
-            'Source batch %d, %d file(s) per combo, %d run(s).',
+            'Source batch %d, %d file(s) per combo, %d run(s)%s.',
             $this->sourceBatchId,
             $this->filesPerCombo,
-            \count($this->runs)
+            \count($this->runs),
+            $this->totals()['failed'] > 0
+                ? \sprintf(', %d of which never generated', $this->totals()['failed'])
+                : ''
         );
         $lines[] = '';
         $lines[] = '| task | combo | model | verdict | global | comp | sign | covr | vol | leak | dup | cost |';
         $lines[] = '|---|---|---|---|---|---|---|---|---|---|---|---|';
 
         foreach ($this->runs as $run) {
+            if (!$run->isScored()) {
+                $lines[] = \sprintf(
+                    '| %d | %s | %s | **failed (no generation)** | - | - | - | - | - | - | - | - |',
+                    $run->taskId,
+                    $run->comboKey,
+                    $run->modelId
+                );
+                continue;
+            }
+
             $lines[] = \sprintf(
                 '| %d | %s | %s | %s | %d | %d | %d | %d | %d | %d | %d | $%.3f |',
                 $run->taskId,
@@ -139,15 +169,16 @@ final class CampaignReport
         }
 
         $lines[] = '';
-        $lines[] = '| combo | runs | publishable | mean global | mean signature | cost |';
-        $lines[] = '|---|---|---|---|---|---|';
+        $lines[] = '| combo | runs | failed | publishable | mean global | mean signature | cost |';
+        $lines[] = '|---|---|---|---|---|---|---|';
 
         foreach ($this->comboKeys() as $key) {
             $stats = $this->comboStats($key);
             $lines[] = \sprintf(
-                '| %s | %d | %.1f%% | %.1f | %.1f | $%.3f |',
+                '| %s | %d | %d | %.1f%% | %.1f | %.1f | $%.3f |',
                 $key,
                 $stats['runs'],
+                $stats['failed'],
                 $stats['publishable_rate'],
                 $stats['mean_global'],
                 $stats['mean_signature'],
@@ -157,8 +188,9 @@ final class CampaignReport
 
         $totals = $this->totals();
         $lines[] = \sprintf(
-            '| **TOTAL** | %d | %.1f%% | %.1f | %.1f | $%.3f |',
+            '| **TOTAL** | %d | %d | %.1f%% | %.1f | %.1f | $%.3f |',
             $totals['runs'],
+            $totals['failed'],
             $totals['publishable_rate'],
             $totals['mean_global'],
             $totals['mean_signature'],
@@ -181,15 +213,18 @@ final class CampaignReport
 
     /**
      * @param RunResult[] $runs
-     * @return array{runs: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
+     * @return array{runs: int, failed: int, publishable_rate: float, mean_global: float, mean_signature: float, total_cost: float}
      */
     private static function aggregate(array $runs): array
     {
+        $failed = \count(array_filter($runs, static fn (RunResult $r): bool => !$r->isScored()));
+        $runs = array_values(array_filter($runs, static fn (RunResult $r): bool => $r->isScored()));
         $count = \count($runs);
 
         if ($count === 0) {
             return [
                 'runs' => 0,
+                'failed' => $failed,
                 'publishable_rate' => 0.0,
                 'mean_global' => 0.0,
                 'mean_signature' => 0.0,
@@ -214,6 +249,7 @@ final class CampaignReport
 
         return [
             'runs' => $count,
+            'failed' => $failed,
             'publishable_rate' => round(100 * $publishable / $count, 1),
             'mean_global' => round($globalSum / $count, 1),
             'mean_signature' => round($signatureSum / $count, 1),

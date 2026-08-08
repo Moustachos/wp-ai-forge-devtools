@@ -241,6 +241,16 @@ final class QgCampaignCommand
 
     private function printAuditHint(CampaignReport $report): void
     {
+        $dead = $report->failedTaskIds();
+
+        if ($dead !== []) {
+            WP_CLI::warning(\sprintf(
+                '%d run(s) never generated (provider outage or timeout): %s. They are excluded from the averages.',
+                \count($dead),
+                implode(', ', $dead)
+            ));
+        }
+
         $flagged = $report->flaggedTaskIds();
 
         if ($flagged === []) {

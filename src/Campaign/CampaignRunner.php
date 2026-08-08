@@ -283,14 +283,18 @@ final class CampaignRunner
 
         foreach ($rootIdsByComboKey as $comboKey => $rootIds) {
             foreach ($rootIds as $rootId) {
-                $llmIds = $this->wpdb->get_col($this->wpdb->prepare(
-                    "SELECT id FROM {$this->wpdb->prefix}aiforge_tasks
+                $rows = $this->wpdb->get_results($this->wpdb->prepare(
+                    "SELECT id, status FROM {$this->wpdb->prefix}aiforge_tasks
                      WHERE root_id = %d AND task_type = 'llm_generate' ORDER BY id",
                     $rootId
                 ));
 
-                foreach ($llmIds as $llmId) {
-                    $results[] = $this->buildRunResult((int) $llmId, (string) $comboKey);
+                foreach ($rows as $row) {
+                    $results[] = $this->buildRunResult(
+                        (int) $row->id,
+                        (string) $comboKey,
+                        (string) $row->status !== 'completed'
+                    );
                 }
             }
         }
@@ -298,7 +302,7 @@ final class CampaignRunner
         return $results;
     }
 
-    private function buildRunResult(int $llmId, string $comboKey): RunResult
+    private function buildRunResult(int $llmId, string $comboKey, bool $failed = false): RunResult
     {
         $meta = [];
 
@@ -324,6 +328,7 @@ final class CampaignRunner
             globalScore: (int) ($meta['quality_score_global'] ?? 0),
             subscores: $subscores,
             cost: (float) ($meta['cost'] ?? 0.0),
+            failed: $failed,
         );
     }
 }
