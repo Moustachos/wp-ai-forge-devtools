@@ -134,9 +134,35 @@ final class CampaignRunner
     }
 
     /**
+     * Meta that pins a specific model while keeping the preset's own settings.
+     *
+     * Lets a campaign benchmark a model no preset ships (an older generation,
+     * a candidate replacement) without editing preset classes. The custom
+     * preset carries the named preset's config so only the model varies.
+     *
+     * @return array<string, mixed>
+     */
+    public function modelOverrideMeta(ComboSpec $combo, string $modelId): array
+    {
+        $config = [];
+
+        try {
+            $preset = \AIForge\Agent\Preset\PresetRegistry::getPreset('content-integrator', $combo->preset);
+            $config = $preset->getConfigForProvider($combo->provider);
+        } catch (\Throwable $e) {
+            $config = [];
+        }
+
+        return [
+            'preset' => 'custom',
+            'custom' => ['model' => $modelId, 'config' => $config],
+        ];
+    }
+
+    /**
      * Create one batch task for a combo. Returns the root task ID.
      */
-    public function createCombo(ComboSpec $combo, int $sourceBatchId, int $files): int
+    public function createCombo(ComboSpec $combo, int $sourceBatchId, int $files, ?string $modelId = null): int
     {
         $templateId = $this->resolveTemplateId($combo->templateSlug);
         $template = get_post($templateId);
@@ -177,20 +203,26 @@ final class CampaignRunner
             $payloads[] = ['type' => "template_snapshot_{$i}", 'payload' => $templateContent];
         }
 
+        $meta = [
+            'agent_id' => 'content-integrator',
+            'provider' => $combo->provider,
+            'preset' => $combo->preset,
+            'batch_name' => 'QG campaign ' . $combo->key() . ($modelId !== null ? ' @' . $modelId : ''),
+            'file_count' => $files,
+            'create_draft' => false,
+            'files_meta' => wp_json_encode($filesMeta),
+            self::CAMPAIGN_META_KEY => '1',
+        ];
+
+        if ($modelId !== null && $modelId !== '') {
+            $meta = array_merge($meta, $this->modelOverrideMeta($combo, $modelId));
+        }
+
         $request = new WP_REST_Request('POST', '/aiforge/v1/tasks');
         $request->set_header('Content-Type', 'application/json');
         $request->set_body(wp_json_encode([
             'taskType' => 'batch_markdown_to_gutenberg',
-            'meta' => [
-                'agent_id' => 'content-integrator',
-                'provider' => $combo->provider,
-                'preset' => $combo->preset,
-                'batch_name' => 'QG campaign ' . $combo->key(),
-                'file_count' => $files,
-                'create_draft' => false,
-                'files_meta' => wp_json_encode($filesMeta),
-                self::CAMPAIGN_META_KEY => '1',
-            ],
+            'meta' => $meta,
             'payloads' => $payloads,
         ]));
 

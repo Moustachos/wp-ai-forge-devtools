@@ -40,6 +40,10 @@ final class QgCampaignCommand
      * [--baseline=<path>]
      * : Path to a previous report JSON to diff against.
      *
+     * [--model=<id>]
+     * : Pin every combo to this model, keeping the preset's own settings.
+     *   Use it to benchmark a model no preset ships.
+     *
      * [--timeout=<seconds>]
      * : Give up waiting after this long. Default 3600.
      *
@@ -70,6 +74,7 @@ final class QgCampaignCommand
             $combos = ComboSpec::parseList((string) ($assoc['combos'] ?? ''));
             $label = (string) ($assoc['label'] ?? 'campaign');
             $timeout = (int) ($assoc['timeout'] ?? self::DEFAULT_TIMEOUT_SECONDS);
+            $modelId = isset($assoc['model']) ? (string) $assoc['model'] : null;
 
             $sourceBatch = isset($assoc['source-batch'])
                 ? (int) $assoc['source-batch']
@@ -107,7 +112,11 @@ final class QgCampaignCommand
             CampaignRunner::MAX_IN_FLIGHT
         ));
 
-        $rootIdsByCombo = $this->launchAndWait($runner, $combos, $sourceBatch, $files, $timeout);
+        if ($modelId !== null) {
+            WP_CLI::log("All combos pinned to model {$modelId}.");
+        }
+
+        $rootIdsByCombo = $this->launchAndWait($runner, $combos, $sourceBatch, $files, $timeout, $modelId);
 
         $report = new CampaignReport($label, $sourceBatch, $files, $runner->collect($rootIdsByCombo));
 
@@ -128,7 +137,8 @@ final class QgCampaignCommand
         array $combos,
         int $sourceBatch,
         int $files,
-        int $timeout
+        int $timeout,
+        ?string $modelId = null
     ): array {
         $queue = $combos;
         $rootIdsByCombo = [];
@@ -155,7 +165,7 @@ final class QgCampaignCommand
                 $combo = array_shift($queue);
 
                 try {
-                    $rootId = $runner->createCombo($combo, $sourceBatch, $files);
+                    $rootId = $runner->createCombo($combo, $sourceBatch, $files, $modelId);
                 } catch (Throwable $e) {
                     WP_CLI::warning($e->getMessage());
                     continue;
