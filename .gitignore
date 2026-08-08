@@ -5,3 +5,4 @@
 admin/node_modules/
 dist/
 vendor/
+.phpunit.cache/
