@@ -57,6 +57,13 @@ final class QgCampaignCommand
 
         wp_set_current_user(1);
 
+        // Creating a task makes the main plugin call spawn_cron(). Under
+        // ALTERNATE_WP_CRON that loads wp-cron.php in-process, which ends in
+        // die() and would kill the campaign right after the first launch.
+        // spawn_cron() bails out when the request already looks like a cron
+        // run, and this campaign drives execution itself through drain().
+        $_GET['doing_wp_cron'] = '1';
+
         $runner = new CampaignRunner($wpdb);
 
         try {
