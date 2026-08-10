@@ -48,6 +48,11 @@ class DemoProviderDecorator implements ProviderInterface
         $this->provider->setModel($model);
     }
 
+    public function getModel(): string
+    {
+        return $this->provider->getModel();
+    }
+
     public function setOptions(array $options): void
     {
         // Delegate to wrapped provider
