@@ -13,9 +13,15 @@ export default {
 		await ensureEditorPage( ctx );
 		await ensureImageBlock( ctx );
 
-		const block = page.frameLocator( CANVAS ).locator( '[data-type="core/image"]' ).first();
+		// The label, not the block itself: the centre of an empty image block
+		// is its media library button, and clicking that opens a modal instead
+		// of selecting the block.
+		const label = page
+			.frameLocator( CANVAS )
+			.locator( '[data-type="core/image"] .components-placeholder__label' )
+			.first();
 
-		await realClick( page, block, 'the image block' );
+		await realClick( page, label, 'the image block' );
 
 		const toolbar = page.locator( '.block-editor-block-contextual-toolbar' );
 

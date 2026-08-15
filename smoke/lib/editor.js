@@ -22,18 +22,38 @@ export async function realClick( page, locator, what ) {
 
 	assertTrue( box !== null, `${ what } has no bounding box` );
 
-	const onTarget = await locator.evaluate( ( node ) => {
+	const hit = await locator.evaluate( ( node ) => {
+		const describe = ( element ) =>
+			element.tagName.toLowerCase() +
+			( element.className && typeof element.className === 'string'
+				? '.' + element.className.trim().split( /\s+/ ).join( '.' )
+				: '' );
+
 		const rect = node.getBoundingClientRect();
 		const top = node.ownerDocument.elementFromPoint(
 			rect.x + rect.width / 2,
 			rect.y + rect.height / 2
 		);
 
-		return top === node || node.contains( top );
+		if ( ! top ) {
+			return { ok: false, reason: 'nothing answers at its centre' };
+		}
+
+		if ( top !== node && ! node.contains( top ) ) {
+			return { ok: false, reason: `covered by ${ describe( top ) }` };
+		}
+
+		const control = top.closest( 'button, a, input, select, textarea, [role="button"]' );
+
+		if ( control && control !== node && node.contains( control ) ) {
+			return { ok: false, reason: `its centre lands on ${ describe( control ) } inside it` };
+		}
+
+		return { ok: true };
 	} );
 
-	if ( ! onTarget ) {
-		throw new AssertionFailure( `${ what } is covered by another element at its own centre` );
+	if ( ! hit.ok ) {
+		throw new AssertionFailure( `cannot click ${ what }: ${ hit.reason }` );
 	}
 
 	await page.mouse.click( box.x + box.width / 2, box.y + box.height / 2 );
@@ -89,12 +109,30 @@ export async function selectDocumentTab( page ) {
 	await page.waitForTimeout( 500 );
 }
 
+/**
+ * A prepared editor page, reused when the session is still sitting on one.
+ *
+ * The flag alone is not enough: a later journey navigates the shared page
+ * elsewhere, and the media library still carries a wp.blocks that answers
+ * calls with nothing registered, so a stale reuse fails somewhere far from
+ * its cause.
+ */
+async function editorStillOpen( page, session ) {
+	if ( ! session.editorReady || ! page.url().includes( '/wp-admin/post-new.php' ) ) {
+		return false;
+	}
+
+	return ( await page.locator( CANVAS ).count() ) > 0;
+}
+
 export async function ensureEditorPage( ctx ) {
 	const { page, session, log } = ctx;
 
-	if ( session.editorReady ) {
+	if ( await editorStillOpen( page, session ) ) {
 		return { canvas: page.frameLocator( CANVAS ), created: false };
 	}
+
+	session.editorReady = false;
 
 	await page.goto( `${ BASE_URL }/wp-admin/post-new.php?post_type=page`, {
 		waitUntil: 'domcontentloaded',
