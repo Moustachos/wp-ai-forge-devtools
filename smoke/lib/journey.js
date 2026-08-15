@@ -29,6 +29,23 @@ export function assertTrue( condition, message ) {
 }
 
 /**
+ * Wait for a locator, and say what is missing rather than printing a call log.
+ */
+export async function expectVisible( locator, message, timeout ) {
+	try {
+		await locator.waitFor( { state: 'visible', timeout } );
+	} catch ( error ) {
+		// A wait that ends on anything but a timeout is a different failure,
+		// and swallowing its cause would hide it behind the assertion.
+		const cause = /Timeout \d+ms exceeded/.test( error.message )
+			? ''
+			: ` (${ error.message.split( '\n' )[ 0 ] })`;
+
+		throw new AssertionFailure( `${ message }${ cause }` );
+	}
+}
+
+/**
  * Poll until the probe returns something truthy.
  *
  * Playwright's own waits cover elements; this covers page state only a script

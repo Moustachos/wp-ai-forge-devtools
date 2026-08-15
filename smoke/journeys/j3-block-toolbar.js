@@ -1,5 +1,5 @@
 import { CANVAS, ensureEditorPage, ensureImageBlock, realClick } from '../lib/editor.js';
-import { assertTrue } from '../lib/journey.js';
+import { assertTrue, expectVisible } from '../lib/journey.js';
 
 const SUGGEST_LABEL = /Suggérer une image pertinente|Suggest a relevant image/i;
 
@@ -25,7 +25,10 @@ export default {
 
 		const toolbar = page.locator( '.block-editor-block-contextual-toolbar' );
 
-		await toolbar.waitFor( { state: 'visible' } );
+		await expectVisible(
+			toolbar,
+			'clicking the image block surfaced no .block-editor-block-contextual-toolbar'
+		);
 
 		const labels = await toolbar
 			.locator( 'button[aria-label]' )

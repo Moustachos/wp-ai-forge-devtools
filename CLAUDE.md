@@ -74,6 +74,25 @@ From Git Bash, an absolute `--baseline=/var/www/...` path gets mangled by MSYS
 into `C:/Program Files/Git/var/www/...`. Use a WordPress-root-relative path
 (`wp-content/uploads/...`) or prefix the command with `MSYS_NO_PATHCONV=1`.
 
+### Browser smoke harness
+
+```bash
+cd smoke && npm install && npx playwright install chromium
+npm run smoke                     # all five journeys
+npm run smoke -- --journey=J4     # one
+```
+
+Five Playwright journeys over the surfaces only a browser can check: the admin
+SPA, the iframed editor (document panels, block toolbar, media modal) and the
+media library grid. Non-zero exit on any failure, screenshots and a
+`summary.json` under `smoke/artifacts/<timestamp>/`.
+
+It is state-preserving: it installs a fake license only when the lab reports
+`not_activated`, removes it again in a `finally`, and never touches a real one.
+Journeys that need a media index or a configured service report **skipped**
+with the probed reason rather than red. Everything worth knowing about it,
+including the environment traps it already pays for, is in `smoke/README.md`.
+
 ### Relationship to Main Plugin
 This plugin extends the main `wp-ai-forge` plugin. Reference patterns from:
 - `../wp-ai-forge/src/Core.php` - Bootstrap and dependency injection pattern

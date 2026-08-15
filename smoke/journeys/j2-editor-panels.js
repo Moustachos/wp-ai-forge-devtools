@@ -1,5 +1,5 @@
 import { ensureEditorPage, selectDocumentTab } from '../lib/editor.js';
-import { assertTrue } from '../lib/journey.js';
+import { assertTrue, expectVisible } from '../lib/journey.js';
 
 export default {
 	id: 'J2',
@@ -13,9 +13,10 @@ export default {
 
 		await selectDocumentTab( page );
 
-		const panels = page.locator( '.aiforge-doc-panel' );
-
-		await panels.first().waitFor( { state: 'visible' } );
+		await expectVisible(
+			page.locator( '.aiforge-doc-panel' ).first(),
+			'no .aiforge-doc-panel in the editor document sidebar'
+		);
 
 		const titles = await page.locator( '.aiforge-doc-panel__title' ).allInnerTexts();
 

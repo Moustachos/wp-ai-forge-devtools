@@ -6,7 +6,7 @@ import {
 	ensureImageBlock,
 	realClick,
 } from '../lib/editor.js';
-import { assertTrue } from '../lib/journey.js';
+import { assertTrue, expectVisible } from '../lib/journey.js';
 import {
 	MODAL_SCOPE,
 	requireIndex,
@@ -37,7 +37,10 @@ export default {
 
 		await realClick( page, button, 'the image block media library button' );
 
-		await page.waitForSelector( '.media-modal', { state: 'visible' } );
+		await expectVisible(
+			page.locator( '.media-modal' ).first(),
+			'the image block media library button opened no .media-modal'
+		);
 
 		const modal = await tagActiveMediaModal( page );
 
