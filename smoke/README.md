@@ -57,6 +57,18 @@ J4 and J5 report **skipped** with the probed reason when the lab has no media
 index or no usable AI service. They only go red when the surface is there and
 broken.
 
+**Every journey must be runnable alone.** `--journey=<one>` has to give the same
+verdict as the same journey inside a full run, so no journey may depend on
+state a previous one left behind. The editor journeys share a prepared page
+through `ensureEditorPage()`, which builds one when the session does not
+already have it, and each of them inserts whatever blocks it needs. When you add
+a journey, prove it both ways:
+
+```bash
+for j in J1 J2 J3 J4 J5; do npm run smoke -- --journey=$j; done
+npm run smoke
+```
+
 ## License
 
 The editor integration is gated on an active license, so a bare lab has nothing
@@ -108,6 +120,16 @@ as caveats.
   `page.mouse`. The hit test also refuses a point that lands on a control
   *inside* the target, which is how an early version silently opened the media
   modal while claiming to select the block.
+- **One mouse move is not a click.** Gutenberg hides the block toolbar while it
+  believes the user is typing, and the only thing that clears that belief is
+  `useMouseMoveTypingReset`. Its listener is attached fresh every time typing
+  starts, with no previous coordinate to compare against, so **the first
+  mousemove after typing is only recorded, never acted on**
+  (`wp-includes/js/dist/block-editor.js`, `stopTypingOnMouseMove`).
+  `page.mouse.click()` emits exactly one move, which is why J3 passed inside a
+  full run (an earlier journey had already moved the pointer) and hung for 20
+  seconds on a cold editor. `realClick()` moves twice, one pixel apart, then
+  presses.
 - **Maintenance mode.** A core or translation update answers 503 for ten minutes.
   Preflight retries with backoff and says so.
 - **`wp.media.frame` lies.** It is the last frame created, not the visible one.

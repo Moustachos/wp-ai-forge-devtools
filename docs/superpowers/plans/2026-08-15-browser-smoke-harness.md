@@ -1721,6 +1721,36 @@ session does not rediscover them.
 7. **`expectVisible` must keep the cause.** Swallowing Playwright's error hid
    the finding below behind a generic "container missing" message for two runs.
    It now appends anything that is not a plain timeout.
+8. **One mouse move is not a click, and only running the full suite hid it.**
+   J3 passed inside a full run in 0.3s and failed standalone after a 20s
+   timeout, with the block selected and no toolbar anywhere. Gutenberg hides the
+   block toolbar while `isTyping` is true, and the only thing that clears it is
+   `useMouseMoveTypingReset` in `wp-includes/js/dist/block-editor.js`:
+
+   ```js
+   let lastClientX;
+   let lastClientY;
+   function stopTypingOnMouseMove( event ) {
+     const { clientX, clientY } = event;
+     if ( lastClientX && lastClientY && ( lastClientX !== clientX || lastClientY !== clientY ) ) {
+       stopTyping();
+     }
+     lastClientX = clientX;
+     lastClientY = clientY;
+   }
+   ```
+
+   Those two variables are local to the effect and the effect re-attaches on
+   every `isTyping` change, so the first mousemove after typing starts is only
+   recorded. `page.mouse.click()` emits exactly one move, so it never cleared
+   the flag; inside a full run an earlier journey had already parked the pointer
+   elsewhere, which is the only reason J3 was ever green. Measured with a
+   capture listener on the canvas document: cold gave
+   `["mouseout","mouseover","mousemove","mousedown","mouseup"]` with
+   `isTyping: true` after; two moves one pixel apart gave `isTyping: false` and
+   the contextual toolbar. `realClick()` now moves twice, then presses, which is
+   also what a real mouse does. **Every journey must stay runnable alone**; the
+   README says so and gives the loop that proves it.
 
 ## Finding: two `#aiforge-root` elements on the AI Forge admin page
 

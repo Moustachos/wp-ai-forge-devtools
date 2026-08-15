@@ -13,6 +13,15 @@ export const MEDIA_LIBRARY_LABEL = /Médiathèque|Media Library/i;
  * canvas which make its actionability check retry until it times out. So the
  * coordinates are driven directly, and the hit test replaces the check it
  * skips: a covered target fails here instead of clicking the cover.
+ *
+ * The pointer travels in two steps because one is never enough. Gutenberg
+ * hides the block toolbar while it thinks the user is typing, and it only
+ * leaves that state from `useMouseMoveTypingReset`, whose listener is attached
+ * fresh every time typing starts with no previous coordinate to compare
+ * against. Its first mousemove is therefore only recorded, never acted on, and
+ * a click that emits exactly one move leaves the editor typing forever with no
+ * toolbar. Two moves at different coordinates are what a mouse really produces
+ * and what the reset actually needs.
  */
 export async function realClick( page, locator, what ) {
 	await locator.waitFor( { state: 'visible' } );
@@ -56,7 +65,13 @@ export async function realClick( page, locator, what ) {
 		throw new AssertionFailure( `cannot click ${ what }: ${ hit.reason }` );
 	}
 
-	await page.mouse.click( box.x + box.width / 2, box.y + box.height / 2 );
+	const x = box.x + box.width / 2;
+	const y = box.y + box.height / 2;
+
+	await page.mouse.move( x >= 1 ? x - 1 : x + 1, y );
+	await page.mouse.move( x, y );
+	await page.mouse.down();
+	await page.mouse.up();
 }
 
 async function dismissBlockingModals( page ) {
