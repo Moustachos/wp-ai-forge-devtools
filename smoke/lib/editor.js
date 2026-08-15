@@ -1,0 +1,208 @@
+import { BASE_URL, TIMEOUTS } from './config.js';
+import { AssertionFailure, assertTrue, waitFor } from './journey.js';
+
+export const CANVAS = 'iframe[name="editor-canvas"]';
+export const MEDIA_LIBRARY_LABEL = /Médiathèque|Media Library/i;
+
+/**
+ * Click where the element actually is, after proving nothing covers it.
+ *
+ * The block toolbar only appears for a real pointer event inside the canvas;
+ * neither selectBlock nor a synthetic click surfaces it. Playwright's own click
+ * would qualify, except that the editor keeps invisible overlays over the
+ * canvas which make its actionability check retry until it times out. So the
+ * coordinates are driven directly, and the hit test replaces the check it
+ * skips: a covered target fails here instead of clicking the cover.
+ *
+ * The pointer travels in two steps because one is never enough. Gutenberg
+ * hides the block toolbar while it thinks the user is typing, and it only
+ * leaves that state from `useMouseMoveTypingReset`, whose listener is attached
+ * fresh every time typing starts with no previous coordinate to compare
+ * against. Its first mousemove is therefore only recorded, never acted on, and
+ * a click that emits exactly one move leaves the editor typing forever with no
+ * toolbar. Two moves at different coordinates are what a mouse really produces
+ * and what the reset actually needs.
+ */
+export async function realClick( page, locator, what ) {
+	await locator.waitFor( { state: 'visible' } );
+	await locator.scrollIntoViewIfNeeded();
+
+	const box = await locator.boundingBox();
+
+	assertTrue( box !== null, `${ what } has no bounding box` );
+
+	const hit = await locator.evaluate( ( node ) => {
+		const describe = ( element ) =>
+			element.tagName.toLowerCase() +
+			( element.className && typeof element.className === 'string'
+				? '.' + element.className.trim().split( /\s+/ ).join( '.' )
+				: '' );
+
+		const rect = node.getBoundingClientRect();
+		const top = node.ownerDocument.elementFromPoint(
+			rect.x + rect.width / 2,
+			rect.y + rect.height / 2
+		);
+
+		if ( ! top ) {
+			return { ok: false, reason: 'nothing answers at its centre' };
+		}
+
+		if ( top !== node && ! node.contains( top ) ) {
+			return { ok: false, reason: `covered by ${ describe( top ) }` };
+		}
+
+		const control = top.closest( 'button, a, input, select, textarea, [role="button"]' );
+
+		if ( control && control !== node && node.contains( control ) ) {
+			return { ok: false, reason: `its centre lands on ${ describe( control ) } inside it` };
+		}
+
+		return { ok: true };
+	} );
+
+	if ( ! hit.ok ) {
+		throw new AssertionFailure( `cannot click ${ what }: ${ hit.reason }` );
+	}
+
+	const x = box.x + box.width / 2;
+	const y = box.y + box.height / 2;
+
+	await page.mouse.move( x >= 1 ? x - 1 : x + 1, y );
+	await page.mouse.move( x, y );
+	await page.mouse.down();
+	await page.mouse.up();
+}
+
+async function dismissBlockingModals( page ) {
+	await page.evaluate( () => {
+		const preferences = window.wp?.data?.dispatch( 'core/preferences' );
+
+		if ( ! preferences ) {
+			return;
+		}
+
+		for ( const scope of [ 'core', 'core/edit-post', 'core/edit-site' ] ) {
+			try {
+				preferences.set( scope, 'welcomeGuide', false );
+				preferences.set( scope, 'welcomeGuideTemplate', false );
+				preferences.set( scope, 'enableChoosePatternModal', false );
+			} catch {
+				// Scopes come and go between releases; the ones that exist are
+				// enough.
+			}
+		}
+	} );
+
+	// A new page opens the start-pattern chooser, which is already mounted by
+	// the time the preference lands and swallows every click on the canvas
+	// until it is closed.
+	for ( let attempt = 0; attempt < 6; attempt++ ) {
+		if ( ( await page.locator( '.components-modal__frame' ).count() ) === 0 ) {
+			return;
+		}
+
+		await page.keyboard.press( 'Escape' );
+		await page.waitForTimeout( 500 );
+	}
+
+	throw new AssertionFailure( 'a modal is still covering the editor after six Escape presses' );
+}
+
+/**
+ * Show the sidebar's document tab.
+ *
+ * PluginDocumentSettingPanel only mounts while that tab is showing, and
+ * selecting a block switches the sidebar to the block tab, which unmounts every
+ * document panel. The id suffix is stable across locales; the label is not.
+ */
+export async function selectDocumentTab( page ) {
+	const tab = page.locator( '[role="tab"][id$="edit-post/document"]' );
+
+	await tab.waitFor( { state: 'visible' } );
+	await tab.click();
+	await page.waitForTimeout( 500 );
+}
+
+/**
+ * A prepared editor page, reused when the session is still sitting on one.
+ *
+ * The flag alone is not enough: a later journey navigates the shared page
+ * elsewhere, and the media library still carries a wp.blocks that answers
+ * calls with nothing registered, so a stale reuse fails somewhere far from
+ * its cause.
+ */
+async function editorStillOpen( page, session ) {
+	if ( ! session.editorReady || ! page.url().includes( '/wp-admin/post-new.php' ) ) {
+		return false;
+	}
+
+	return ( await page.locator( CANVAS ).count() ) > 0;
+}
+
+export async function ensureEditorPage( ctx ) {
+	const { page, session, log } = ctx;
+
+	if ( await editorStillOpen( page, session ) ) {
+		return { canvas: page.frameLocator( CANVAS ), created: false };
+	}
+
+	session.editorReady = false;
+
+	await page.goto( `${ BASE_URL }/wp-admin/post-new.php?post_type=page`, {
+		waitUntil: 'domcontentloaded',
+	} );
+	await page.waitForSelector( CANVAS, { timeout: TIMEOUTS.editor } );
+
+	await dismissBlockingModals( page );
+
+	const canvas = page.frameLocator( CANVAS );
+
+	await canvas.locator( '.editor-post-title__input' ).first().click();
+	await page.keyboard.type( 'AI Forge smoke page' );
+	await page.keyboard.press( 'Enter' );
+	await page.keyboard.type( 'A paragraph typed by the browser smoke harness.' );
+
+	await waitFor(
+		() =>
+			page.evaluate( () => {
+				const title = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'title' );
+				const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
+
+				return title && blocks.some( ( block ) => block.name === 'core/paragraph' )
+					? { title }
+					: null;
+			} ),
+		'the typed title and paragraph never reached the editor store'
+	);
+
+	session.editorReady = true;
+	log( 'editor page prepared (title and paragraph typed in the canvas)' );
+
+	return { canvas, created: true };
+}
+
+export async function ensureImageBlock( ctx ) {
+	const { page } = ctx;
+
+	const present = await page.evaluate( () =>
+		wp.data
+			.select( 'core/block-editor' )
+			.getBlocks()
+			.some( ( block ) => block.name === 'core/image' )
+	);
+
+	if ( ! present ) {
+		await page.evaluate( () => {
+			wp.data
+				.dispatch( 'core/block-editor' )
+				.insertBlocks( wp.blocks.createBlock( 'core/image' ) );
+		} );
+	}
+
+	await page
+		.frameLocator( CANVAS )
+		.locator( '[data-type="core/image"]' )
+		.first()
+		.waitFor( { state: 'visible' } );
+}
