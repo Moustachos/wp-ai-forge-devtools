@@ -4,7 +4,7 @@
 * Plugin Name: AI Forge Dev Tools
 * Requires Plugins: wp-ai-forge
 * Description: Developper only add-on for AI Forge
-* Version: 0.2.2
+* Version: 0.3.0
 * Author: AI Forge
 * Text Domain: wp-ai-forge-devtools
 * Domain Path: /languages
