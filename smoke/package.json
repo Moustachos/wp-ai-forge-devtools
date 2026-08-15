@@ -1,0 +1,13 @@
+{
+  "name": "wp-ai-forge-smoke",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Journey-level browser smoke harness for the AI Forge plugin, run against the wp-env lab.",
+  "scripts": {
+    "smoke": "node run.js"
+  },
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}
