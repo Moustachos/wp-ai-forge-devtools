@@ -1688,6 +1688,69 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 ---
 
+## Execution notes (2026-08-15)
+
+What the plan got wrong, and what the harness found while being built. Each of
+these is already fixed in the committed code; they are recorded so the next
+session does not rediscover them.
+
+1. **`wp eval-file` cannot carry `declare(strict_types=1)`.** WP-CLI runs the
+   file body through `eval()`, where a `declare()` is never the first statement,
+   and the whole command dies with a fatal error. `php/harness.php` says so in
+   its header.
+2. **The environment has to be probed twice.** The plan probed once, before
+   installing the fake license, and then took the J4/J5 skip decisions from it.
+   On a `not_activated` lab that skipped both journeys for a license the harness
+   had just installed. `run.js` re-probes whenever `license.managed` is true.
+3. **The editor fixture cannot memoise on a flag alone.** J4 navigates the
+   shared page to `upload.php`, where `wp.blocks` still exists but has nothing
+   registered, so a stale reuse in J5 blew the stack inside core's `createBlock`
+   rather than saying the page was wrong. `ensureEditorPage()` checks the URL
+   and the canvas, not only `session.editorReady`.
+4. **The centre of an empty image block is its media library button.** The first
+   J3 passed while quietly opening the media modal, and its screenshot proved
+   it. `realClick()` now refuses a point that resolves to a control *inside* the
+   target, and J3 aims at `.components-placeholder__label`.
+5. **The band answers before the tiles arrive.** Asserting only the summary
+   produced audit screenshots of an empty library under "2 AI results".
+   `waitForResults()` waits for the library to render as many tiles as the band
+   claims.
+6. **Login needs a retry.** One run bounced back to `wp-login.php` with no
+   error; `login()` retries three times and reports `#login_error` verbatim when
+   it gives up.
+7. **`expectVisible` must keep the cause.** Swallowing Playwright's error hid
+   the finding below behind a generic "container missing" message for two runs.
+   It now appends anything that is not a plain timeout.
+
+## Finding: two `#aiforge-root` elements on the AI Forge admin page
+
+`../wp-ai-forge/src/Admin/AdminMenu.php:105` (`renderApp`) is registered on the
+`toplevel_page_ai-forge` page hook **twice**: once by `add_menu_page()` and once
+by the `add_submenu_page()` at line 39 that renames the first submenu entry to
+"Dashboard". Both calls resolve to the same hook name, so `do_action($page_hook)`
+runs the callback twice and the page ships:
+
+```html
+<div id="aiforge-root" class="aiforge-admin"></div><div id="aiforge-root" class="aiforge-admin"></div>
+```
+
+Verified two ways: the served HTML contains the div twice, and reflecting over
+`$wp_filter['toplevel_page_ai-forge']` reports two callbacks, both
+`src/Admin/AdminMenu.php:105`. It is not the dev-tools plugin: nothing here
+renders that id.
+
+React mounts into the first and the second stays empty forever, which is why
+nothing looked broken. It is still a duplicate DOM id, so it is invalid HTML,
+any strict selector over it throws, and anything that mounts into "the" root
+can reach the wrong one.
+
+The fix belongs in the main plugin, which this plan may not touch: pass a
+no-op callback (or `null`) as the `add_submenu_page()` render argument for the
+duplicated slug, since WordPress only needs that call for the submenu label.
+
+J1 asserts a single root and is therefore **red until that lands**. It is not
+loosened: the harness exists to catch exactly this.
+
 ## Self-review against the spec
 
 | Spec item | Where |
