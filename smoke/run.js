@@ -66,18 +66,30 @@ try {
 
 	await prepareLab();
 
-	const env = await probeEnvironment();
+	let env = await probeEnvironment();
 
-	summary.preflight = { site, environment: env };
-	log(
-		`WordPress ${ env.wpVersion } (${ env.locale }), ` +
-			`AI Forge ${ env.pluginActive ? 'active' : 'INACTIVE' }, ` +
-			`license ${ env.license.status }, media index ${ env.mediaIndexed }, ` +
-			`AI search ${ env.search.available ? 'available' : `unavailable (${ env.search.reason })` }`
-	);
+	const describe = ( probed ) =>
+		`WordPress ${ probed.wpVersion } (${ probed.locale }), ` +
+		`AI Forge ${ probed.pluginActive ? 'active' : 'INACTIVE' }, ` +
+		`license ${ probed.license.status }, media index ${ probed.mediaIndexed }, ` +
+		`AI search ${
+			probed.search.available ? 'available' : `unavailable (${ probed.search.reason })`
+		}`;
+
+	log( describe( env ) );
 
 	license = await ensureLicense( log );
 	summary.license = license;
+
+	// A license the harness just installed changes what the journeys can
+	// reach, so the skip decisions are taken on the state the browser will
+	// actually meet rather than on the one the run started from.
+	if ( license.managed ) {
+		env = await probeEnvironment();
+		log( describe( env ) );
+	}
+
+	summary.preflight = { site, environment: env };
 
 	session = await openSession( { dir, log } );
 
