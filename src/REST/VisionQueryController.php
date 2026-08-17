@@ -13,12 +13,20 @@ use WP_REST_Server;
 /**
  * Saves the vision benchmark query file from the picker page.
  *
- * The picker is a static HTML file served from uploads, so it authenticates
- * with the cookie already in the browser plus a nonce baked in at generation
- * time. Writes are confined to the aiforge-dev upload directory.
+ * The picker is a static HTML file, so it cannot carry a REST nonce: a nonce
+ * minted by WP-CLI is computed against an empty session token and will never
+ * verify against a browser session. The page therefore presents a one-off
+ * token, stored as a transient when the page is generated and expiring with
+ * it. Writes stay confined to .json files in the aiforge-dev upload directory.
  */
 class VisionQueryController extends WP_REST_Controller
 {
+    /** Transient holding the token the current picker page was built with. */
+    public const TOKEN_TRANSIENT = 'aiforge_dev_picker_token';
+
+    /** Header the picker page sends its token in. */
+    public const TOKEN_HEADER = 'X-AIForge-Picker-Token';
+
     protected $namespace = 'aiforge-dev/v1';
     protected $rest_base = 'vision-queries';
 
@@ -28,7 +36,7 @@ class VisionQueryController extends WP_REST_Controller
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => $this->save(...),
-                'permission_callback' => static fn (): bool => current_user_can('manage_options'),
+                'permission_callback' => $this->permissionCheck(...),
                 'args' => [
                     'file' => [
                         'type' => 'string',
@@ -42,6 +50,21 @@ class VisionQueryController extends WP_REST_Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * An administrator session, or the token the current picker page holds.
+     */
+    public function permissionCheck(WP_REST_Request $request): bool
+    {
+        if (current_user_can('manage_options')) {
+            return true;
+        }
+
+        $stored = get_transient(self::TOKEN_TRANSIENT);
+        $sent = (string) $request->get_header(self::TOKEN_HEADER);
+
+        return \is_string($stored) && $stored !== '' && $sent !== '' && hash_equals($stored, $sent);
     }
 
     public function save(WP_REST_Request $request): WP_REST_Response|WP_Error

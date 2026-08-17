@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AIForge\Cli;
 
+use AIForge\REST\VisionQueryController;
 use AIForge\Vision\VisionBenchRunner;
 use AIForge\Vision\VisionPickerPage;
 use WP_CLI;
@@ -84,12 +85,17 @@ final class VisionPickerCommand
             WP_CLI::warning('Referenced outside the sample, tiles will be blank: ' . implode(', ', $outside));
         }
 
+        // A nonce made here would be computed against an empty session token and
+        // would never verify against the browser session opening the page.
+        $token = wp_generate_password(32, false);
+        set_transient(VisionQueryController::TOKEN_TRANSIENT, $token, 12 * HOUR_IN_SECONDS);
+
         $html = VisionPickerPage::render(
             $queries,
             $images,
             $fileName,
             rest_url('aiforge-dev/v1/vision-queries'),
-            wp_create_nonce('wp_rest')
+            $token
         );
 
         $out = $dir . '/picker.html';
@@ -98,7 +104,6 @@ final class VisionPickerCommand
         $url = wp_upload_dir()['baseurl'] . '/aiforge-dev/picker.html';
 
         WP_CLI::success(sprintf('%d queries, %d images. Open %s', \count($queries), \count($images), $url));
-        WP_CLI::log('Log into wp-admin first — the page saves through the REST API with your cookie.');
-        WP_CLI::log('The nonce expires after about 12 hours; re-run this command to refresh it.');
+        WP_CLI::log('The page carries its own save token, valid 12 hours. Re-run this command to refresh it.');
     }
 }

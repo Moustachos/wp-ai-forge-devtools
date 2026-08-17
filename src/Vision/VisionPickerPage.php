@@ -17,14 +17,14 @@ final class VisionPickerPage
      * @param list<array<string, mixed>> $queries   Raw entries, candidates included
      * @param array<int, array{url: string, title: string}> $images  Sample images by id
      */
-    public static function render(array $queries, array $images, string $fileName, string $restUrl, string $nonce): string
+    public static function render(array $queries, array $images, string $fileName, string $restUrl, string $token): string
     {
         $payload = wp_json_encode([
             'queries' => $queries,
             'images' => $images,
             'file' => $fileName,
             'rest' => $restUrl,
-            'nonce' => $nonce,
+            'token' => $token,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $css = self::css();
@@ -236,7 +236,7 @@ CSS;
     fetch(data.rest, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': data.nonce },
+      headers: { 'Content-Type': 'application/json', 'X-AIForge-Picker-Token': data.token },
       body: JSON.stringify({ file: data.file, queries: queries })
     })
       .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })

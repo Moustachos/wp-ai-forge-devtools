@@ -129,9 +129,11 @@ index and blindly accepting them would enshrine one model's view as ground
 truth.
 
 - The page lives in uploads and is opened over the site's origin, so thumbnails
-  load from the same host and the browser cookie authenticates the save. **You
-  must be logged into wp-admin.** The nonce is baked in at generation time and
-  lasts about 12 hours — re-run the command to refresh it.
+  load from the same host. **A REST nonce cannot be used here**: one minted by
+  WP-CLI is computed against an empty session token and never verifies against
+  a browser session. The page carries a one-off token instead, stored as a
+  transient for 12 hours — re-run the command to refresh it. No wp-admin login
+  needed.
 - Saving goes through `POST aiforge-dev/v1/vision-queries`, which only writes
   `.json` files inside the aiforge-dev upload directory and keeps a `.bak` of
   the previous content first.
