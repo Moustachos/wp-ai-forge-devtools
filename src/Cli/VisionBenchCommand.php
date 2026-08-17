@@ -41,6 +41,9 @@ final class VisionBenchCommand
      *   An empty `expect` marks a trap query nothing should answer. Without
      *   this file only the index-health metrics are produced.
      *
+     * [--batch-size=<n>]
+     * : Images per vision call, matching MediaIndexBatchExecutor. Default 5.
+     *
      * [--label=<name>]
      * : Report name. Default "vision-bench".
      *
@@ -110,6 +113,16 @@ final class VisionBenchCommand
         WP_CLI::log(sprintf('Backed up %d existing index row(s) for the sample.', \count($backup)));
 
         $config = new ConfigRepository();
+        $batchSize = (int) ($assoc['batch-size'] ?? 5);
+
+        // Warm the query-parse cache once, before any model runs. The parser is
+        // rate limited to 30 calls a minute and silently degrades to raw
+        // keywords when it declines — which would quietly handicap whichever
+        // model happened to go first.
+        if ($queries !== []) {
+            $this->warmParseCache($queries, $config);
+        }
+
         $service = new MediaIndexService(new MediaIndexRepository($wpdb));
         $allowed = $this->allowedTaxonomy();
         $report = ['label' => $label, 'sample' => $sample, 'models' => []];
@@ -131,11 +144,31 @@ final class VisionBenchCommand
 
                     $provider = ProviderFactory::make($providerId, $config);
                     $started = microtime(true);
-                    $outcome = $service->indexBatch($sample, $provider);
+
+                    // Same chunking as MediaIndexBatchExecutor: one call per 5
+                    // images. Handing the whole sample to a single vision call
+                    // would blow past every request limit.
+                    $errors = [];
+                    $chunks = array_chunk($sample, $batchSize);
+                    foreach ($chunks as $n => $chunk) {
+                        $outcome = $service->indexBatch($chunk, $provider);
+                        foreach (($outcome['errors'] ?? []) as $err) {
+                            if ($err) {
+                                $errors[] = $err;
+                            }
+                        }
+                        WP_CLI::log(sprintf(
+                            '  batch %d/%d — indexed %d, failed %d',
+                            $n + 1,
+                            \count($chunks),
+                            $outcome['indexed'] ?? 0,
+                            $outcome['failed'] ?? 0
+                        ));
+                    }
                     $elapsed = round(microtime(true) - $started, 1);
 
-                    if (!empty($outcome['errors'])) {
-                        WP_CLI::warning('  ' . implode(' | ', array_filter($outcome['errors'])));
+                    if ($errors !== []) {
+                        WP_CLI::warning('  ' . implode(' | ', array_slice(array_unique($errors), 0, 3)));
                     }
 
                     $rows = $runner->harvest($sample);
@@ -201,6 +234,28 @@ final class VisionBenchCommand
         }
 
         return $out;
+    }
+
+    /**
+     * Run every query once so its parsed facets land in the transient cache,
+     * pausing to stay under the parser's per-minute budget.
+     *
+     * @param list<array{query: string, expect: list<int>}> $queries
+     */
+    private function warmParseCache(array $queries, ConfigRepository $config): void
+    {
+        $perMinute = 25;
+        WP_CLI::log(sprintf('Warming the query parser cache (%d queries)...', \count($queries)));
+
+        foreach (array_chunk($queries, $perMinute) as $i => $chunk) {
+            if ($i > 0) {
+                WP_CLI::log('  parser budget reached, waiting 60s...');
+                sleep(61);
+            }
+            $this->runQueries($chunk, $config);
+        }
+
+        WP_CLI::log('  cache warm, every model will search on the same parsed facets.');
     }
 
     /**
