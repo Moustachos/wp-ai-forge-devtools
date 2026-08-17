@@ -75,7 +75,12 @@ final class VisionBenchCommand
         $queries = [];
         if (isset($assoc['queries'])) {
             $path = $this->resolvePath((string) $assoc['queries']);
-            $queries = VisionBenchRunner::loadQueries($path);
+
+            try {
+                $queries = VisionBenchRunner::loadQueries($path);
+            } catch (Throwable $e) {
+                WP_CLI::error($e->getMessage());
+            }
 
             $unreachable = VisionBenchRunner::unreachableExpectations($queries, $sample);
             if ($unreachable !== []) {

@@ -22,6 +22,9 @@ use wpdb;
  */
 final class VisionBenchRunner
 {
+    /** Entry type marking a query nothing in the sample should answer. */
+    public const TYPE_TRAP = 'piege';
+
     /** Closed-taxonomy columns whose values must come from a known set. */
     private const TAXONOMY_COLUMNS = ['tone', 'usage_type', 'category', 'image_type', 'color_mood', 'people_count', 'setting', 'subject_position', 'negative_space'];
 
@@ -207,10 +210,25 @@ final class VisionBenchRunner
                 throw new RuntimeException("Entry $i has no usable 'query'.");
             }
             if (!\array_key_exists('expect', $entry) || !\is_array($entry['expect'])) {
-                throw new RuntimeException("Entry $i has no 'expect' array (use [] for a trap query).");
+                throw new RuntimeException("Entry $i has no 'expect' array.");
             }
+
+            $type = isset($entry['type']) ? (string) $entry['type'] : '';
+            $isTrap = $type === self::TYPE_TRAP;
+
+            // An empty `expect` on a non-trap entry is an unfilled row, not a
+            // trap. Scoring it as one would quietly reward every model for
+            // returning nothing, so refuse the file instead.
+            if ($entry['expect'] === [] && !$isTrap) {
+                throw new RuntimeException(
+                    "Entry $i (\"{$entry['query']}\") has an empty 'expect' but is not typed as '"
+                    . self::TYPE_TRAP . "'. Fill in the expected attachment ids, or mark it as a trap."
+                );
+            }
+
             $queries[] = [
                 'query' => trim($entry['query']),
+                'type' => $type,
                 'expect' => array_values(array_map('intval', $entry['expect'])),
             ];
         }

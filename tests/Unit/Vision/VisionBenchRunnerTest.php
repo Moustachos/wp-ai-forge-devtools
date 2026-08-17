@@ -57,6 +57,32 @@ class VisionBenchRunnerTest extends TestCase
         $this->assertSame(0, $health['off_taxonomy'], 'a failed row carries no usable taxonomy');
     }
 
+    public function testRefusesAnUnfilledQueryInsteadOfScoringItAsATrap(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'q');
+        file_put_contents($path, json_encode([
+            ['query' => 'a real one', 'type' => 'facile', 'expect' => []],
+        ]));
+
+        $this->expectExceptionMessageMatches('/expect/');
+        VisionBenchRunner::loadQueries($path);
+    }
+
+    public function testAcceptsAnEmptyExpectOnlyWhenTheEntryIsTypedAsATrap(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'q');
+        file_put_contents($path, json_encode([
+            ['query' => 'nothing answers this', 'type' => 'piege', 'expect' => []],
+            ['query' => 'a real one', 'type' => 'facile', 'expect' => [12]],
+        ]));
+
+        $queries = VisionBenchRunner::loadQueries($path);
+
+        $this->assertCount(2, $queries);
+        $this->assertSame('piege', $queries[0]['type']);
+        $this->assertSame([12], $queries[1]['expect']);
+    }
+
     public function testAveragesKeywordsAcrossIndexedRows(): void
     {
         $rows = [
