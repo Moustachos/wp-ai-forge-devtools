@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AIForge\DevTools\Tests\Unit\Vision;
+
+use AIForge\DevTools\Tests\Unit\TestCase;
+use AIForge\Vision\VisionBenchScorer;
+
+class VisionBenchScorerTest extends TestCase
+{
+    public function testRanksTheFirstExpectedAttachmentInTheResultList(): void
+    {
+        $this->assertSame(1, VisionBenchScorer::rank([10], [10, 20, 30]));
+        $this->assertSame(3, VisionBenchScorer::rank([30], [10, 20, 30]));
+        $this->assertSame(2, VisionBenchScorer::rank([99, 20], [10, 20, 30]), 'best rank among several accepted answers');
+        $this->assertNull(VisionBenchScorer::rank([77], [10, 20, 30]), 'absent from results');
+    }
+
+    public function testScoresTopOneAndTopThreeRates(): void
+    {
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 'b', 'expect' => [20]],
+            ['query' => 'c', 'expect' => [30]],
+            ['query' => 'd', 'expect' => [40]],
+        ];
+        $results = [
+            'a' => [10, 11, 12],   // rank 1
+            'b' => [11, 20, 12],   // rank 2
+            'c' => [11, 12, 13, 30], // rank 4
+            'd' => [11, 12, 13],   // miss
+        ];
+
+        $score = VisionBenchScorer::score($queries, $results);
+
+        $this->assertSame(4, $score['answerable']);
+        $this->assertSame(1, $score['top1']);
+        $this->assertSame(2, $score['top3']);
+        $this->assertSame(1, $score['misses']);
+        $this->assertSame(25.0, $score['top1_rate']);
+        $this->assertSame(50.0, $score['top3_rate']);
+    }
+
+    public function testMeanReciprocalRankRewardsHigherPositions(): void
+    {
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 'b', 'expect' => [20]],
+        ];
+
+        // ranks 1 and 2 -> (1 + 0.5) / 2
+        $score = VisionBenchScorer::score($queries, ['a' => [10], 'b' => [11, 20]]);
+        $this->assertSame(0.75, $score['mrr']);
+
+        // a miss contributes zero
+        $score = VisionBenchScorer::score($queries, ['a' => [10], 'b' => [11, 12]]);
+        $this->assertSame(0.5, $score['mrr']);
+    }
+
+    public function testTreatsQueriesWithNoExpectedImageAsPrecisionTraps(): void
+    {
+        $queries = [
+            ['query' => 'nothing matches this', 'expect' => []],
+            ['query' => 'nor this', 'expect' => []],
+            ['query' => 'real one', 'expect' => [10]],
+        ];
+        $results = [
+            'nothing matches this' => [],       // correctly empty
+            'nor this' => [11, 12],             // false positive
+            'real one' => [10],
+        ];
+
+        $score = VisionBenchScorer::score($queries, $results);
+
+        $this->assertSame(2, $score['traps']);
+        $this->assertSame(1, $score['false_positives']);
+        $this->assertSame(1, $score['answerable'], 'traps are not counted as answerable queries');
+        $this->assertSame(100.0, $score['top1_rate'], 'traps must not dilute the recall rate');
+    }
+
+    public function testMissingResultEntryCountsAsAMiss(): void
+    {
+        $queries = [['query' => 'a', 'expect' => [10]]];
+
+        $score = VisionBenchScorer::score($queries, []);
+
+        $this->assertSame(1, $score['misses']);
+        $this->assertSame(0.0, $score['top1_rate']);
+    }
+}

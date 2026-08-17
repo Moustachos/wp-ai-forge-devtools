@@ -1,0 +1,242 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AIForge\Vision;
+
+use RuntimeException;
+use wpdb;
+
+/**
+ * Indexes one image sample with several vision models and measures which index
+ * answers a human-written query set best.
+ *
+ * The media index holds one row per attachment (UNIQUE KEY attachment_id), so
+ * the models cannot coexist. Each pass therefore snapshots the sample's rows,
+ * wipes them, indexes with its own model, harvests the result, and the original
+ * rows are put back at the end — in a finally, because losing a real index to a
+ * benchmark would be indefensible.
+ *
+ * The vision model is forced through the main plugin's own
+ * `aiforge_media_vision_model` filter rather than by touching provider code.
+ */
+final class VisionBenchRunner
+{
+    /** Closed-taxonomy columns whose values must come from a known set. */
+    private const TAXONOMY_COLUMNS = ['tone', 'usage_type', 'category', 'image_type', 'color_mood', 'people_count', 'setting', 'subject_position', 'negative_space'];
+
+    public function __construct(private readonly wpdb $db)
+    {
+    }
+
+    private function table(): string
+    {
+        return $this->db->prefix . 'aiforge_media_index';
+    }
+
+    /**
+     * Image attachments to benchmark on, oldest first so a given --images
+     * count always resolves to the same sample.
+     *
+     * @return list<int>
+     */
+    public function resolveSample(int $count): array
+    {
+        $ids = $this->db->get_col(
+            $this->db->prepare(
+                "SELECT ID FROM {$this->db->posts}
+                 WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%%'
+                 ORDER BY ID ASC LIMIT %d",
+                $count
+            )
+        );
+
+        return array_map('intval', $ids);
+    }
+
+    /**
+     * @param list<int> $attachmentIds
+     * @return list<array<string, mixed>>
+     */
+    public function snapshot(array $attachmentIds): array
+    {
+        if ($attachmentIds === []) {
+            return [];
+        }
+        $in = implode(',', array_map('intval', $attachmentIds));
+
+        return $this->db->get_results("SELECT * FROM {$this->table()} WHERE attachment_id IN ($in)", ARRAY_A) ?: [];
+    }
+
+    /** @param list<int> $attachmentIds */
+    public function wipe(array $attachmentIds): void
+    {
+        if ($attachmentIds === []) {
+            return;
+        }
+        $in = implode(',', array_map('intval', $attachmentIds));
+        $this->db->query("DELETE FROM {$this->table()} WHERE attachment_id IN ($in)");
+    }
+
+    /**
+     * @param list<int>                    $attachmentIds
+     * @param list<array<string, mixed>>   $rows
+     */
+    public function restore(array $attachmentIds, array $rows): void
+    {
+        $this->wipe($attachmentIds);
+
+        foreach ($rows as $row) {
+            unset($row['id']);
+            $this->db->insert($this->table(), $row);
+        }
+    }
+
+    /**
+     * Rows produced for the sample, keyed by attachment.
+     *
+     * @param list<int> $attachmentIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function harvest(array $attachmentIds): array
+    {
+        $out = [];
+        foreach ($this->snapshot($attachmentIds) as $row) {
+            $out[(int) $row['attachment_id']] = $row;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Free, judgement-free quality signals on a harvested index.
+     *
+     * @param array<int, array<string, mixed>>   $rows
+     * @param array<string, list<string>>        $allowed  Column => accepted values
+     * @return array<string, int|float>
+     */
+    public static function indexHealth(array $rows, array $allowed): array
+    {
+        $indexed = 0;
+        $failed = 0;
+        $offTaxonomy = 0;
+        $keywordCount = 0;
+        $descriptionChars = 0;
+
+        foreach ($rows as $row) {
+            if (($row['status'] ?? '') !== 'indexed') {
+                $failed++;
+                continue;
+            }
+            $indexed++;
+
+            foreach (self::TAXONOMY_COLUMNS as $col) {
+                if (!isset($allowed[$col]) || $allowed[$col] === []) {
+                    continue;
+                }
+                foreach (self::facetValues($row[$col] ?? null) as $value) {
+                    if (!\in_array($value, $allowed[$col], true)) {
+                        $offTaxonomy++;
+                    }
+                }
+            }
+
+            $keywords = $row['keywords'] ?? '';
+            $decoded = \is_string($keywords) ? json_decode($keywords, true) : null;
+            $keywordCount += \is_array($decoded) ? \count($decoded) : \count(array_filter(explode(',', (string) $keywords)));
+            $descriptionChars += mb_strlen((string) ($row['description'] ?? ''));
+        }
+
+        $total = $indexed + $failed;
+
+        return [
+            'indexed' => $indexed,
+            'failed' => $failed,
+            'failure_rate' => $total > 0 ? round(100 * $failed / $total, 1) : 0.0,
+            'off_taxonomy' => $offTaxonomy,
+            'avg_keywords' => $indexed > 0 ? round($keywordCount / $indexed, 1) : 0.0,
+            'avg_description_chars' => $indexed > 0 ? (int) round($descriptionChars / $indexed) : 0,
+        ];
+    }
+
+    /**
+     * Facet columns hold either a scalar or a JSON array — several of them are
+     * multi-valued (`usage_type`, `tone`, `category`). Reading them as scalars
+     * flags every multi-valued row as off-taxonomy, which is how this metric
+     * first reported 9 violations on 3 perfectly valid images.
+     *
+     * @return list<string>
+     */
+    private static function facetValues(mixed $raw): array
+    {
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+
+        if (\is_array($raw)) {
+            return array_map('strval', $raw);
+        }
+
+        $decoded = json_decode((string) $raw, true);
+        if (\is_array($decoded)) {
+            return array_map('strval', $decoded);
+        }
+
+        return [(string) $raw];
+    }
+
+    /**
+     * Load and validate the query file.
+     *
+     * @return list<array{query: string, expect: list<int>}>
+     */
+    public static function loadQueries(string $path): array
+    {
+        if (!file_exists($path)) {
+            throw new RuntimeException("Query file not found: $path");
+        }
+
+        $raw = json_decode((string) file_get_contents($path), true);
+        if (!\is_array($raw)) {
+            throw new RuntimeException("Query file is not valid JSON: $path");
+        }
+
+        $queries = [];
+        foreach ($raw as $i => $entry) {
+            if (!isset($entry['query']) || !\is_string($entry['query']) || trim($entry['query']) === '') {
+                throw new RuntimeException("Entry $i has no usable 'query'.");
+            }
+            if (!\array_key_exists('expect', $entry) || !\is_array($entry['expect'])) {
+                throw new RuntimeException("Entry $i has no 'expect' array (use [] for a trap query).");
+            }
+            $queries[] = [
+                'query' => trim($entry['query']),
+                'expect' => array_values(array_map('intval', $entry['expect'])),
+            ];
+        }
+
+        return $queries;
+    }
+
+    /**
+     * Attachments referenced by the query set that are missing from the sample —
+     * those queries could never be answered, whatever the model.
+     *
+     * @param list<array{query: string, expect: list<int>}> $queries
+     * @param list<int>                                     $sample
+     * @return list<int>
+     */
+    public static function unreachableExpectations(array $queries, array $sample): array
+    {
+        $missing = [];
+        foreach ($queries as $q) {
+            foreach ($q['expect'] as $id) {
+                if (!\in_array($id, $sample, true) && !\in_array($id, $missing, true)) {
+                    $missing[] = $id;
+                }
+            }
+        }
+
+        return $missing;
+    }
+}

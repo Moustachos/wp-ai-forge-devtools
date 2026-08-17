@@ -74,6 +74,46 @@ From Git Bash, an absolute `--baseline=/var/www/...` path gets mangled by MSYS
 into `C:/Program Files/Git/var/www/...`. Use a WordPress-root-relative path
 (`wp-content/uploads/...`) or prefix the command with `MSYS_NO_PATHCONV=1`.
 
+### Vision benchmark
+
+```bash
+cd ../.. && npx wp-env run cli -- wp aiforge-dev vision-bench \
+  --models=gemini:gemini-3-flash-preview,openai:gpt-5.6-luna,anthropic:claude-sonnet-5 \
+  --images=100 --queries=wp-content/uploads/aiforge-dev/queries.json --label=vision-aug
+```
+
+Indexes the same image sample with each vision model and scores the resulting
+index on a human-written query set: does the expected image come back, and at
+what rank. Ranking is the measure because there is no ground truth for what a
+"good" description reads like. Free signals come along for the ride: failure
+rate, off-taxonomy values, keyword count, description length, wall time.
+
+The query file is `[{"query": "...", "expect": [attachment ids]}]`. An empty
+`expect` marks a **trap**: nothing in the sample answers it, so anything
+returned is a false positive. Traps are scored separately so a model that
+answers everything cannot look good just for never staying silent.
+
+Four things worth knowing:
+
+- **The index holds one row per attachment** (`UNIQUE KEY attachment_id`), so
+  models cannot coexist. Each pass snapshots the sample's rows, wipes them,
+  indexes, harvests, and the originals go back in a `finally`. Verified on the
+  lab: 346 rows, identical checksum before and after.
+- **`indexBatch` fills existing rows, it does not create them.** After a wipe
+  you must call `syncMissingEntries()` or every image silently indexes to
+  nothing — the run looks successful and produces zero rows.
+- **Facet columns are multi-valued**, stored as JSON arrays (`usage_type`,
+  `tone`, `category`). Reading them as scalars flags every valid row as
+  off-taxonomy; the metric reported 9 violations on 3 clean images before this
+  was fixed.
+- **The query parser is cached per query** (transient on the parsed facets, not
+  on the results), which is what keeps the parsing side constant across models
+  while the SQL search is genuinely re-run for each index.
+
+Use `--dry-run` to resolve the sample and validate the query file without
+spending anything. Attachments referenced by a query but absent from the sample
+are reported as unreachable rather than silently scored as misses.
+
 ### Browser smoke harness
 
 ```bash
