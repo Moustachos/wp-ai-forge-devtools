@@ -7,6 +7,7 @@ namespace AIForge;
 use AIForge\Admin\DevAssetLoader;
 use AIForge\Admin\DeveloperPage;
 use AIForge\Cli\QgCampaignCommand;
+use AIForge\Cli\SuggestionBenchCommand;
 use AIForge\Cli\VisionBenchCommand;
 use AIForge\Cli\VisionPickerCommand;
 use AIForge\REST\DemoModeController;
@@ -74,6 +75,7 @@ class DevTools
         \WP_CLI::add_command('aiforge-dev qg-campaign', QgCampaignCommand::class);
         \WP_CLI::add_command('aiforge-dev vision-bench', VisionBenchCommand::class);
         \WP_CLI::add_command('aiforge-dev vision-picker', VisionPickerCommand::class);
+        \WP_CLI::add_command('aiforge-dev suggestion-bench', SuggestionBenchCommand::class);
     }
 
     private function registerDeveloperPage(): void
