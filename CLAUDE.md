@@ -114,6 +114,31 @@ Use `--dry-run` to resolve the sample and validate the query file without
 spending anything. Attachments referenced by a query but absent from the sample
 are reported as unreachable rather than silently scored as misses.
 
+#### Filling the query file visually
+
+```bash
+cd ../.. && npx wp-env run cli -- wp aiforge-dev vision-picker --images=100
+# then open http://localhost:8888/wp-content/uploads/aiforge-dev/picker.html
+```
+
+Writes a standalone page listing every query with its candidate thumbnails.
+Click a tile to add or remove it from `expect`, then Save. Ticking "voir toute
+la médiathèque" exposes the whole sample when the suggested candidates are
+wrong — which matters, because pre-filled candidates come from the *current*
+index and blindly accepting them would enshrine one model's view as ground
+truth.
+
+- The page lives in uploads and is opened over the site's origin, so thumbnails
+  load from the same host and the browser cookie authenticates the save. **You
+  must be logged into wp-admin.** The nonce is baked in at generation time and
+  lasts about 12 hours — re-run the command to refresh it.
+- Saving goes through `POST aiforge-dev/v1/vision-queries`, which only writes
+  `.json` files inside the aiforge-dev upload directory and keeps a `.bak` of
+  the previous content first.
+- `candidates` and `hint` survive the round trip; only `expect` changes.
+- This is not a WordPress admin screen on purpose: it is a one-off data entry
+  task, so it costs no menu registration, no asset pipeline and no build step.
+
 ### Browser smoke harness
 
 ```bash
