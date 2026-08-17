@@ -144,7 +144,17 @@ final class SuggestionBenchCommand
                             static fn ($s) => (int) ($s['attachment_id'] ?? $s['id'] ?? 0),
                             $picked
                         );
-                        $perBlock[] = ['block' => $i, 'suggestions' => array_values(array_filter($ids))];
+                        // Keep the scores: they let any threshold be simulated
+                        // afterwards instead of re-running the whole bench.
+                        $scores = [];
+                        foreach ($picked as $sel) {
+                            $scores[(int) ($sel['attachment_id'] ?? 0)] = (int) ($sel['relevance_score'] ?? -1);
+                        }
+                        $perBlock[] = [
+                            'block' => $i,
+                            'suggestions' => array_values(array_filter($ids)),
+                            'scores' => $scores,
+                        ];
                     } catch (Throwable $e) {
                         WP_CLI::warning('  block ' . $i . ': ' . mb_substr($e->getMessage(), 0, 60));
                         $perBlock[] = ['block' => $i, 'suggestions' => [], 'error' => $e->getMessage()];

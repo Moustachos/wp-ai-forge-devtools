@@ -6,6 +6,7 @@ namespace AIForge\Cli;
 
 use AIForge\REST\VisionQueryController;
 use AIForge\Vision\SuggestionReviewPage;
+use AIForge\Vision\SuggestionWastePage;
 use WP_CLI;
 
 /**
@@ -19,6 +20,11 @@ final class SuggestionReviewCommand
      * [--report=<file>]
      * : suggestion-bench report inside the aiforge-dev upload directory.
      *   Defaults to the most recent sugg-*.json.
+     *
+     * [--mode=<mode>]
+     * : `preference` (default) asks which series is best; `waste` asks which
+     *   individual images do not belong. The second answers "how much does this
+     *   index throw in that should not be there", which preference cannot.
      *
      * [--only-divergent]
      * : Skip blocks where every index proposed the same three images — there is
@@ -92,20 +98,20 @@ final class SuggestionReviewCommand
         $token = wp_generate_password(32, false);
         set_transient(VisionQueryController::TOKEN_TRANSIENT, $token, 12 * HOUR_IN_SECONDS);
 
-        $out = $dir . 'suggestion-review.html';
-        $verdictFile = 'suggestion-verdicts.json';
+        $waste = ($assoc['mode'] ?? 'preference') === 'waste';
+        $file = $waste ? 'suggestion-waste.html' : 'suggestion-review.html';
+        $verdictFile = $waste ? 'suggestion-waste.json' : 'suggestion-verdicts.json';
 
-        file_put_contents($out, SuggestionReviewPage::render(
-            $cases,
-            $verdictFile,
-            rest_url('aiforge-dev/v1/vision-queries'),
-            $token
-        ));
+        $html = $waste
+            ? SuggestionWastePage::render($cases, $verdictFile, rest_url('aiforge-dev/v1/vision-queries'), $token)
+            : SuggestionReviewPage::render($cases, $verdictFile, rest_url('aiforge-dev/v1/vision-queries'), $token);
+
+        file_put_contents($dir . $file, $html);
 
         WP_CLI::success(sprintf(
             '%d case(s) to review. Open %s',
             \count($cases),
-            wp_upload_dir()['baseurl'] . '/aiforge-dev/suggestion-review.html'
+            wp_upload_dir()['baseurl'] . '/aiforge-dev/' . $file
         ));
         WP_CLI::log("Verdicts are saved to $verdictFile; models stay hidden until you reveal them.");
     }
