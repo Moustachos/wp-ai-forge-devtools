@@ -153,7 +153,22 @@ final class VisionBenchCommand
                     $usage = ['prompt_tokens' => 0, 'completion_tokens' => 0];
                     $chunks = array_chunk($sample, $batchSize);
                     foreach ($chunks as $n => $chunk) {
-                        $outcome = $service->indexBatch($chunk, $provider);
+                        // A provider throwing on one batch (a 503, a retry
+                        // budget spent) must not cost the other 69. The real
+                        // executor degrades batch by batch; so do we.
+                        try {
+                            $outcome = $service->indexBatch($chunk, $provider);
+                        } catch (Throwable $batchError) {
+                            $errors[] = $batchError->getMessage();
+                            WP_CLI::log(sprintf(
+                                '  batch %d/%d — threw: %s',
+                                $n + 1,
+                                \count($chunks),
+                                mb_substr($batchError->getMessage(), 0, 60)
+                            ));
+                            continue;
+                        }
+
                         foreach (($outcome['errors'] ?? []) as $err) {
                             if ($err) {
                                 $errors[] = $err;
