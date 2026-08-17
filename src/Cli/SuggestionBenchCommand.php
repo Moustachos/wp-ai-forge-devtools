@@ -8,6 +8,7 @@ use AIForge\Agent\MediaIntelligence\MediaIndexRepository;
 use AIForge\Agent\MediaIntelligence\MediaIntelligenceAgent;
 use AIForge\AI\ProviderFactory;
 use AIForge\Config\ConfigRepository;
+use AIForge\Vision\SuggestionAgreement;
 use AIForge\Vision\SuggestionBlockSelector;
 use AIForge\Vision\SuggestionContextBuilder;
 use AIForge\Vision\VisionBenchRunner;
@@ -127,9 +128,13 @@ final class SuggestionBenchCommand
                             'locale' => 'fr_FR',
                         ]);
                         $decoded = json_decode((string) $result->content, true);
+                        // The agent returns `selections`; reading the wrong key
+                        // silently produced an empty set for every model and
+                        // the bench called that unanimous agreement.
+                        $picked = $decoded['selections'] ?? $decoded['suggestions'] ?? [];
                         $ids = array_map(
                             static fn ($s) => (int) ($s['attachment_id'] ?? $s['id'] ?? 0),
-                            $decoded['suggestions'] ?? []
+                            $picked
                         );
                         $perBlock[] = ['block' => $i, 'suggestions' => array_values(array_filter($ids))];
                     } catch (Throwable $e) {
@@ -147,12 +152,25 @@ final class SuggestionBenchCommand
             WP_CLI::log(sprintf('Restored %d original index row(s).', \count($backup)));
         }
 
-        $report['agreement'] = $this->agreement($report['models'], \count($blocks));
+        $report['agreement'] = SuggestionAgreement::compute($report['models'], \count($blocks));
+        $a = $report['agreement'];
         WP_CLI::log(sprintf(
-            'Agreement: %d block(s) where every index proposed the same set, %d where they all differ.',
-            $report['agreement']['unanimous'],
-            $report['agreement']['fully_split']
+            'Answered by all: %d/%d (partial %d, none %d)',
+            $a['comparable'],
+            \count($blocks),
+            $a['partial'],
+            $a['no_answer']
         ));
+        if ($a['comparable'] > 0) {
+            WP_CLI::log(sprintf(
+                'Of those: %d identical, %d all-different, %d share the first pick.',
+                $a['unanimous'],
+                $a['fully_split'],
+                $a['same_first']
+            ));
+        } else {
+            WP_CLI::warning('No block was answered by every index — nothing can be compared.');
+        }
 
         $file = $dir . $label . '-' . gmdate('Ymd-His') . '.json';
         file_put_contents($file, (string) wp_json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -223,50 +241,4 @@ final class SuggestionBenchCommand
         return $out;
     }
 
-    /**
-     * How often the indexes lead to the same suggestions. Blocks where they
-     * agree carry no information and are not worth a human looking at them.
-     *
-     * @param array<string, list<array{block: int, suggestions: list<int>}>> $models
-     * @return array{unanimous: int, fully_split: int, per_block: list<array<string, mixed>>}
-     */
-    private function agreement(array $models, int $blockCount): array
-    {
-        $names = array_keys($models);
-        $unanimous = 0;
-        $split = 0;
-        $perBlock = [];
-
-        for ($i = 0; $i < $blockCount; $i++) {
-            $sets = [];
-            foreach ($names as $name) {
-                $ids = $models[$name][$i]['suggestions'] ?? [];
-                sort($ids);
-                $sets[$name] = $ids;
-            }
-
-            $signatures = array_map(static fn ($s) => implode(',', $s), $sets);
-            $distinct = \count(array_unique($signatures));
-
-            // Overlap of the first suggestion, the one users actually see first
-            $firsts = array_map(static fn ($s) => $s[0] ?? 0, $sets);
-            $sameFirst = \count(array_unique($firsts)) === 1;
-
-            if ($distinct === 1) {
-                $unanimous++;
-            }
-            if ($distinct === \count($names)) {
-                $split++;
-            }
-
-            $perBlock[] = [
-                'block' => $i,
-                'distinct_sets' => $distinct,
-                'same_first_pick' => $sameFirst,
-                'sets' => $sets,
-            ];
-        }
-
-        return ['unanimous' => $unanimous, 'fully_split' => $split, 'per_block' => $perBlock];
-    }
 }
