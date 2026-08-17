@@ -7,15 +7,11 @@ namespace AIForge\Vision;
 /**
  * Measures how far indexes lead to the same media suggestions.
  *
- * The point is to spend human judgement only where the indexes disagree. That
+ * The point is to spend human judgement only where the indexes disagree, which
  * makes the silent case dangerous: blocks nobody answered are trivially
- * "identical" and, counted as agreement, turn a broken run into a verdict. The
- * first version of this bench reported unanimity on twelve blocks while every
- * set was empty, because the result parser was reading the wrong key.
- *
- * So blocks are sorted into three buckets — answered by everyone (comparable),
- * answered by some (partial), answered by nobody (no_answer) — and unanimity is
- * only ever counted within the first.
+ * "identical" and would turn a broken run into a verdict. Blocks are therefore
+ * bucketed into comparable / partial / no_answer, and unanimity is only ever
+ * counted within the first.
  */
 final class SuggestionAgreement
 {
