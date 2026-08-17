@@ -6,6 +6,7 @@ namespace AIForge;
 
 use AIForge\Admin\DevAssetLoader;
 use AIForge\Admin\DeveloperPage;
+use AIForge\Cli\IndexReviewCommand;
 use AIForge\Cli\QgCampaignCommand;
 use AIForge\Cli\SuggestionBenchCommand;
 use AIForge\Cli\SuggestionReviewCommand;
@@ -78,6 +79,7 @@ class DevTools
         \WP_CLI::add_command('aiforge-dev vision-picker', VisionPickerCommand::class);
         \WP_CLI::add_command('aiforge-dev suggestion-bench', SuggestionBenchCommand::class);
         \WP_CLI::add_command('aiforge-dev suggestion-review', SuggestionReviewCommand::class);
+        \WP_CLI::add_command('aiforge-dev index-review', IndexReviewCommand::class);
     }
 
     private function registerDeveloperPage(): void
