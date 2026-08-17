@@ -189,6 +189,67 @@ final class VisionBenchRunner
     }
 
     /**
+     * How much each facet actually separates the images.
+     *
+     * A model can be perfectly consistent and still produce a useless index: if
+     * it labels 90% of the library `muted`, that facet filters nothing and no
+     * query on it will ever narrow anything down. Internal agreement says
+     * nothing about this — only the spread of values does.
+     *
+     * `dominant_share` is the fraction carried by the most frequent value (1.0
+     * = everything identical). `entropy` is Shannon entropy normalised by the
+     * number of distinct values observed, so 0 is one value everywhere and 1 is
+     * a perfectly even spread.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @param list<string>                     $facets
+     * @return array<string, array{fill_rate: float, distinct: int, dominant: string, dominant_share: float, entropy: float}>
+     */
+    public static function facetDiscrimination(array $rows, array $facets): array
+    {
+        $indexed = array_filter($rows, static fn ($r) => ($r['status'] ?? '') === 'indexed');
+        $total = \count($indexed);
+        $out = [];
+
+        foreach ($facets as $facet) {
+            $counts = [];
+            $filled = 0;
+
+            foreach ($indexed as $row) {
+                $values = self::facetValues($row[$facet] ?? null);
+                if ($values === []) {
+                    continue;
+                }
+                $filled++;
+                foreach ($values as $v) {
+                    $counts[$v] = ($counts[$v] ?? 0) + 1;
+                }
+            }
+
+            $sum = array_sum($counts);
+            $entropy = 0.0;
+            if ($sum > 0 && \count($counts) > 1) {
+                foreach ($counts as $n) {
+                    $p = $n / $sum;
+                    $entropy -= $p * log($p);
+                }
+                $entropy /= log(\count($counts));
+            }
+
+            arsort($counts);
+            $out[$facet] = [
+                'fill_rate' => $total > 0 ? round(100 * $filled / $total, 1) : 0.0,
+                'distinct' => \count($counts),
+                'dominant' => $counts === [] ? '' : (string) array_key_first($counts),
+                'dominant_share' => $sum > 0 ? round(reset($counts) / $sum, 3) : 0.0,
+                'entropy' => round($entropy, 3),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * Load and validate the query file.
      *
      * @return list<array{query: string, expect: list<int>}>

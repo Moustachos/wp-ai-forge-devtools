@@ -95,4 +95,35 @@ class VisionBenchRunnerTest extends TestCase
         $this->assertSame(2.0, $health['avg_keywords']);
         $this->assertSame(5, $health['avg_description_chars']);
     }
+
+    public function testFacetDiscriminationFlagsAFacetThatSaysTheSameThingEverywhere(): void
+    {
+        // A facet whose value never varies is internally consistent and
+        // useless: it filters nothing.
+        $rows = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $rows[$i] = ['status' => 'indexed', 'color_mood' => 'muted', 'category' => '["' . ($i % 5) . '"]'];
+        }
+
+        $d = VisionBenchRunner::facetDiscrimination($rows, ['color_mood', 'category']);
+
+        $this->assertSame(1.0, $d['color_mood']['dominant_share'], 'one value covers everything');
+        $this->assertSame(0.0, $d['color_mood']['entropy'], 'no information at all');
+        $this->assertSame(0.2, $d['category']['dominant_share'], 'five values evenly spread');
+        $this->assertSame(1.0, $d['category']['entropy']);
+    }
+
+    public function testFillRateCountsRowsWhereTheFacetIsMissing(): void
+    {
+        $rows = [
+            1 => ['status' => 'indexed', 'setting' => 'indoor'],
+            2 => ['status' => 'indexed', 'setting' => ''],
+            3 => ['status' => 'indexed'],
+            4 => ['status' => 'indexed', 'setting' => 'outdoor'],
+        ];
+
+        $d = VisionBenchRunner::facetDiscrimination($rows, ['setting']);
+
+        $this->assertSame(50.0, $d['setting']['fill_rate']);
+    }
 }

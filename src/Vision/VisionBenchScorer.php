@@ -20,6 +20,13 @@ namespace AIForge\Vision;
 final class VisionBenchScorer
 {
     /**
+     * Rank standing in for a miss in the rank series. Larger than any sample
+     * this bench runs on, so a miss always sorts last without pretending to be
+     * a measured position.
+     */
+    public const MISS_RANK = 9999;
+
+    /**
      * Best (lowest) 1-based position among the accepted answers, null if none
      * of them came back at all.
      *
@@ -54,8 +61,11 @@ final class VisionBenchScorer
         $answerable = 0;
         $top1 = 0;
         $top3 = 0;
+        $top5 = 0;
+        $top10 = 0;
         $misses = 0;
         $traps = 0;
+        $rankSeries = [];
         $falsePositives = 0;
         $reciprocal = 0.0;
         $detail = [];
@@ -78,6 +88,10 @@ final class VisionBenchScorer
             $answerable++;
             $rank = self::rank($expect, $results);
 
+            // A miss enters the rank series as worse than anything observed,
+            // so the median cannot be flattered by dropping the failures.
+            $rankSeries[] = $rank ?? self::MISS_RANK;
+
             if ($rank === null) {
                 $misses++;
             } else {
@@ -88,15 +102,33 @@ final class VisionBenchScorer
                 if ($rank <= 3) {
                     $top3++;
                 }
+                if ($rank <= 5) {
+                    $top5++;
+                }
+                if ($rank <= 10) {
+                    $top10++;
+                }
             }
 
             $detail[] = ['query' => $query, 'trap' => false, 'rank' => $rank, 'returned' => \count($results)];
+        }
+
+        sort($rankSeries);
+        $n = \count($rankSeries);
+        $median = 0.0;
+        if ($n > 0) {
+            $median = $n % 2 === 1
+                ? (float) $rankSeries[intdiv($n, 2)]
+                : (float) (($rankSeries[$n / 2 - 1] + $rankSeries[$n / 2]) / 2);
         }
 
         return [
             'answerable' => $answerable,
             'top1' => $top1,
             'top3' => $top3,
+            'top5' => $top5,
+            'top10' => $top10,
+            'median_rank' => $median,
             'misses' => $misses,
             'traps' => $traps,
             'false_positives' => $falsePositives,

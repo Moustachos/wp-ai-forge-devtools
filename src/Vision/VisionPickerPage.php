@@ -52,6 +52,7 @@ final class VisionPickerPage
 </header>
 <main id="app"></main>
 <div id="toast" role="status"></div>
+<div id="lightbox"><img alt=""><span></span></div>
 <script>window.BENCH = {$payload};</script>
 <script>{$js}</script>
 </body>
@@ -95,13 +96,36 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
 .count { margin-left: auto; font-size: 13px; color: var(--muted); }
 .count.filled { color: var(--ok); font-weight: 600; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-figure { margin: 0; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 4px; background: #fafafa; transition: border-color .12s; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+figure { position: relative; margin: 0; cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 6px; background: #fafafa; transition: border-color .12s; }
 figure:hover { border-color: #c7d2fe; }
 figure.on { border-color: var(--accent); background: #eff6ff; }
-figure img { width: 100%; height: 110px; object-fit: cover; border-radius: 4px; display: block; background: #e4e4e7; }
-figcaption { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; justify-content: space-between; gap: 6px; }
+/* contain, never cover: the crop is exactly what these queries are about.
+   The checkerboard makes the real edges of the image visible. */
+.frame {
+  height: 190px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  background-color: #e9e9ec;
+  background-image: linear-gradient(45deg, #dededf 25%, transparent 25%), linear-gradient(-45deg, #dededf 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #dededf 75%), linear-gradient(-45deg, transparent 75%, #dededf 75%);
+  background-size: 14px 14px; background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+}
+.frame img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.zoom {
+  position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 4px;
+  border: none; background: rgba(24,24,27,.72); color: #fff; font-size: 14px; line-height: 26px;
+  padding: 0; text-align: center; opacity: 0; transition: opacity .12s;
+}
+figure:hover .zoom { opacity: 1; }
+figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; gap: 6px; }
 figure.on figcaption { color: var(--accent); font-weight: 600; }
+.shape { font-variant-numeric: tabular-nums; }
+#lightbox {
+  position: fixed; inset: 0; background: rgba(9,9,11,.92); display: none; align-items: center;
+  justify-content: center; z-index: 50; padding: 30px; cursor: zoom-out;
+}
+#lightbox.on { display: flex; }
+#lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 4px 30px rgba(0,0,0,.5); }
+#lightbox span { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d4d4d8; font-size: 13px; }
 .extra { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
 .extra summary { cursor: pointer; font-size: 13px; color: var(--muted); }
 .extra[open] summary { margin-bottom: 12px; }
@@ -141,9 +165,20 @@ CSS;
     var meta = images[id] || { url: '', title: '#' + id };
     var fig = document.createElement('figure');
     fig.className = (q.expect || []).indexOf(id) > -1 ? 'on' : '';
+    var shape = meta.w && meta.h
+      ? (meta.ratio > 1.05 ? 'paysage' : (meta.ratio < 0.95 ? 'portrait' : 'carré')) + ' ' + meta.w + '×' + meta.h
+      : '';
     fig.innerHTML =
-      '<img loading="lazy" src="' + meta.url + '" alt="">' +
-      '<figcaption><span>#' + id + '</span><span>' + (meta.title || '') + '</span></figcaption>';
+      '<div class="frame"><img loading="lazy" src="' + meta.url + '" alt=""></div>' +
+      '<button class="zoom" type="button" title="Agrandir">⤢</button>' +
+      '<figcaption><span>#' + id + '</span><span class="shape">' + shape + '</span></figcaption>';
+    fig.querySelector('.zoom').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var lb = document.getElementById('lightbox');
+      lb.querySelector('img').src = meta.full || meta.url;
+      lb.querySelector('span').textContent = '#' + id + ' — ' + (meta.title || '') + ' — ' + shape;
+      lb.className = 'on';
+    });
     fig.addEventListener('click', function () {
       q.expect = q.expect || [];
       var at = q.expect.indexOf(id);
@@ -224,6 +259,11 @@ CSS;
     t.className = 'show' + (isError ? ' err' : '');
     setTimeout(function () { t.className = ''; }, 3500);
   }
+
+  document.getElementById('lightbox').addEventListener('click', function () { this.className = ''; });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { document.getElementById('lightbox').className = ''; }
+  });
 
   document.getElementById('all-images').addEventListener('change', function (e) {
     showAll = e.target.checked;

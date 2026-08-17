@@ -88,4 +88,41 @@ class VisionBenchScorerTest extends TestCase
         $this->assertSame(1, $score['misses']);
         $this->assertSame(0.0, $score['top1_rate']);
     }
+
+    public function testReportsMedianRankAndTopFive(): void
+    {
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 'b', 'expect' => [20]],
+            ['query' => 'c', 'expect' => [30]],
+            ['query' => 'd', 'expect' => [40]],
+        ];
+        $results = [
+            'a' => [10],                          // rank 1
+            'b' => [1, 2, 20],                    // rank 3
+            'c' => [1, 2, 3, 4, 5, 6, 30],        // rank 7
+            'd' => [1, 2],                        // miss
+        ];
+
+        $score = VisionBenchScorer::score($queries, $results);
+
+        // ranks 1, 3, 7 and a miss: the miss must not be dropped, it is the
+        // worst possible outcome and has to weigh as such. Median of the four
+        // sorted values is therefore (3 + 7) / 2.
+        $this->assertSame(5.0, $score['median_rank'], 'median over 1, 3, 7, miss');
+        $this->assertSame(2, $score['top5'], 'ranks 1 and 3');
+        $this->assertSame(3, $score['top10'], 'ranks 1, 3 and 7');
+    }
+
+    public function testMedianRankIgnoresTrapQueries(): void
+    {
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 't', 'expect' => []],
+        ];
+
+        $score = VisionBenchScorer::score($queries, ['a' => [10], 't' => [1, 2, 3]]);
+
+        $this->assertSame(1.0, $score['median_rank']);
+    }
 }

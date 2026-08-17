@@ -10,6 +10,7 @@ use AIForge\Agent\MediaIntelligence\MediaIndexService;
 use AIForge\Agent\MediaIntelligence\MediaSearchCostLog;
 use AIForge\Agent\MediaIntelligence\MediaSearchService;
 use AIForge\Agent\MediaIntelligence\MediaTaxonomy;
+use AIForge\AI\ModelCatalog;
 use AIForge\AI\ProviderFactory;
 use AIForge\Config\ConfigRepository;
 use AIForge\Vision\VisionBenchRunner;
@@ -149,6 +150,7 @@ final class VisionBenchCommand
                     // images. Handing the whole sample to a single vision call
                     // would blow past every request limit.
                     $errors = [];
+                    $usage = ['prompt_tokens' => 0, 'completion_tokens' => 0];
                     $chunks = array_chunk($sample, $batchSize);
                     foreach ($chunks as $n => $chunk) {
                         $outcome = $service->indexBatch($chunk, $provider);
@@ -157,6 +159,9 @@ final class VisionBenchCommand
                                 $errors[] = $err;
                             }
                         }
+                        // Real tokens, not an estimate: the provider bills these.
+                        $usage['prompt_tokens'] += (int) ($outcome['usage']['prompt_tokens'] ?? 0);
+                        $usage['completion_tokens'] += (int) ($outcome['usage']['completion_tokens'] ?? 0);
                         WP_CLI::log(sprintf(
                             '  batch %d/%d — indexed %d, failed %d',
                             $n + 1,
@@ -174,27 +179,49 @@ final class VisionBenchCommand
                     $rows = $runner->harvest($sample);
                     $health = VisionBenchRunner::indexHealth($rows, $allowed);
                     $health['seconds'] = $elapsed;
+                    $health['prompt_tokens'] = $usage['prompt_tokens'];
+                    $health['completion_tokens'] = $usage['completion_tokens'];
+
+                    $pricing = ModelCatalog::describe($modelId);
+                    if (!empty($pricing['input'])) {
+                        $health['cost'] = round(
+                            $usage['prompt_tokens'] / 1e6 * $pricing['input']
+                            + $usage['completion_tokens'] / 1e6 * ($pricing['output'] ?? 0),
+                            4
+                        );
+                        $health['cost_per_1000_images'] = \count($sample) > 0
+                            ? round($health['cost'] / \count($sample) * 1000, 3)
+                            : 0.0;
+                    }
 
                     WP_CLI::log(sprintf(
-                        '  indexed %d, failed %d, off-taxonomy %d, %.1f keywords/img, %ds',
+                        '  indexed %d, failed %d, off-taxonomy %d, %.1f kw/img, %ds, $%s/1000 img',
                         $health['indexed'],
                         $health['failed'],
                         $health['off_taxonomy'],
                         $health['avg_keywords'],
-                        $elapsed
+                        $elapsed,
+                        $health['cost_per_1000_images'] ?? '?'
                     ));
 
-                    $entry = ['health' => $health];
+                    $entry = [
+                        'health' => $health,
+                        'facets' => VisionBenchRunner::facetDiscrimination($rows, array_keys($allowed)),
+                        // The rows themselves, so the index can be judged on its
+                        // content and not only on what search made of it.
+                        'rows' => $rows,
+                    ];
 
                     if ($queries !== []) {
                         $entry['search'] = VisionBenchScorer::score($queries, $this->runQueries($queries, $config));
                         WP_CLI::log(sprintf(
-                            '  top1 %.1f%%  top3 %.1f%%  mrr %.3f  misses %d  false positives %d',
+                            '  top1 %.1f%%  top5 %d/%d  median rank %.1f  mrr %.3f  misses %d',
                             $entry['search']['top1_rate'],
-                            $entry['search']['top3_rate'],
+                            $entry['search']['top5'],
+                            $entry['search']['answerable'],
+                            $entry['search']['median_rank'],
                             $entry['search']['mrr'],
-                            $entry['search']['misses'],
-                            $entry['search']['false_positives']
+                            $entry['search']['misses']
                         ));
                     }
 

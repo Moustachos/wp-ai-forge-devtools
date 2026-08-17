@@ -59,15 +59,24 @@ final class VisionPickerCommand
 
         $images = [];
         foreach ($sample as $id) {
-            $url = wp_get_attachment_image_url($id, 'medium');
-            if (!$url) {
-                $url = wp_get_attachment_url($id);
-            }
+            $src = wp_get_attachment_image_src($id, 'medium');
+            $url = $src ? $src[0] : wp_get_attachment_url($id);
             if (!$url) {
                 continue;
             }
+
+            // Real dimensions, not the thumbnail's: queries about square format,
+            // subject position or negative space cannot be judged on a crop.
+            $meta = wp_get_attachment_metadata($id);
+            $w = (int) ($meta['width'] ?? ($src[1] ?? 0));
+            $h = (int) ($meta['height'] ?? ($src[2] ?? 0));
+
             $images[$id] = [
                 'url' => $url,
+                'full' => wp_get_attachment_url($id),
+                'w' => $w,
+                'h' => $h,
+                'ratio' => $h > 0 ? round($w / $h, 2) : 0,
                 'title' => mb_substr((string) get_the_title($id), 0, 22),
             ];
         }
