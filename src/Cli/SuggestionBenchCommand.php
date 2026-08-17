@@ -114,6 +114,14 @@ final class SuggestionBenchCommand
                 WP_CLI::log("--- $name ---");
                 $runner->restore($touched, array_values($rows));
 
+                // The saved indexes were captured after a wipe, so they carry
+                // no exclusion flag. Without this, images the user removed from
+                // suggestions come back and every series is polluted.
+                $reapplied = $runner->applyUserDecisions($backup);
+                if ($reapplied > 0) {
+                    WP_CLI::log("  re-applied {$reapplied} user decision(s)");
+                }
+
                 $agent = new MediaIntelligenceAgent();
                 $agent->setIndexRepository(new MediaIndexRepository($wpdb));
                 $provider = ProviderFactory::make($suggestProvider, $config);

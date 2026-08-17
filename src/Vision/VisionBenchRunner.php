@@ -96,6 +96,45 @@ final class VisionBenchRunner
     }
 
     /**
+     * Columns holding a user decision rather than model output. They must
+     * survive any index swap: an image the user excluded from suggestions is
+     * excluded whatever model described it, and a benchmark that resurrects it
+     * compares suggestion sets the product would never produce.
+     */
+    private const USER_DECISION_COLUMNS = ['excluded_from_suggestions'];
+
+    /**
+     * Re-apply the user's own decisions on top of a restored index.
+     *
+     * @param list<array<string, mixed>> $reference Rows carrying the real values
+     */
+    public function applyUserDecisions(array $reference): int
+    {
+        $applied = 0;
+
+        foreach ($reference as $row) {
+            $data = [];
+            foreach (self::USER_DECISION_COLUMNS as $column) {
+                if (isset($row[$column])) {
+                    $data[$column] = $row[$column];
+                }
+            }
+
+            if ($data === []) {
+                continue;
+            }
+
+            $applied += (int) $this->db->update(
+                $this->table(),
+                $data,
+                ['attachment_id' => (int) $row['attachment_id']]
+            );
+        }
+
+        return $applied;
+    }
+
+    /**
      * Rows produced for the sample, keyed by attachment.
      *
      * @param list<int> $attachmentIds
