@@ -35,17 +35,36 @@ final class IndexCoverageCommand
      * @var list<array{0: string, 1: string, 2: string}>
      */
     private const PROBES = [
-        ['facial expression', "people_count IS NOT NULL AND people_count <> 'none'", 'smil|happy|joy|laugh|serious|pensive|cheer|focused|surprised'],
-        ['apparent age', "people_count IS NOT NULL AND people_count <> 'none'", 'child|kid|baby|toddler|teen|young|elderly|senior|adult'],
-        ['clothing', "people_count IS NOT NULL AND people_count <> 'none'", 'suit|shirt|dress|jacket|hoodie|uniform|coat|sweater|hat'],
-        ['activity', "people_count IS NOT NULL AND people_count <> 'none'", 'running|walking|jumping|sitting|standing|holding|reading|writing|working'],
-        ['time of day', "setting = 'outdoor'", 'sunrise|sunset|morning|midday|golden hour|dusk|dawn|night|daylight'],
-        ['season', "setting = 'outdoor'", 'spring|summer|autumn|winter|snow|foliage|blossom'],
-        ['weather', "setting = 'outdoor'", 'sunny|cloudy|overcast|rain|storm|fog|wind|clear sky'],
+        // Whole words, never stems: the boundaries below mean `smil` matches
+        // neither "smile" nor "smiling", so every form is spelled out.
+        ['facial expression', self::PEOPLE, 'smile|smiles|smiling|happy|joy|joyful|laughing|laughter|serious|pensive|cheerful|focused|surprised'],
+        ['apparent age', self::PEOPLE, 'child|children|kid|kids|baby|babies|toddler|teen|teenager|young|youth|elderly|senior|adult|adults'],
+        ['clothing', self::PEOPLE, 'suit|shirt|dress|jacket|hoodie|uniform|coat|sweater|hat'],
+        ['activity', self::PEOPLE, 'running|walking|jumping|sitting|standing|holding|reading|writing|working'],
+        ['time of day', self::OUTDOOR, 'sunrise|sunset|morning|midday|noon|golden hour|dusk|dawn|twilight|night|daylight|afternoon|evening'],
+        ['season', self::OUTDOOR, 'spring|summer|autumn|fall|winter|snow|foliage|blossom'],
+        ['weather', self::OUTDOOR, 'sunny|cloudy|overcast|rain|storm|fog|mist|haze|wind|clear sky'],
         ['framing', '1=1', 'close-up|closeup|macro|aerial|overhead|wide shot|low angle|eye level'],
         ['named colours', '1=1', 'red|blue|green|yellow|orange|purple|pink|brown|white|black|grey'],
         ['materials', '1=1', 'wood|metal|glass|brick|concrete|fabric|stone|leather|paper'],
     ];
+
+    private const PEOPLE = "people_count IS NOT NULL AND people_count <> 'none'";
+
+    private const OUTDOOR = "setting = 'outdoor'";
+
+    /**
+     * The people probes read low by construction, and the expression one most
+     * of all: a photograph of a back, a pair of hands or a distant crowd holds
+     * a person and no describable face or outfit. Narrowing the population to
+     * rows that name a face was tried and abandoned, because deriving it from
+     * keywords is circular and leaves too few rows to judge.
+     *
+     * So these shares are a floor, not an estimate. Read them as "at most this
+     * fraction could have been described, and this many were". On the lab the
+     * floor and a portrait-only cross-check agreed anyway: 28% over every row
+     * holding a person, 35% over the rows the taxonomy calls portraits.
+     */
 
     /** Below this share of its population, a dimension is unanswerable. */
     private const GAP = 35;
@@ -95,11 +114,17 @@ final class IndexCoverageCommand
                 continue;
             }
 
-            $hit = (int) $wpdb->get_var(
+            // Whole words only. Without the boundaries `wind` matches
+            // "windows" and `rain` matches "train", which reported a weather
+            // coverage the index did not have.
+            $bounded = '\b(' . $terms . ')\b';
+            $hit = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table}
                  WHERE status = 'indexed' AND ({$population})
-                 AND (keywords REGEXP '{$terms}' OR description REGEXP '{$terms}')"
-            );
+                 AND (keywords REGEXP %s OR description REGEXP %s)",
+                $bounded,
+                $bounded
+            ));
 
             $share = (int) round(100 * $hit / $pop);
             $verdict = '';
