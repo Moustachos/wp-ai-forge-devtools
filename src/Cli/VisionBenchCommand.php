@@ -29,9 +29,12 @@ final class VisionBenchCommand
      *
      * ## OPTIONS
      *
-     * --models=<list>
+     * [--models=<list>]
      * : Comma-separated provider:model pairs, e.g.
      *   gemini:gemini-3-flash-preview,openai:gpt-5.6-luna,anthropic:claude-sonnet-5
+     *   Omit it to score the index exactly as it stands, with no indexing pass,
+     *   which is how two engine versions are compared on one set of rows.
+     *   Requires --queries.
      *
      * [--images=<n>]
      * : How many image attachments to index. Oldest first, so the sample is
@@ -53,6 +56,7 @@ final class VisionBenchCommand
      *
      * ## EXAMPLES
      *
+     *     wp aiforge-dev vision-bench --queries=wp-content/uploads/aiforge-dev/queries.json --label=before
      *     wp aiforge-dev vision-bench --models=gemini:gemini-3.7-flash --images=10 --dry-run
      *     wp aiforge-dev vision-bench --models=gemini:gemini-3-flash-preview,openai:gpt-5.6-luna --images=100 --queries=wp-content/uploads/aiforge-dev/queries.json
      *
@@ -86,7 +90,12 @@ final class VisionBenchCommand
                 WP_CLI::error($e->getMessage());
             }
 
-            $unreachable = VisionBenchRunner::unreachableExpectations($queries, $sample);
+            // Only the indexing passes are confined to the sample. Scoring the
+            // index as it stands searches all of it, so the sample says
+            // nothing about what a query can reach.
+            $unreachable = $models === []
+                ? []
+                : VisionBenchRunner::unreachableExpectations($queries, $sample);
             if ($unreachable !== []) {
                 WP_CLI::warning(sprintf(
                     '%d expected attachment(s) are outside the sample and can never be found: %s. Raise --images or fix the query file.',
@@ -107,6 +116,30 @@ final class VisionBenchCommand
 
         if ($dryRun) {
             WP_CLI::success('Dry run: sample resolved and query file valid. Nothing indexed.');
+            return;
+        }
+
+        // No model means score the index exactly as it stands. This is what
+        // lets two engine versions be compared on one set of rows, without an
+        // indexing pass moving underneath them, and it is the only way to have
+        // a "before" once a reindex has destroyed it.
+        if ($models === []) {
+            if ($queries === []) {
+                WP_CLI::error('--queries is required without --models: there would be nothing to score.');
+            }
+
+            $config = new ConfigRepository();
+            $this->warmParseCache($queries, $config);
+
+            $path = $this->write($label, [
+                'label' => $label,
+                'mode' => 'current-index',
+                'indexed_rows' => $this->indexedRows(),
+                'search' => VisionBenchScorer::score($queries, $this->runQueries($queries, $config)),
+            ]);
+
+            WP_CLI::success("Scored the current index, report at {$path}");
+
             return;
         }
 
@@ -271,10 +304,8 @@ final class VisionBenchCommand
             $out[] = [$parts[0], $parts[1]];
         }
 
-        if ($out === []) {
-            WP_CLI::error('--models is required, e.g. --models=gemini:gemini-3.7-flash');
-        }
-
+        // An empty list is a mode, not a mistake: no model means score the
+        // index exactly as it stands. __invoke() decides what to do with it.
         return $out;
     }
 
@@ -351,6 +382,17 @@ final class VisionBenchCommand
     private function resolvePath(string $path): string
     {
         return str_starts_with($path, '/') ? $path : ABSPATH . ltrim($path, '/');
+    }
+
+    /**
+     * How many rows the scored index held, so two reports cannot be compared
+     * without noticing that the index itself changed between them.
+     */
+    private function indexedRows(): int
+    {
+        global $wpdb;
+
+        return (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . $wpdb->prefix . 'aiforge_media_index');
     }
 
     /**
