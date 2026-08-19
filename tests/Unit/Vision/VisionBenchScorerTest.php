@@ -42,6 +42,60 @@ class VisionBenchScorerTest extends TestCase
         $this->assertSame(50.0, $score['top3_rate']);
     }
 
+    public function testPrecisionSeparatesTwoEnginesThatRankTheSame(): void
+    {
+        // The case ranking cannot see: both put the wanted image first, one
+        // hands back two results and the other ten.
+        $queries = [['query' => 'a', 'expect' => [10, 11]]];
+
+        $tight = VisionBenchScorer::score($queries, ['a' => [10, 11]]);
+        $loose = VisionBenchScorer::score($queries, ['a' => [10, 11, 20, 21, 22, 23, 24, 25, 26, 27]]);
+
+        $this->assertSame(1, $tight['top1']);
+        $this->assertSame(1, $loose['top1']);
+        $this->assertSame($tight['mrr'], $loose['mrr'], 'ranking cannot tell them apart');
+
+        $this->assertSame(1.0, $tight['precision']);
+        $this->assertSame(0.2, $loose['precision']);
+        $this->assertSame(0, $tight['noise_total']);
+        $this->assertSame(8, $loose['noise_total'], 'rows the user had to look past');
+    }
+
+    public function testPrecisionIsAveragedPerQueryAndSkipsEmptyResults(): void
+    {
+        // A query that returned nothing has no precision to speak of; counting
+        // it as zero would punish silence twice, once here and once in misses.
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 'b', 'expect' => [20]],
+        ];
+
+        $score = VisionBenchScorer::score($queries, ['a' => [10, 30], 'b' => []]);
+
+        $this->assertSame(0.5, $score['precision'], 'only the query that returned anything counts');
+        $this->assertSame(1, $score['misses']);
+    }
+
+    public function testShownSetIsMeasuredOnAnswerableQueriesOnly(): void
+    {
+        $queries = [
+            ['query' => 'a', 'expect' => [10]],
+            ['query' => 'b', 'expect' => [20]],
+            ['query' => 'trap', 'type' => 'piege', 'expect' => []],
+        ];
+
+        $score = VisionBenchScorer::score($queries, [
+            'a' => [10, 30, 31],
+            'b' => [20],
+            'trap' => [40, 41, 42, 43, 44, 45, 46, 47, 48],
+        ]);
+
+        $this->assertSame(4, $score['shown_total'], 'the trap is scored as a false positive, not as volume');
+        $this->assertSame(2.0, $score['shown_median']);
+        $this->assertSame(3, $score['shown_max']);
+        $this->assertSame(1, $score['false_positives']);
+    }
+
     public function testMeanReciprocalRankRewardsHigherPositions(): void
     {
         $queries = [

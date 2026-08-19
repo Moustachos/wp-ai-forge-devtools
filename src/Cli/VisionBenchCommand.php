@@ -271,6 +271,14 @@ final class VisionBenchCommand
                             $entry['search']['mrr'],
                             $entry['search']['misses']
                         ));
+                        WP_CLI::log(sprintf(
+                            '  precision %.3f (floor)  shown median %.0f  p90 %d  max %d  rows to look past %d',
+                            $entry['search']['precision'],
+                            $entry['search']['shown_median'],
+                            $entry['search']['shown_p90'],
+                            $entry['search']['shown_max'],
+                            $entry['search']['noise_total']
+                        ));
                     }
 
                     $report['models'][$key] = $entry;
