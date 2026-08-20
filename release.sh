@@ -197,7 +197,7 @@ if [[ "$IS_RELEASE" == true ]]; then
     git commit -m "$(cat <<EOF
 Release v${VERSION}
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
 )"
     git tag "v${VERSION}"
