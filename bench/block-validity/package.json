@@ -1,0 +1,12 @@
+{
+  "name": "aiforge-block-validity-spike",
+  "private": true,
+  "type": "module",
+  "description": "Measures how many blocks in stored Content Integrator generations Gutenberg would reject.",
+  "scripts": {
+    "validate": "node validate.mjs"
+  },
+  "dependencies": {
+    "block-runner": "0.9.8"
+  }
+}
