@@ -63,10 +63,24 @@ final class TrapChecker
         $results['stat_has_figure'] = $hasStats ? $this->statHasFigure($outputDoc) : self::na();
         $results['stat_cram'] = $hasStats ? $this->statCram($outputDoc) : self::na();
 
+        $source = new MarkdownDocument($markdown);
+
         if ($templateDoc->hasTestimonialSlot()) {
             [$results['testimonial_grounding'], $results['testimonial_repurposed']] =
-                $this->testimonials($entry, new MarkdownDocument($markdown), $outputDoc);
+                $this->testimonials($entry, $source, $outputDoc);
         }
+
+        if ($templateDoc->hasCardGrid(3) && $entry->grid !== null) {
+            $results['card_count'] = $this->cardCount($entry->grid['items'], $outputDoc);
+        }
+
+        if ($templateDoc->hasButton()) {
+            $results['cta_grounding'] = $this->ctaGrounding($entry, $outputDoc);
+        }
+
+        $results['orphan_headings'] = $this->orphanHeadings($source, $outputDoc);
+        $results['content_retention'] = $this->contentRetention($source, $outputDoc);
+        $results['link_preservation'] = $this->linkPreservation($source, $outputDoc);
 
         return $results;
     }
@@ -232,6 +246,150 @@ final class TrapChecker
     {
         foreach ($phrases as $phrase) {
             if (self::isPercent($phrase)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string[] $items
+     * @return array{status: string, findings: string[]}
+     */
+    private function cardCount(array $items, GenerationDocument $output): array
+    {
+        $itemWords = array_map(static fn (string $item): array => TextTools::contentWords($item), $items);
+        $best = null;
+        $bestHits = 0;
+
+        foreach ($output->cardGrids() as $cards) {
+            $hits = 0;
+
+            foreach ($cards as $card) {
+                if ($this->matchesAny(TextTools::contentWords($card), $itemWords)) {
+                    $hits++;
+                }
+            }
+
+            if ($hits > $bestHits) {
+                $best = $cards;
+                $bestHits = $hits;
+            }
+        }
+
+        if ($best === null || \count($best) <= \count($items)) {
+            return self::outcome([]);
+        }
+
+        return self::outcome([\sprintf('%d cards for %d items: %s', \count($best), \count($items), implode(' | ', $best))]);
+    }
+
+    /**
+     * @return array{status: string, findings: string[]}
+     */
+    private function ctaGrounding(ManifestEntry $entry, GenerationDocument $output): array
+    {
+        $generic = array_map(static fn (string $cta): string => implode(' ', TextTools::words($cta)), $this->settings->genericCta);
+        $allowed = [];
+
+        foreach (array_merge($entry->offers, $this->settings->ctaVocabulary) as $phrase) {
+            foreach (TextTools::contentWords($phrase) as $word) {
+                $allowed[$word] = true;
+            }
+        }
+
+        $findings = [];
+
+        foreach ($output->buttons() as $label) {
+            $words = TextTools::words($label);
+
+            if ($words === [] || \in_array(implode(' ', $words), $generic, true)) {
+                continue;
+            }
+
+            $stray = array_values(array_filter(
+                TextTools::contentWords($label),
+                static fn (string $word): bool => !isset($allowed[$word])
+            ));
+
+            if ($stray !== []) {
+                $findings[] = "«{$label}»: " . implode(', ', $stray) . ' named in no offer';
+            }
+        }
+
+        return self::outcome($findings);
+    }
+
+    /**
+     * @return array{status: string, findings: string[]}
+     */
+    private function orphanHeadings(MarkdownDocument $source, GenerationDocument $output): array
+    {
+        $references = [];
+
+        foreach ($source->headings() as $heading) {
+            $references[] = TextTools::contentWords($heading['text']);
+        }
+
+        foreach ($source->boldLeads() as $lead) {
+            $references[] = TextTools::contentWords($lead);
+        }
+
+        $findings = [];
+
+        foreach ($output->headings() as $heading) {
+            $words = TextTools::contentWords($heading);
+
+            if ($words !== [] && !$this->matchesAny($words, $references)) {
+                $findings[] = "«{$heading}»";
+            }
+        }
+
+        return self::outcome($findings);
+    }
+
+    /**
+     * @return array{status: string, findings: string[]}
+     */
+    private function contentRetention(MarkdownDocument $source, GenerationDocument $output): array
+    {
+        $kept = array_flip(TextTools::shingles($output->plainText()));
+        $findings = [];
+
+        foreach ($source->sections() as $section) {
+            $shingles = TextTools::shingles(MarkdownDocument::toPlain($section['body']));
+
+            if ($shingles === []) {
+                continue;
+            }
+
+            $recall = \count(array_filter($shingles, static fn (string $s): bool => isset($kept[$s]))) / \count($shingles);
+
+            if ($recall < $this->settings->retention) {
+                $findings[] = \sprintf('%s: %.2f', $section['heading'], $recall);
+            }
+        }
+
+        return self::outcome($findings);
+    }
+
+    /**
+     * @return array{status: string, findings: string[]}
+     */
+    private function linkPreservation(MarkdownDocument $source, GenerationDocument $output): array
+    {
+        return self::outcome(array_values(array_diff(array_unique($source->links()), $output->links())));
+    }
+
+    /**
+     * @param string[] $words
+     * @param array<int, string[]> $references
+     */
+    private function matchesAny(array $words, array $references): bool
+    {
+        foreach ($references as $reference) {
+            if (TextTools::overlap($words, $reference) >= $this->settings->orphanOverlap) {
                 return true;
             }
         }

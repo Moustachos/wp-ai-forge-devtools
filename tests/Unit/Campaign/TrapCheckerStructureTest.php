@@ -1,0 +1,136 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AIForge\DevTools\Tests\Unit\Campaign;
+
+use AIForge\Campaign\CheckSettings;
+use AIForge\Campaign\ManifestEntry;
+use AIForge\Campaign\TrapChecker;
+use AIForge\DevTools\Tests\Unit\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class TrapCheckerStructureTest extends TestCase
+{
+    private const GRID_TEMPLATE = '<div class="wp-block-columns"><div class="wp-block-column"><h3>A</h3></div><div class="wp-block-column"><h3>B</h3></div><div class="wp-block-column"><h3>C</h3></div></div>'
+        . '<div class="wp-block-buttons"><div class="wp-block-button"><a class="wp-block-button__link">Go</a></div></div>';
+
+    private const SOURCE = "# Atelier Brun\n\nMenuiserie de quartier, meubles en chêne massif pour toute la maison.\n\n## Nos deux ateliers\n\n### Sur mesure\n\nNous dessinons et fabriquons chaque meuble pour la pièce qui l'attend, du placard sous l'escalier à la bibliothèque du salon.\n\n### Restauration\n\n**Tables anciennes**\n\nNous reprenons les tables de famille, les chaises paillées et les commodes abîmées par le temps.\n\n[Nous écrire](https://example.com/contact)\n";
+
+    private function entry(array $extra = []): ManifestEntry
+    {
+        return ManifestEntry::fromArray($extra + [
+            'id' => 'x',
+            'traps' => ['T3', 'T5'],
+            'grid' => ['section' => 'Nos deux ateliers', 'items' => ['Sur mesure', 'Restauration']],
+            'offers' => [],
+        ]);
+    }
+
+    private function checker(): TrapChecker
+    {
+        return new TrapChecker(new CheckSettings(ctaVocabulary: ['réserver', 'votre', 'nous']));
+    }
+
+    private function grid(string ...$headings): string
+    {
+        $cols = array_map(static fn (string $h): string => "<div class=\"wp-block-column\"><h3>{$h}</h3><p>texte</p></div>", $headings);
+
+        return '<div class="wp-block-columns">' . implode('', $cols) . '</div>';
+    }
+
+    public function testTwoCardsForTwoItemsPass(): void
+    {
+        $result = $this->checker()->check($this->entry(), self::SOURCE, self::GRID_TEMPLATE, $this->grid('Sur mesure', 'Restauration'));
+
+        $this->assertSame(TrapChecker::PASS, $result['card_count']['status']);
+    }
+
+    public function testAThirdCardFails(): void
+    {
+        $result = $this->checker()->check($this->entry(), self::SOURCE, self::GRID_TEMPLATE, $this->grid('Sur mesure', 'Restauration', 'Conseil déco'));
+
+        $this->assertSame(TrapChecker::FAIL, $result['card_count']['status']);
+        $this->assertSame(['3 cards for 2 items: Sur mesure | Restauration | Conseil déco'], $result['card_count']['findings']);
+    }
+
+    public function testItemsRenderedOutsideAGridPass(): void
+    {
+        $result = $this->checker()->check($this->entry(), self::SOURCE, self::GRID_TEMPLATE, '<h2>Nos deux ateliers</h2><p>Sur mesure, restauration.</p>');
+
+        $this->assertSame(TrapChecker::PASS, $result['card_count']['status']);
+    }
+
+    public function testCardCountNeedsAGridInTheTemplateAndTheEntry(): void
+    {
+        $noGrid = $this->checker()->check($this->entry(), self::SOURCE, '<p>x</p>', $this->grid('A', 'B', 'C'));
+        $noItems = $this->checker()->check(ManifestEntry::fromArray(['id' => 'x']), self::SOURCE, self::GRID_TEMPLATE, $this->grid('A', 'B', 'C'));
+
+        $this->assertSame(TrapChecker::NA, $noGrid['card_count']['status']);
+        $this->assertSame(TrapChecker::NA, $noItems['card_count']['status']);
+    }
+
+    /**
+     * @return array<string, array{string, string[], string}>
+     */
+    public static function ctaCases(): array
+    {
+        return [
+            'generic invitation' => ['Contactez-nous', [], TrapChecker::PASS],
+            'generic with different case and spacing' => ['  EN SAVOIR PLUS ', [], TrapChecker::PASS],
+            'offer word with a tolerated verb' => ['Réserver votre bilan', ['bilan initial'], TrapChecker::PASS],
+            'offer word absent from offers' => ['Réserver un bilan', [], TrapChecker::FAIL],
+            'invented trial' => ['Démarrer l\'essai gratuit', [], TrapChecker::FAIL],
+        ];
+    }
+
+    /**
+     * @param string[] $offers
+     */
+    #[DataProvider('ctaCases')]
+    public function testCtaGrounding(string $label, array $offers, string $expected): void
+    {
+        $output = "<div class=\"wp-block-button\"><a class=\"wp-block-button__link\">{$label}</a></div>";
+
+        $result = $this->checker()->check($this->entry(['offers' => $offers]), self::SOURCE, self::GRID_TEMPLATE, $output);
+
+        $this->assertSame($expected, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
+    }
+
+    public function testCtaNeedsAButtonInTheTemplate(): void
+    {
+        $result = $this->checker()->check($this->entry(), self::SOURCE, '<p>x</p>', '<a class="wp-block-button__link">Essai gratuit</a>');
+
+        $this->assertSame(TrapChecker::NA, $result['cta_grounding']['status']);
+    }
+
+    public function testOrphanHeadings(): void
+    {
+        $output = '<h1>Atelier Brun</h1><h2>Nos ateliers</h2><h3>Tables anciennes</h3><h2>Pourquoi nous choisir</h2>';
+
+        $result = $this->checker()->check($this->entry(), self::SOURCE, '', $output);
+
+        $this->assertSame(['«Pourquoi nous choisir»'], $result['orphan_headings']['findings']);
+    }
+
+    public function testContentRetentionFlagsTheDroppedSection(): void
+    {
+        $output = '<h1>Atelier Brun</h1><p>Menuiserie de quartier, meubles en chêne massif pour toute la maison.</p>'
+            . '<p>Nous dessinons et fabriquons chaque meuble pour la pièce qui l\'attend, du placard sous l\'escalier à la bibliothèque du salon.</p>';
+
+        $result = $this->checker()->check($this->entry(), self::SOURCE, '', $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['content_retention']['status']);
+        $this->assertCount(1, $result['content_retention']['findings']);
+        $this->assertStringStartsWith('Nos deux ateliers: 0.', $result['content_retention']['findings'][0]);
+    }
+
+    public function testLinkPreservation(): void
+    {
+        $kept = $this->checker()->check($this->entry(), self::SOURCE, '', '<a href="https://example.com/contact">x</a>');
+        $lost = $this->checker()->check($this->entry(), self::SOURCE, '', '<a href="https://example.com/autre">x</a>');
+
+        $this->assertSame(TrapChecker::PASS, $kept['link_preservation']['status']);
+        $this->assertSame(['https://example.com/contact'], $lost['link_preservation']['findings']);
+    }
+}
