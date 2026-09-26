@@ -172,21 +172,24 @@ final class CorpusPreconditions
             }
 
             preg_match_all('/^###\s+(.+?)\s*$/mu', $section['body'], $h3);
-            $items = $h3[1];
+            $items = array_map('trim', $h3[1]);
+            $fromHeadings = $items !== [];
 
-            if ($items === []) {
+            if (!$fromHeadings) {
                 preg_match_all('/^[-*+]\s+(?:\*\*)?([^*\n:]+)/mu', $section['body'], $list);
-                $items = $list[1];
+                $items = array_map('trim', $list[1]);
             }
-
-            $items = array_map('trim', $items);
 
             if (\count($items) !== \count($grid['items'])) {
                 return \sprintf('T3 section «%s» holds %d parallel items, expected %s', $grid['section'], \count($items), $expected);
             }
 
             foreach ($grid['items'] as $i => $item) {
-                if (!str_starts_with(TextTools::fold($items[$i]), TextTools::fold($item))) {
+                $matches = $fromHeadings
+                    ? TextTools::fold($items[$i]) === TextTools::fold($item)
+                    : str_starts_with(TextTools::fold($items[$i]), TextTools::fold($item));
+
+                if (!$matches) {
                     return \sprintf('T3 section «%s» items are %s, expected %s', $grid['section'], implode(' | ', $items), $expected);
                 }
             }

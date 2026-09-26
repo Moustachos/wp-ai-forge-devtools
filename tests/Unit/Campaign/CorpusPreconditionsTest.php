@@ -97,6 +97,25 @@ class CorpusPreconditionsTest extends TestCase
         $this->assertSame([], CorpusPreconditions::check($entry, $page));
     }
 
+    public function testT3RejectsWrongHeadingLabelsAtTheSameCount(): void
+    {
+        $entry = $this->entry(['traps' => ['T3'], 'grid' => ['section' => 'Nos deux ateliers', 'items' => ['Sur mesure', 'Restauration']]]);
+        $page = $this->page("Menuiserie depuis 1998.\n\n## Nos deux ateliers\n\n### Sur mesure avancée\n\nTexte.\n\n### Restauration\n\nTexte.");
+
+        $this->assertContains(
+            'T3 section «Nos deux ateliers» items are Sur mesure avancée | Restauration, expected Sur mesure | Restauration',
+            CorpusPreconditions::check($entry, $page)
+        );
+    }
+
+    public function testT3AcceptsListLeadsStartingWithTheGridItems(): void
+    {
+        $entry = $this->entry(['traps' => ['T3'], 'grid' => ['section' => 'Nos deux ateliers', 'items' => ['Sur mesure', 'Restauration']]]);
+        $page = $this->page("Menuiserie depuis 1998.\n\n## Nos deux ateliers\n\n- **Sur mesure avancée** : cuisines.\n- **Restauration** : meubles anciens.");
+
+        $this->assertSame([], CorpusPreconditions::check($entry, $page));
+    }
+
     public function testT4NeedsOneDenseSection(): void
     {
         $entry = $this->entry(['traps' => ['T4']]);
