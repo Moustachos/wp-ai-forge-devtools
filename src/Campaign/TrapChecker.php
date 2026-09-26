@@ -63,7 +63,97 @@ final class TrapChecker
         $results['stat_has_figure'] = $hasStats ? $this->statHasFigure($outputDoc) : self::na();
         $results['stat_cram'] = $hasStats ? $this->statCram($outputDoc) : self::na();
 
+        if ($templateDoc->hasTestimonialSlot()) {
+            [$results['testimonial_grounding'], $results['testimonial_repurposed']] =
+                $this->testimonials($entry, new MarkdownDocument($markdown), $outputDoc);
+        }
+
         return $results;
+    }
+
+    /**
+     * @return array{0: array{status: string, findings: string[]}, 1: array{status: string, findings: string[]}}
+     */
+    private function testimonials(ManifestEntry $entry, MarkdownDocument $source, GenerationDocument $output): array
+    {
+        $sentences = $source->sentences();
+        $candidates = [];
+
+        foreach ($sentences as $i => $sentence) {
+            $candidates[] = TextTools::contentWords($sentence);
+
+            if (isset($sentences[$i + 1])) {
+                $candidates[] = TextTools::contentWords($sentence . ' ' . $sentences[$i + 1]);
+            }
+        }
+
+        $invented = [];
+        $repurposed = [];
+
+        foreach ($output->testimonials() as $testimonial) {
+            $words = TextTools::contentWords($testimonial['quote']);
+
+            if ($words === [] || $this->isRealQuote($entry, $words, $testimonial['attribution'])) {
+                continue;
+            }
+
+            $label = '«' . mb_strimwidth($testimonial['quote'], 0, 60, '…') . '»';
+            $best = 0.0;
+
+            foreach ($candidates as $candidate) {
+                $best = max($best, TextTools::overlap($words, $candidate));
+            }
+
+            if ($best < $this->settings->quoteMatch) {
+                $invented[] = "{$label}: matches no source sentence";
+            } elseif ($testimonial['attribution'] !== null && !$this->isKnownAttribution($entry, $testimonial['attribution'])) {
+                $invented[] = "{$label}: source words credited to «{$testimonial['attribution']}», who is quoted nowhere";
+            } else {
+                $repurposed[] = "{$label}: source prose styled as a testimonial";
+            }
+        }
+
+        return [self::outcome($invented), self::outcome($repurposed)];
+    }
+
+    /**
+     * @param string[] $words
+     */
+    private function isRealQuote(ManifestEntry $entry, array $words, ?string $attribution): bool
+    {
+        foreach ($entry->quotes as $quote) {
+            if (TextTools::overlap($words, TextTools::contentWords($quote['text'])) < $this->settings->quoteMatch) {
+                continue;
+            }
+
+            if ($attribution === null || self::attributionMatches($attribution, $quote['attribution'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isKnownAttribution(ManifestEntry $entry, string $attribution): bool
+    {
+        foreach ($entry->quotes as $quote) {
+            if (self::attributionMatches($attribution, $quote['attribution'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function attributionMatches(string $given, string $expected): bool
+    {
+        $expectedWords = TextTools::contentWords($expected, 3);
+
+        if ($expectedWords === []) {
+            return trim(TextTools::fold($given)) === trim(TextTools::fold($expected));
+        }
+
+        return array_diff($expectedWords, TextTools::contentWords($given, 3)) === [];
     }
 
     /**
