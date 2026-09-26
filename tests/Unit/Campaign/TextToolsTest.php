@@ -6,6 +6,7 @@ namespace AIForge\DevTools\Tests\Unit\Campaign;
 
 use AIForge\Campaign\TextTools;
 use AIForge\DevTools\Tests\Unit\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class TextToolsTest extends TestCase
 {
@@ -56,9 +57,9 @@ class TextToolsTest extends TestCase
     }
 
     /**
-     * @dataProvider numberCases
      * @param string[] $expected
      */
+    #[DataProvider('numberCases')]
     public function testNumbersAreNormalised(string $text, array $expected): void
     {
         $this->assertSame($expected, TextTools::numbers($text));
