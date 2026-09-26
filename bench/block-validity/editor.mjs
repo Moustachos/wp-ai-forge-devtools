@@ -1,6 +1,6 @@
-// Ground truth for the spike: parses every exported document with the lab
-// site's own editor (its exact Gutenberg and every block the site registers)
-// and records which blocks come out isValid === false.
+// Parses every exported document with the lab site's own editor (its exact
+// Gutenberg and every block the site registers), records which blocks come out
+// isValid === false, and keeps validateBlock()'s diff for each of them.
 // Runs on the host with the smoke harness's Playwright. Writes out/editor.jsonl.
 //
 //   node editor.mjs
@@ -21,12 +21,7 @@ await page.waitForURL((url) => url.pathname.includes('/wp-admin/'));
 
 await page.goto(`${BASE_URL}/wp-admin/post-new.php?post_type=page`);
 await page.waitForFunction(() => window.wp?.blocks?.getBlockTypes?.().length > 50, null, { timeout: 60000 });
-
-const version = await page.evaluate(() => ({
-    blockTypes: window.wp.blocks.getBlockTypes().length,
-    wp: document.querySelector('meta[name="generator"]')?.content ?? null,
-}));
-process.stderr.write(`editor ready: ${JSON.stringify(version)}\n`);
+process.stderr.write(`editor ready: ${await page.evaluate(() => window.wp.blocks.getBlockTypes().length)} block types\n`);
 
 const sink = createWriteStream('out/editor.jsonl');
 
@@ -35,10 +30,17 @@ async function run(file, kind) {
     let n = 0;
     for await (const line of lines) {
         if (!line.trim()) continue;
-        const doc = JSON.parse(line);
-        if (!doc.content) continue;
+        const { content, ...rest } = JSON.parse(line);
+        if (!content) continue;
 
         const res = await page.evaluate((markup) => {
+            const { parse, validateBlock } = window.wp.blocks;
+            const show = (v) => (typeof v === 'string' ? v : JSON.stringify(v));
+            const format = (issue) => {
+                const [fmt, ...values] = issue?.args ?? [String(issue)];
+                if (typeof fmt !== 'string' || fmt.startsWith('Block validation failed for')) return '';
+                return fmt.replace(/%[oOsdi]/g, () => show(values.shift()));
+            };
             const flatten = (list, out = []) => {
                 for (const b of list) {
                     out.push(b);
@@ -46,15 +48,29 @@ async function run(file, kind) {
                 }
                 return out;
             };
-            const all = flatten(window.wp.blocks.parse(markup)).filter((b) => b.name !== null);
-            return {
-                blocks: all.length,
-                invalid: all.filter((b) => b.isValid === false && b.name !== 'core/missing').map((b) => b.name),
-                missing: all.filter((b) => b.name === 'core/missing').map((b) => b.attributes?.originalName ?? '?'),
-            };
-        }, doc.content);
 
-        sink.write(JSON.stringify({ kind, id: doc.id ?? null, hash: doc.hash ?? null, ...res }) + '\n');
+            const saved = console.error;
+            const savedInfo = console.info;
+            const savedWarn = console.warn;
+            console.error = console.info = console.warn = () => {};
+            try {
+                const all = flatten(parse(markup)).filter((b) => b.name !== null);
+                return {
+                    blocks: all.length,
+                    invalid: all.filter((b) => b.isValid === false && b.name !== 'core/missing').map((b) => {
+                        const [, issues] = validateBlock(b);
+                        return { block: b.name, reason: (issues ?? []).map(format).filter(Boolean).join('; ').slice(0, 4000) };
+                    }),
+                    missing: all.filter((b) => b.name === 'core/missing').map((b) => b.attributes?.originalName ?? '?'),
+                };
+            } finally {
+                console.error = saved;
+                console.info = savedInfo;
+                console.warn = savedWarn;
+            }
+        }, content);
+
+        sink.write(JSON.stringify({ kind, ...rest, ...res }) + '\n');
         if (++n % 200 === 0) process.stderr.write(`${kind}: ${n}\n`);
     }
     return n;

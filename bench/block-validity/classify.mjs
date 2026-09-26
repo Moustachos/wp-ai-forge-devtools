@@ -1,5 +1,5 @@
-// Classifies the blocks the real editor rejects (out/editor.jsonl) using
-// block-runner's diff for the same block (out/results.jsonl).
+// Classifies the blocks the real editor rejects, from the validateBlock()
+// diffs editor.mjs stores in out/editor.jsonl.
 //
 //   node classify.mjs [--since=2026-08-01] [--verbose]
 
@@ -9,7 +9,6 @@ const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/
 const since = args.since ?? '0000';
 
 const read = (f) => readFileSync(f, 'utf8').split('\n').filter(Boolean).map(JSON.parse);
-const editor = new Map(read('out/editor.jsonl').filter((r) => r.kind === 'generation').map((r) => [r.id, r]));
 
 const decls = (s) => new Map(s.split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
     const i = d.indexOf(':');
@@ -25,7 +24,7 @@ function styleDiff(expected, saw) {
 }
 
 function classify(reason) {
-    if (/'wp-block-columns [^']*wp-block-column /.test(reason)) return ['wrapper: columns comment around a column', [reason.slice(0, 200)]];
+    if (/["']wp-block-columns [^"']*wp-block-column /.test(reason)) return ['wrapper: columns comment around a column', [reason.slice(0, 200)]];
     let m = reason.match(/Expected attribute `style` of value `([^`]*)`, saw `([^`]*)`/);
     if (m) {
         const diff = styleDiff(m[1], m[2]);
@@ -35,7 +34,7 @@ function classify(reason) {
         if (diff.every((d) => d.startsWith('html lacks'))) return ['style: json carries css the html lost', diff];
         return ['style: value mismatch', diff];
     }
-    if (/Expected attributes \[.*\], instead saw \[.*'style'/s.test(reason) && !/Expected attributes \[[^\]]*'style'/s.test(reason)) {
+    if (/Expected attributes \[.*\], instead saw \[.*["']style["']/s.test(reason) && !/Expected attributes \[[^\]]*["']style["']/s.test(reason)) {
         return ['style: html carries css the json does not', [reason.slice(0, 300)]];
     }
     if (/Expected attribute `class`/.test(reason)) return ['class mismatch', [reason.slice(0, 300)]];
@@ -46,16 +45,10 @@ function classify(reason) {
 
 const families = new Map();
 let docs = 0;
-for (const r of read('out/results.jsonl')) {
-    if (r.kind !== 'generation' || r.created_at < since) continue;
-    const e = editor.get(r.id);
-    if (!e.invalid.length) continue;
+for (const r of read('out/editor.jsonl')) {
+    if (r.kind !== 'generation' || r.created_at < since || !r.invalid.length) continue;
     docs++;
-    const want = new Map();
-    e.invalid.forEach((n) => want.set(n, (want.get(n) ?? 0) + 1));
-    for (const item of r.br_invalid) {
-        if (!want.get(item.block)) continue;
-        want.set(item.block, want.get(item.block) - 1);
+    for (const item of r.invalid) {
         const [family, detail] = classify(item.reason);
         if (!families.has(family)) families.set(family, []);
         families.get(family).push({ id: r.id, model: r.model_id ?? r.provider, block: item.block, detail });

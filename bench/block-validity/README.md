@@ -15,28 +15,24 @@ npx wp-env run cli wp eval-file wp-content/plugins/wp-ai-forge-devtools/bench/bl
 Then, from this directory:
 
 ```bash
-node editor.mjs                        # ground truth: the lab editor's parse() + isValid
-node recovery.mjs --since=2026-08-01   # replay createBlock() recovery, diff the root element
-
-# block-runner needs Node >= 22.13; run it in a container, node_modules in a named volume
-MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W):/w" -v aiforge-block-validity-nm:/app/node_modules node:22 \
-  sh -c "cp /w/package.json /w/package-lock.json /w/validate.mjs /app && cd /app && npm ci && ln -sf /w/out out && node validate.mjs"
-
-node classify.mjs --since=2026-08-01 --verbose   # failure families, from block-runner's diffs
+node editor.mjs                                  # verdict + validateBlock() diff per rejected block
+node classify.mjs --since=2026-08-01 --verbose   # failure families
+node recovery.mjs --since=2026-08-01             # replay createBlock() recovery, diff the root element
 ```
 
-`editor.mjs` and `recovery.mjs` reuse the smoke harness's Playwright and
-credentials (`../../smoke`), so `smoke/npm install` must have run once.
+The scripts reuse the smoke harness's Playwright and credentials (`../../smoke`),
+so `smoke/npm install` must have run once. The verdict comes from the lab
+site's own editor: its exact Gutenberg, and every block the site registers.
 
 ## Things that will mislead you
 
-- **block-runner's `validate()` is not the editor's verdict.** It re-validates
-  each block after deprecation migration, so markup the editor silently accepts
-  through a deprecation (list without `wp-block-list`, heading without
-  `wp-block-heading`, old quote shape) is reported invalid. On the 2026-09
-  corpus that was 260 false documents against 82 true ones. Use it for the
-  diff text, and `editor.mjs` for the verdict.
+- **Read `isValid` after `parse()`, never re-validate every block.** Markup
+  the editor accepts through a deprecation (list without `wp-block-list`,
+  heading without `wp-block-heading`, old quote shape) fails a fresh
+  `validateBlock()`. Humanmade's block-runner does exactly that and flagged
+  260 documents the editor accepts, against 82 real ones. `editor.mjs` only
+  asks `validateBlock()` for the diff of blocks `parse()` already rejected.
 - `response_snapshot` and `result_content` are the same post-sanitizer string;
   the raw LLM output is not stored, so this measures what the editor receives.
-- Blocks the headless registry does not know (`rank-math/faq-block`) are
-  invisible to block-runner; the lab editor sees them.
+- `recovery.mjs` compares root elements only. Its text lengths are not a
+  content-loss measure: `originalContent` excludes inner blocks' text.
