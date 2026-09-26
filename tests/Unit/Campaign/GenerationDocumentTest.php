@@ -31,6 +31,19 @@ class GenerationDocumentTest extends TestCase
         );
     }
 
+    public function testABoldPhraseInsideFollowingProseIsNotTheAttribution(): void
+    {
+        $html = '<div><p class="is-style-testimonial">« Un travail soigné. »</p>'
+            . '<p>Une équipe qui suit des <strong>formations régulières</strong> chaque année.</p>'
+            . '<div class="wp-block-group"><p><strong>Marie Durand</strong></p><p>Lyon</p></div>'
+            . '<p class="is-style-testimonial">« Rapide. »</p><p>— <strong>Paul</strong>, client</p></div>';
+
+        $this->assertSame(
+            [['quote' => 'Un travail soigné.', 'attribution' => 'Marie Durand'], ['quote' => 'Rapide.', 'attribution' => 'Paul']],
+            (new GenerationDocument($html))->testimonials()
+        );
+    }
+
     public function testCiteInsideTheTestimonialIsTheAttribution(): void
     {
         $html = '<blockquote class="wp-block-quote is-style-testimonial"><p>Très bien.</p><cite>Paul</cite></blockquote>';

@@ -95,6 +95,7 @@ class TrapCheckerTestimonialTest extends TestCase
             'a generic family' => ['Une famille'],
             'a role' => ['Manager'],
             'a person named only in the body' => ['Julie Roche'],
+            'a team that is not the business' => ["L'équipe de Julie Roche"],
         ];
     }
 
@@ -140,6 +141,22 @@ class TrapCheckerTestimonialTest extends TestCase
 
         $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status'], implode("\n", $result['testimonial_grounding']['findings']));
         $this->assertStringContainsString('«Le métier de fromager', implode("\n", $result['testimonial_repurposed']['findings']));
+    }
+
+    public function testTheAttributionIsTheNameLineNotABoldPhraseInTheContinuationOnARealRun(): void
+    {
+        $result = $this->check(ManifestEntry::fromArray(['id' => '7374']), '7374');
+
+        $this->assertSame(TrapChecker::FAIL, $result['testimonial_grounding']['status']);
+        $this->assertStringContainsString('credited to «Laurent Ferrand»', implode("\n", $result['testimonial_grounding']['findings']));
+    }
+
+    public function testSourceProseCreditedToTheBusinessTeamIsRepurposedOnARealRun(): void
+    {
+        $result = $this->check(ManifestEntry::fromArray(['id' => '7394']), '7394');
+
+        $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status'], implode("\n", $result['testimonial_grounding']['findings']));
+        $this->assertStringContainsString('«Shiftloom was founded', implode("\n", $result['testimonial_repurposed']['findings']));
     }
 
     public function testAnInventedQuoteSpanningSeveralSentencesStillFails(): void

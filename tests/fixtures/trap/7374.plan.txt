@@ -1,0 +1,26 @@
+ANALYSIS
+domain: automotive dealership
+tone: professional friendly
+visual_density: balanced
+
+COMPOSITION
+The markdown has 9 logical sections mapping onto a 7-slot blueprint with dark, neutral, and light alternating rhythms. The range presentation maps neatly to the features slot, while narrative and service sections alternate across content-image and banner modules. Content-image is mirrored on reuse to maintain visual variety before closing with the FAQ and contact CTA.
+
+MAPPING
+[intro] → [0] hero
+Toute la gamme Renault et Dacia neuve → [2] features
+Un conseil d'achat personnalisé, pas un catalogue à défiler → [3] content-image
+Reprise de votre ancien véhicule lors de l'achat neuf → [4] banner
+Financement et livraison → [3] content-image (reuse) (mirror)
+Agent Renault ou concession : quelle différence pour vous ? → [1] stats (overflow)
+Un ancrage Renault de père en fils → [5] testimonial
+Questions fréquentes sur l'achat d'un véhicule neuf à Cagnes-sur-Mer → [3] content-image (reuse)
+Nous trouver → [6] cta
+
+NOTES
+- Repurposed [1] stats for "Agent Renault ou concession" using overflow to emphasize local trust points against big groups.
+- [5] testimonial is adapted for the family heritage narrative of Laurent Ferrand.
+- Mirrored layout applied to second use of [3] content-image to ensure rhythm.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":2,"label":"Toute la gamme Renault et Dacia neuve"},{"slot_id":3,"label":"Un conseil d'achat personnalisé, pas un catalogue à défiler"},{"slot_id":4,"label":"Reprise de votre ancien véhicule lors de l'achat neuf"},{"slot_id":3,"label":"Financement et livraison"},{"slot_id":1,"label":"Agent Renault ou concession : quelle différence pour vous ?"},{"slot_id":5,"label":"Un ancrage Renault de père en fils"},{"slot_id":3,"label":"Questions fréquentes sur l'achat d'un véhicule neuf à Cagnes-sur-Mer"},{"slot_id":6,"label":"Nous trouver"}]}

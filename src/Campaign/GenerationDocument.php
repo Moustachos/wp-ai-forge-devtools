@@ -236,14 +236,33 @@ final class GenerationDocument
                 return null;
             }
 
-            $strong = $node->nodeName === 'strong' ? $node : $this->xpath->query('.//strong', $node)->item(0);
+            $strongs = $node->nodeName === 'strong' ? [$node] : $this->xpath->query('.//strong', $node);
 
-            if ($strong !== null) {
-                return self::textOf($strong);
+            foreach ($strongs as $strong) {
+                if ($strong instanceof DOMElement && self::leadsItsBlock($strong)) {
+                    return self::textOf($strong);
+                }
             }
         }
 
         return null;
+    }
+
+    /**
+     * A name line starts with its bold name ("Marie Durand", "— Paul, client");
+     * a bold phrase inside running prose is emphasis, not an attribution.
+     */
+    private static function leadsItsBlock(DOMElement $strong): bool
+    {
+        $parent = $strong->parentNode;
+
+        if (!$parent instanceof DOMElement) {
+            return true;
+        }
+
+        $before = strstr(self::textOf($parent), self::textOf($strong), true);
+
+        return $before === false || preg_match('/[\p{L}\d]/u', $before) !== 1;
     }
 
     /**

@@ -44,6 +44,9 @@ final class TrapChecker
 
     private const PERCENT_MARKERS = ['%', 'pour cent', 'pourcent', 'percent'];
 
+    /** Folded words that name the business's own people as a whole, beside its name. */
+    private const TEAM_WORDS = ['equipe', 'team'];
+
     public function __construct(
         private readonly CheckSettings $settings = new CheckSettings(),
     ) {
@@ -180,15 +183,16 @@ final class TrapChecker
     }
 
     /**
-     * A page crediting its own prose to itself ("L'atelier" under "# Atelier Brun")
-     * repurposes, it does not invent. Only the title names the business: a patient
-     * or a person the body mentions is still someone who said nothing.
+     * A page crediting its own prose to itself ("L'atelier" under "# Atelier Brun",
+     * "Shiftloom Team") repurposes, it does not invent. Only the title names the
+     * business: a patient or a person the body mentions is still someone who said
+     * nothing.
      *
      * @param array<string, int> $titleWords
      */
     private static function isTheBusinessName(string $attribution, array $titleWords): bool
     {
-        $words = TextTools::contentWords($attribution, 3);
+        $words = array_diff(TextTools::contentWords($attribution, 3), self::TEAM_WORDS);
 
         return $words !== [] && array_diff_key(array_flip($words), $titleWords) === [];
     }

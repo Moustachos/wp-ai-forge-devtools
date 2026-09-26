@@ -1,0 +1,28 @@
+ANALYSIS
+domain: SaaS product / workforce scheduling
+tone: conversational friendly, practical expert
+visual_density: balanced
+
+COMPOSITION
+The page has 10 markdown sections (with one dense section) against a 7-slot template (hero, stats, features, content-image, banner, testimonial, cta). Since there is no explicit stats/specs data or named testimonial quote in the markdown, we repurpose the slots and reuse `content-image` with mirroring to comfortably accommodate all 10 sections while keeping a balanced dark-to-light visual rhythm. "How a schedule gets built" is dense (~687 words, 8 logical steps) and will be split across two sections for readability.
+
+MAPPING
+[intro] → [0] hero
+What Shiftloom does → [2] features
+Who it's for → [3] content-image
+How a schedule gets built [part 1/2] → [4] banner
+How a schedule gets built [part 2/2] → [3] content-image (reuse) (mirror)
+For the people on the rota → [1] stats (overflow)
+Payroll and the tools you already use → [3] content-image (reuse)
+Your data stays yours → [4] banner (reuse)
+About Shiftloom → [5] testimonial
+Setting up your team → [3] content-image (reuse) (mirror)
+Getting started → [6] cta
+
+NOTES
+- "How a schedule gets built" is split across banner ([4]) and content-image ([3] mirror) to give proper pacing to the workflow steps.
+- "About Shiftloom" adapts cleanly into slot [5] (testimonial/founder statement layout).
+- "For the people on the rota" uses slot [1] (stats/grid layout) with overflow handling for clean structured presentation.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":2,"label":"What Shiftloom does"},{"slot_id":3,"label":"Who it's for"},{"slot_id":4,"label":"How a schedule gets built [part 1/2]"},{"slot_id":3,"label":"How a schedule gets built [part 2/2]"},{"slot_id":1,"label":"For the people on the rota"},{"slot_id":3,"label":"Payroll and the tools you already use"},{"slot_id":4,"label":"Your data stays yours"},{"slot_id":5,"label":"About Shiftloom"},{"slot_id":3,"label":"Setting up your team"},{"slot_id":6,"label":"Getting started"}]}
