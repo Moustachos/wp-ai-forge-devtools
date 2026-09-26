@@ -2,7 +2,7 @@
   "version": 1,
   "thresholds": {"orphan_overlap": 0.5, "retention": 0.8, "quote_match": 0.6, "cram_chars": 40},
   "generic_cta": ["nous contacter", "prendre contact", "contactez-nous", "en savoir plus", "découvrir", "contact us", "get in touch", "learn more"],
-  "cta_vocabulary": ["réserver", "demander", "prendre", "obtenir", "contacter", "appeler", "écrire", "venir", "rencontrer", "parler", "échanger", "poser", "question", "questions", "découvrir", "voir", "visiter", "rejoindre", "lire", "consulter", "réalisations", "projets", "services", "équipe", "histoire", "votre", "notre", "vous", "nous", "avec", "pour", "dans", "plus", "book", "request", "call", "contact", "write", "visit", "talk", "see", "discover", "explore", "read", "view", "join", "meet", "team", "story", "work", "with", "your", "about", "more", "touch"],
+  "cta_vocabulary": ["réserver", "demander", "prendre", "obtenir", "contacter", "appeler", "écrire", "venir", "demandez", "réservez", "contactez", "appelez", "découvrez", "visitez", "rejoignez", "écrivez", "consultez", "voyez", "lisez", "prenez", "rencontrer", "parler", "échanger", "poser", "question", "questions", "découvrir", "voir", "visiter", "rejoindre", "lire", "consulter", "réalisations", "projets", "services", "équipe", "histoire", "votre", "notre", "vous", "nous", "avec", "pour", "dans", "plus", "book", "request", "call", "contact", "write", "visit", "talk", "see", "discover", "explore", "read", "view", "join", "meet", "team", "story", "work", "with", "your", "about", "more", "touch"],
   "files": [
     {
       "id": "hard-01-menuiserie-atelier",

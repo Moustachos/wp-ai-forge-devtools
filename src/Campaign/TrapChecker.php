@@ -101,7 +101,7 @@ final class TrapChecker
             }
         }
 
-        $sourceWords = array_flip(TextTools::contentWords($source->title() . ' ' . $source->plainText(), 3));
+        $titleWords = array_flip(TextTools::contentWords((string) $source->title(), 3));
         $invented = [];
         $repurposed = [];
 
@@ -124,7 +124,7 @@ final class TrapChecker
             } elseif (
                 $testimonial['attribution'] !== null
                 && !$this->isKnownAttribution($entry, $testimonial['attribution'])
-                && !self::namedInSource($testimonial['attribution'], $sourceWords)
+                && !self::isTheBusinessName($testimonial['attribution'], $titleWords)
             ) {
                 $invented[] = "{$label}: source words credited to «{$testimonial['attribution']}», who is quoted nowhere";
             } else {
@@ -165,15 +165,17 @@ final class TrapChecker
     }
 
     /**
-     * A page crediting its own prose to itself ("L'atelier") repurposes, it does not invent.
+     * A page crediting its own prose to itself ("L'atelier" under "# Atelier Brun")
+     * repurposes, it does not invent. Only the title names the business: a patient
+     * or a person the body mentions is still someone who said nothing.
      *
-     * @param array<string, int> $sourceWords
+     * @param array<string, int> $titleWords
      */
-    private static function namedInSource(string $attribution, array $sourceWords): bool
+    private static function isTheBusinessName(string $attribution, array $titleWords): bool
     {
         $words = TextTools::contentWords($attribution, 3);
 
-        return $words !== [] && array_diff_key(array_flip($words), $sourceWords) === [];
+        return $words !== [] && array_diff_key(array_flip($words), $titleWords) === [];
     }
 
     private static function attributionMatches(string $given, string $expected): bool
@@ -318,11 +320,20 @@ final class TrapChecker
     private function ctaGrounding(ManifestEntry $entry, MarkdownDocument $source, GenerationDocument $output): array
     {
         $generic = array_map(static fn (string $cta): string => implode(' ', TextTools::words($cta)), $this->settings->genericCta);
-        $allowed = [];
+        $vocabulary = [];
+        $groundedStems = [];
 
-        foreach (array_merge($entry->offers, $this->settings->ctaVocabulary, [(string) $source->title()]) as $phrase) {
+        foreach ($this->settings->ctaVocabulary as $phrase) {
+            foreach (TextTools::words($phrase) as $word) {
+                $vocabulary[$word] = true;
+            }
+        }
+
+        // Only offers and the business's own title are stemmed: a stemmed verb
+        // would admit its noun ("réserver" → "réservation", "consulter" → "consultation").
+        foreach (array_merge($entry->offers, [(string) $source->title()]) as $phrase) {
             foreach (TextTools::contentWords($phrase) as $word) {
-                $allowed[TextTools::stem($word)] = true;
+                $groundedStems[TextTools::stem($word)] = true;
             }
         }
 
@@ -337,7 +348,7 @@ final class TrapChecker
 
             $stray = array_values(array_filter(
                 TextTools::contentWords($label),
-                static fn (string $word): bool => !isset($allowed[TextTools::stem($word)])
+                static fn (string $word): bool => !isset($vocabulary[$word]) && !isset($groundedStems[TextTools::stem($word)])
             ));
 
             if ($stray !== []) {

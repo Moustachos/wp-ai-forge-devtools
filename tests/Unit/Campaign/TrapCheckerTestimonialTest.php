@@ -8,6 +8,7 @@ use AIForge\Campaign\GenerationDocument;
 use AIForge\Campaign\ManifestEntry;
 use AIForge\Campaign\TrapChecker;
 use AIForge\DevTools\Tests\Unit\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class TrapCheckerTestimonialTest extends TestCase
 {
@@ -82,6 +83,32 @@ class TrapCheckerTestimonialTest extends TestCase
 
         $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status'], implode("\n", $result['testimonial_grounding']['findings']));
         $this->assertSame(TrapChecker::FAIL, $result['testimonial_repurposed']['status']);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function inventedAttributions(): array
+    {
+        return [
+            'a generic patient the source talks about' => ['Un patient'],
+            'a generic family' => ['Une famille'],
+            'a role' => ['Manager'],
+            'a person named only in the body' => ['Julie Roche'],
+        ];
+    }
+
+    #[DataProvider('inventedAttributions')]
+    public function testSourceProseCreditedToAnyoneButTheBusinessNameIsInvented(string $attribution): void
+    {
+        $template = '<p class="is-style-testimonial">"x"</p>';
+        $markdown = "# Cabinet Lefèvre\n\nChaque patient est reçu sans attente, avec une famille si besoin. Julie Roche, manager du cabinet, organise le planning.\n";
+        $output = "<p class=\"is-style-testimonial\">« Chaque patient est reçu sans attente, avec une famille si besoin. »</p><p><strong>{$attribution}</strong></p>";
+
+        $result = (new TrapChecker())->check(ManifestEntry::fromArray(['id' => 'x']), $markdown, $template, $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['testimonial_grounding']['status']);
+        $this->assertStringContainsString('who is quoted nowhere', implode("\n", $result['testimonial_grounding']['findings']));
     }
 
     public function testSourceProseWithoutAttributionIsRepurposed(): void

@@ -142,7 +142,66 @@ class TrapCheckerStructureTest extends TestCase
             'invented assessment' => ['Réserver un bilan', [], 'Atelier Brun', TrapChecker::FAIL],
             'invented quote' => ['Obtenir un devis gratuit', [], 'Atelier Brun', TrapChecker::FAIL],
             'invented English trial' => ['Book a free trial', [], 'Atelier Brun', TrapChecker::FAIL],
+            'invented consultation beside an offered trial' => ['Free consultation', ['free trial'], 'Shiftloom: staff scheduling for teams that work in shifts', TrapChecker::FAIL],
+            "the title's own business word" => ['Schedule a call', ['free trial', 'book a demo'], 'Shiftloom: staff scheduling for teams that work in shifts', TrapChecker::PASS],
         ];
+    }
+
+    private const INVENTED_OFFER_LABELS = [
+        'Réserver une visite',
+        'Demandez votre visite',
+        'Demander une consultation',
+        'Réserver une consultation',
+        'Consultation',
+        'Book a consultation',
+        'Request a consultation',
+        'Réservation',
+        'Appel découverte',
+        'Réserver un appel',
+        'Book a discovery call',
+        'Réserver votre rencontre',
+        'Demander un échange',
+        'Demander un échantillon',
+    ];
+
+    /**
+     * Every T5 file of the frozen corpus that offers nothing, crossed with the labels that invent an offer.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function inventedOfferOnT5Cases(): array
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $cases = [];
+
+        foreach ($manifest->entries as $entry) {
+            if (!\in_array('T5', $entry->traps, true) || $entry->offers !== []) {
+                continue;
+            }
+
+            foreach (self::INVENTED_OFFER_LABELS as $label) {
+                $cases["{$label} @ {$entry->id}"] = [$label, $entry->id];
+            }
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('inventedOfferOnT5Cases')]
+    public function testAnInventedOfferFailsOnAT5FileWithoutOffers(string $label, string $entryId): void
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $entry = $manifest->entry($entryId);
+        $output = "<div class=\"wp-block-button\"><a class=\"wp-block-button__link\">{$label}</a></div>";
+
+        $result = (new TrapChecker($manifest->settings))->check($entry, (string) $manifest->markdown($entry), self::GRID_TEMPLATE, $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['cta_grounding']['status']);
+    }
+
+    public function testTheFrozenCorpusHasFourT5FilesWithoutOffers(): void
+    {
+        $this->assertCount(4 * \count(self::INVENTED_OFFER_LABELS), self::inventedOfferOnT5Cases());
     }
 
     /**
