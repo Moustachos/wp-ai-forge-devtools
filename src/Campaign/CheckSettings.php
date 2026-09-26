@@ -20,7 +20,7 @@ final class CheckSettings
      *                                and function words, never an offer noun.
      * @param string[] $ctaNavigation Words that make a label a way around the page
      *                                ("voir", "méthode"): such a label may also name
-     *                                what the source's headings name.
+     *                                what the source's headings and links name.
      */
     public function __construct(
         public readonly float $orphanOverlap = 0.5,
