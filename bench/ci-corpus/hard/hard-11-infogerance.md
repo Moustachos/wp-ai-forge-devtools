@@ -1,0 +1,88 @@
+# Arcane Infogérance, infogérance et support informatique à Lille
+
+Arcane Infogérance est une société d'infogérance et de support informatique installée à 59000 Lille. Nous accompagnons des entreprises qui veulent un interlocuteur stable pour le suivi de leur parc, l'assistance aux utilisateurs et la remise en ordre de leur environnement de travail. L'entreprise a été fondée en 2013 et nous sommes aujourd'hui huit personnes.
+
+Nous ne cherchons pas à donner une image compliquée de notre métier. Notre rôle est simple à expliquer : faire en sorte que les postes, les comptes, les accès, les outils du quotidien et les usages restent gérables, compréhensibles et suivis dans le temps. Quand un client nous contacte, c'est souvent parce qu'il manque de visibilité sur son parc, parce que les demandes utilisateurs s'accumulent, ou parce qu'il veut sortir d'un fonctionnement reposant sur des habitudes non documentées.
+
+Nous travaillons avec des structures qui ont besoin d'un cadre clair : qui fait quoi, comment les demandes sont reçues, comment les interventions sont tracées, et comment les décisions techniques sont expliquées. Nous préférons une relation de travail directe, avec des mots simples, des constats vérifiables et des priorités posées ensemble.
+
+Si vous souhaitez un premier échange, vous pouvez nous appeler au 03 20 00 00 00 ou [Demander un audit de votre parc](https://example.com/audit).
+
+## Qui nous sommes
+
+Arcane Infogérance est une petite équipe de proximité. Nous sommes basés à 59000 Lille et nous intervenons pour des entreprises qui attendent un suivi régulier plutôt qu'une succession d'actions isolées. Notre taille nous oblige à rester concrets : quand nous prenons un sujet, nous devons pouvoir le comprendre, l'expliquer et le tenir dans la durée.
+
+Le fait d'être huit personnes compte dans notre manière de travailler. Cela signifie que les échanges restent directs, que les dossiers circulent entre collègues sans se perdre, et que les clients savent généralement à qui ils parlent. Nous ne présentons pas une organisation théorique ; nous présentons une équipe qui gère des postes, des comptes, des incidents, des arrivées, des départs, des changements de matériel et des besoins d'assistance au quotidien.
+
+Depuis 2013, nous avons construit notre façon de faire autour d'un principe simple : un parc informatique se gère mieux quand il est documenté, suivi et relu régulièrement. Beaucoup de difficultés viennent moins d'un problème technique exceptionnel que d'une accumulation de petites zones floues. Notre travail consiste souvent à réduire ce flou.
+
+## Ce que nous faisons au quotidien
+
+Nous intervenons sur le parc informatique d'entreprise dans son sens le plus concret : postes de travail, comptes utilisateurs, droits d'accès, messagerie, périphériques, incidents courants, suivi des changements et accompagnement des usages. Nous prenons aussi le temps de remettre à plat ce qui n'est pas clair : machines non identifiées, procédures absentes, dépendances connues d'une seule personne, ou habitudes prises sans validation.
+
+Notre travail n'est pas seulement de résoudre des demandes entrantes. Il consiste aussi à créer un cadre de gestion qui permette de savoir ce qui existe, ce qui doit être maintenu, ce qui pose problème de manière répétée et ce qui doit être arbitré. Un parc bien repris n'est pas un parc où il n'arrive jamais rien ; c'est un parc où les sujets sont visibles, classés, suivis et traités sans improvisation permanente.
+
+Nous faisons attention à la qualité des échanges avec les utilisateurs. Un support utile ne se limite pas à "faire disparaître" un incident. Il faut aussi comprendre le contexte, vérifier l'impact réel, éviter les récidives quand c'est possible et laisser une trace exploitable pour la suite. C'est souvent cette continuité qui manque quand une entreprise décide de changer d'interlocuteur.
+
+## Nos deux offres
+
+### Infogérance du parc
+
+Cette offre concerne la gestion du parc dans la durée. Elle comprend la prise de connaissance de l'existant, la tenue d'un inventaire exploitable, le suivi des postes et des comptes, la formalisation des accès, la traçabilité des interventions et la préparation des points de revue. L'objectif est de sortir d'un fonctionnement où l'on découvre les sujets au dernier moment.
+
+Concrètement, nous reprenons les informations utiles, nous vérifions ce qui est réellement en place, nous signalons les écarts et nous mettons en place une méthode de suivi. Nous cherchons à rendre le parc lisible : quels équipements sont utilisés, quels accès existent, quels points dépendent d'une procédure, quels sujets doivent être surveillés, et quels choix doivent être validés côté client.
+
+Cette offre s'adresse aux entreprises qui veulent une gestion continue, avec un interlocuteur qui connaît leur environnement et qui peut suivre les changements dans le temps.
+
+### Support aux utilisateurs
+
+Cette offre concerne l'assistance apportée aux personnes qui utilisent le parc au quotidien. Elle couvre la réception des demandes, l'analyse des incidents, l'aide à l'usage, le traitement des blocages courants et l'escalade des sujets qui demandent une action plus large sur l'environnement.
+
+Nous attachons de l'importance à la manière dont une demande est prise en charge. Un utilisateur doit savoir que sa demande a été comprise, qu'elle est suivie et qu'elle ne dépend pas uniquement de la disponibilité d'une personne précise. Nous documentons les interventions utiles, nous clarifions les causes quand elles sont identifiées et nous remontons les problèmes récurrents pour qu'ils soient traités à la bonne échelle.
+
+Cette offre s'adresse aux entreprises qui veulent un support structuré, avec des échanges simples et un suivi cohérent des demandes.
+
+## Comment nous reprenons un parc informatique
+
+La reprise d'un parc informatique ne commence pas par une promesse de transformation rapide. Elle commence par une phase d'observation et de vérification. Quand une entreprise nous confie son environnement, nous partons du principe qu'une partie des informations disponibles est utile, qu'une autre est incomplète, et qu'une troisième ne correspond plus à la réalité. Notre première responsabilité est donc de distinguer les faits, les habitudes et les suppositions.
+
+La première étape est l'inventaire. Nous demandons les listes existantes, les accès documentés, les informations sur les postes, les comptes, les outils utilisés au quotidien et les procédures déjà en place. Nous ne considérons pas cet inventaire comme un document figé, mais comme un point de départ. Une liste de matériel, par exemple, ne suffit pas si elle ne permet pas de savoir quel poste est réellement utilisé, par qui, dans quel contexte et avec quelles dépendances. De la même manière, une liste de comptes n'est exploitable que si l'on comprend à quoi ils servent, qui les utilise et comment ils sont administrés.
+
+Ensuite, nous confrontons cet inventaire à la réalité du terrain. Cela passe par des vérifications techniques, mais aussi par des échanges avec les personnes qui utilisent l'environnement. Les utilisateurs savent souvent où se trouvent les points de friction : un poste qui pose régulièrement problème, un accès qui dépend toujours de la même manipulation, un périphérique capricieux, une boîte de messagerie partagée dont personne ne connaît vraiment les règles d'usage, ou un départ de collaborateur dont les conséquences n'ont jamais été complètement traitées. Ces informations ne remplacent pas l'analyse technique, mais elles la rendent plus juste.
+
+À ce stade, nous cherchons surtout à identifier les zones sensibles. Il peut s'agir d'un manque de documentation, d'une dépendance à un prestataire précédent, d'un compte à privilèges mal suivi, d'équipements dont le statut n'est pas clair, ou simplement d'une accumulation de petites exceptions qui rendent l'ensemble difficile à administrer. Notre objectif n'est pas de tout corriger immédiatement. Il est d'établir une carte du parc telle qu'il fonctionne réellement, avec ses points stables et ses points fragiles.
+
+Une fois cette vue d'ensemble constituée, nous organisons la reprise des accès et des informations utiles au support. Cela signifie que nous devons pouvoir recevoir une demande, la qualifier, savoir sur quel périmètre elle porte et intervenir sans dépendre d'un savoir implicite détenu ailleurs. Cette phase demande de la méthode. Nous reprenons les éléments nécessaires à l'administration courante, nous vérifions leur validité et nous notons ce qui manque encore. Quand une information n'est pas disponible, nous ne la remplaçons pas par une approximation ; nous la signalons comme absente et nous prévoyons sa collecte.
+
+En parallèle, nous mettons en place le cadre de traitement des demandes. Il ne s'agit pas seulement d'ouvrir un canal de contact. Il faut définir comment une demande arrive, comment elle est reformulée si besoin, comment elle est priorisée, comment elle est suivie et comment elle est clôturée. Cette discipline est importante dès le départ, car elle évite que la reprise du parc se transforme en succession d'urgences non reliées entre elles. Dès les premiers jours, nous cherchons à faire apparaître les récurrences : mêmes incidents sur plusieurs postes, mêmes incompréhensions d'usage, mêmes demandes liées à un changement récent ou à une règle mal comprise.
+
+Après l'inventaire et la reprise des informations, nous passons à une phase d'observation active. Pendant cette période, nous traitons les demandes courantes tout en continuant à apprendre le parc. Chaque incident est l'occasion de vérifier si la documentation est suffisante, si le comportement observé est isolé ou symptomatique, et si une correction locale suffit. C'est souvent là que se révèle l'état réel d'un environnement. Un parc peut sembler simple sur le papier et pourtant dépendre d'enchaînements fragiles. À l'inverse, un environnement perçu comme désordonné peut devenir tout à fait gérable dès lors que ses exceptions sont identifiées et classées.
+
+Nous faisons aussi un travail de clarification des responsabilités. Certaines actions relèvent de notre périmètre de gestion, d'autres demandent une validation du client, et d'autres encore impliquent un tiers. Sans cette clarification, les blocages durent plus longtemps que nécessaire. Nous préférons dire clairement ce qui peut être fait immédiatement, ce qui nécessite un arbitrage, et ce qui doit être traité dans un second temps. Cette transparence évite les malentendus au moment où le parc est justement en train d'être repris.
+
+Vient ensuite la phase de stabilisation. Une fois les premiers sujets urgents absorbés et les informations principales rassemblées, nous commençons à structurer le suivi. Nous consolidons l'inventaire, nous mettons à jour les éléments découverts pendant les interventions, nous corrigeons les doublons, nous signalons les incohérences et nous listons les points qui restent ouverts. Nous cherchons à produire un état du parc qui puisse être relu et compris sans commentaire oral permanent. C'est un point essentiel : un parc bien repris ne doit pas dépendre uniquement de la mémoire des personnes qui l'ont observé au début.
+
+Dans le même temps, nous préparons le premier cycle de revue. Nous regardons quelles demandes ont été reçues, lesquelles reviennent, quels types d'utilisateurs sollicitent le plus souvent de l'aide, quels sujets ont demandé le plus de temps et quels points du parc restent mal décrits. Nous n'utilisons pas cette revue pour produire un discours abstrait. Nous l'utilisons pour mettre en évidence ce qui mérite une décision : une documentation à formaliser, une procédure à simplifier, un accès à régulariser, un poste à surveiller de près, une habitude d'usage à recadrer.
+
+Le premier point mensuel est une étape importante, parce qu'il transforme la reprise en gestion continue. À ce moment-là, nous présentons ce que nous avons constaté depuis la prise en charge, ce qui a été traité, ce qui reste à clarifier et ce qui demande une décision côté client. Nous revenons sur les incidents marquants, sur les récurrences observées et sur les écarts entre l'image initiale du parc et sa réalité. Nous mettons aussi en avant les zones où l'information est désormais fiable et celles où elle doit encore être consolidée.
+
+Ce premier bilan mensuel n'est pas un exercice de communication. C'est un moment de travail. Il doit permettre au client de comprendre l'état de son parc sans jargon inutile, de voir ce qui a été sécurisé dans l'organisation quotidienne, et d'identifier les priorités raisonnables pour la suite. Une reprise réussie ne signifie pas que tout est réglé en peu de temps. Elle signifie que le parc n'est plus subi de la même manière, que les demandes sont suivies, que les informations deviennent exploitables et que les décisions peuvent être prises sur une base plus claire.
+
+C'est généralement à partir de là que la relation prend son rythme normal. Le support devient plus fluide, l'inventaire devient un outil vivant, les procédures cessent d'être implicites et les points mensuels servent à piloter plutôt qu'à découvrir. Nous considérons que cette transition est le vrai résultat d'une reprise de parc : passer d'un environnement connu par fragments à un environnement géré avec continuité.
+
+## Notre manière de travailler
+
+Nous essayons d'être précis sans compliquer les choses. Cela veut dire que nous préférons poser une question de plus plutôt que supposer, vérifier un accès plutôt que le croire valide, et documenter une action utile plutôt que compter sur la mémoire. Cette façon de travailler peut paraître simple, mais elle change beaucoup dans la durée.
+
+Nous faisons aussi attention à la qualité de la reprise d'information. Quand un dossier change de main, quand un utilisateur rappelle, ou quand un sujet réapparaît plusieurs semaines plus tard, il faut que le contexte soit retrouvable. C'est une condition de sérieux, mais aussi une manière de respecter le temps du client et celui des utilisateurs.
+
+Enfin, nous n'essayons pas de masquer les limites d'une situation. Si un parc est mal documenté, nous le disons. Si une décision doit être prise côté client, nous l'expliquons. Si un problème est récurrent parce qu'il dépasse le cadre d'une intervention ponctuelle, nous le signalons comme tel. Nous pensons qu'une relation de confiance se construit davantage sur des constats clairs que sur des formules rassurantes.
+
+## Nous contacter
+
+Si vous cherchez un interlocuteur pour reprendre ou suivre votre environnement informatique, nous pouvons commencer par un échange simple sur votre situation actuelle, vos difficultés récurrentes et le niveau de visibilité que vous avez sur votre parc.
+
+Vous pouvez nous joindre au 03 20 00 00 00. Si vous préférez une première prise de contact écrite, vous pouvez aussi [Demander un audit de votre parc](https://example.com/audit).
+
+Arcane Infogérance  
+59000 Lille

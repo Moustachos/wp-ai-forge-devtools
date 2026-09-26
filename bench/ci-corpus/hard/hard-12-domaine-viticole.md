@@ -1,0 +1,76 @@
+# Vins nature du Luberon, Domaine de la Coste Rousse, producteur certifié bio et biodynamie
+
+## Une vigne, une famille, une obsession
+
+Nous ne faisons pas du vin. Nous faisons des décisions : sur le sol, sur la taille, sur la date des vendanges, sur ce qu'on ajoute et sur ce qu'on s'interdit d'ajouter. Le vin, lui, se fait tout seul, à condition qu'on lui en laisse la possibilité.
+
+Le Domaine de la Coste Rousse est une propriété familiale à taille humaine, implantée sur les contreforts du Luberon, à Lourmarin. Nous travaillons en **agriculture biologique certifiée** depuis 2008, puis en **biodynamie**. Nos vins sont vendus en cave directe, chez une sélection de cavistes indépendants en France et chez quelques importateurs à l'étranger.
+
+---
+
+## L'histoire du domaine
+
+Le domaine existe depuis 1947. Il a été fondé par **Marius Rimbert**, qui plantait alors la vigne en polyculture, comme tout le monde le faisait dans la région, entre les oliviers, les amandiers et un peu de blé. Son fils **Pierre** restructure les parcelles une génération plus tard et commence à vinifier lui-même, en quittant la coopérative. C'est lui qui plante les parcelles de Grenache blanc et de Syrah qui constituent aujourd'hui le cœur de notre gamme.
+
+**Laure et Thomas Rimbert**, enfants de Pierre, reprennent le domaine en 2004. Laure est œnologue, formée à Bordeaux puis rodée sur plusieurs propriétés en Vallée du Rhône et en Espagne. Thomas gère les vignes. Depuis peu, leur fille **Inès**, revenue d'un passage chez un domaine biodynamique en Autriche, les accompagne sur la partie technique et commence à prendre en main certaines cuvées en autonomie.
+
+Les générations se suivent sur le même bout de calcaire, avec des visions qui se corrigent et s'affinent.
+
+---
+
+## Nos vins
+
+### Les blancs
+
+Nos blancs sont ce que nous aimons le plus faire. Le sol calcaire du plateau, combiné à l'altitude du domaine, donne à nos Grenache blanc et Roussanne une fraîcheur et une tension que l'on trouve rarement dans l'appellation. Nous vinifions en **demi-muid**, sans collage ni filtration, avec des levures indigènes exclusivement.
+
+Notre cuvée phare, **Les Adrets**, est issue d'une parcelle de vieux Grenache blanc plantée par Pierre. Les rendements y sont naturellement bas, et l'élevage est long. C'est un vin qui a besoin de temps, en cave comme en verre. Jeune, il paraît presque austère ; il s'ouvre ensuite sur des notes de fruits secs, de fleurs blanches et de pierre chaude, et supporte très bien une carafe.
+
+### Les rouges
+
+Nos rouges s'appuient principalement sur la Syrah et le Grenache noir, avec de petits complants de Mourvèdre sur les parcelles les plus chaudes. Nous pratiquons des vendanges entièrement manuelles, en cagettes, avec un tri sévère à la vigne puis à la table de tri. La vinification se fait par **extraction douce**, sans recours aux levures exogènes ni aux correcteurs d'acidité.
+
+Nous cherchons des rouges digestes, qui gardent le fruit et la fraîcheur du plateau plutôt que la puissance. Certains se boivent dans leur jeunesse, légèrement rafraîchis ; d'autres demandent quelques années de cave avant de s'exprimer pleinement.
+
+### Le rosé
+
+Notre rosé est un assemblage de Grenache et de Cinsault, vinifié en saignée courte. Nous ne cherchons pas la pâleur pour la pâleur. Nous cherchons un vin de gastronomie, structuré, qui tienne à table autrement qu'en apéritif.
+
+---
+
+## Notre façon de travailler la vigne
+
+La biodynamie, pour nous, n'est pas une philosophie abstraite. C'est un calendrier, des observations, des corrections progressives. Concrètement, cela implique :
+
+- Des **préparations biodynamiques**, bouse de corne, silice de corne et tisanes de plantes, appliquées à des dates précises selon le calendrier lunaire
+- Un travail du sol mécanique exclusivement, sans herbicides ni intrants de synthèse
+- Un **enherbement maîtrisé** entre les rangs pour favoriser la biodiversité et limiter l'érosion
+- Des **vendanges à la main** sur l'ensemble du domaine, en plusieurs passages selon la maturité des parcelles
+
+Nous ne sommes pas dogmatiques. Si une décision technique s'impose pour sauver une récolte, nous la prenons. Mais nous la prenons en connaissance de cause, en sachant ce qu'elle coûte à long terme.
+
+---
+
+## Au chai
+
+Au chai, la règle est la même qu'à la vigne : intervenir le moins possible, mais au bon moment. Les raisins arrivent en cagettes, sont triés à nouveau, puis rejoignent les cuves par gravité autant que le bâtiment le permet. Les fermentations démarrent seules, avec des levures indigènes exclusivement, et nous les suivons de près, en goûtant chaque jour plutôt qu'en nous fiant aux seules analyses.
+
+Nous n'ajoutons ni enzymes, ni tanins, ni acidité. Le soufre est utilisé avec parcimonie, au moment de la mise en bouteille, et seulement quand un vin en a besoin pour voyager. Certaines cuvées n'en reçoivent pas du tout, et nous l'indiquons clairement sur l'étiquette.
+
+Chaque millésime ressemble à son année. Nous ne cherchons pas à corriger un été trop chaud ou un printemps pluvieux pour obtenir un vin identique d'une récolte à l'autre : nous préférons que vous puissiez reconnaître, dans le verre, ce que la vigne a traversé.
+
+---
+
+## Vente et visites
+
+Nos vins sont disponibles à la propriété, du lundi au samedi, et sur rendez-vous pendant l'hiver. On les trouve aussi chez une sélection de **cavistes indépendants**, référencés sur la page [Nos revendeurs](https://example.com/revendeurs), et à l'export, via nos importateurs en Europe et au Japon.
+
+Nous proposons des visites du domaine et des dégustations commentées sur réservation. La visite commence dans les vignes, où Thomas ou Inès expliquent le travail de la saison, les sols et les choix de conduite de chaque parcelle. Elle se poursuit au chai, entre les cuves et les demi-muids, avec Laure, et se termine par une dégustation des vins du moment, parfois complétée par un échantillon prélevé en cours d'élevage.
+
+Ces visites sont payantes et non remboursées en cas d'achat, parce que notre temps a de la valeur et que nous préférons être clairs là-dessus dès le départ. En contrepartie, nous prenons le temps de répondre à toutes les questions, y compris celles qui fâchent sur les sulfites ou la biodynamie.
+
+Pendant les vendanges, la cave reste ouverte à la vente, mais nous suspendons les visites : toute la famille est dans les rangs. Le reste de l'année, n'hésitez pas à passer au caveau sans prévenir pour acheter quelques bouteilles : il y a presque toujours quelqu'un pour vous faire goûter, même si ce n'est pas une dégustation commentée.
+
+[Réserver une visite](https://example.com/visites)
+
+Domaine de la Coste Rousse, 84160 Lourmarin. Téléphone : 04 90 00 00 00.

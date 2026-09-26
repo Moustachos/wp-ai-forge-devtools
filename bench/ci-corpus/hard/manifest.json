@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "thresholds": {"orphan_overlap": 0.5, "retention": 0.8, "quote_match": 0.6, "cram_chars": 40},
+  "generic_cta": ["nous contacter", "prendre contact", "contactez-nous", "en savoir plus", "découvrir", "contact us", "get in touch", "learn more"],
+  "cta_vocabulary": ["réserver", "demander", "prendre", "obtenir", "contacter", "appeler", "écrire", "venir", "rencontrer", "parler", "échanger", "poser", "question", "questions", "votre", "notre", "vous", "nous", "avec", "pour", "dans", "plus", "book", "request", "call", "contact", "write", "visit", "talk", "with", "your", "about", "more", "touch"],
+  "files": [
+    {
+      "id": "hard-01-menuiserie-atelier",
+      "file": "hard-01-menuiserie-atelier.md",
+      "author": "claude",
+      "locale": "fr_FR",
+      "sector": "artisan",
+      "traps": ["T1", "T3"],
+      "figures": {
+        "2006": ["depuis 2006"],
+        "2": ["deux menuisiers"],
+        "44150": ["44150 Ancenis"],
+        "0240000000": ["02 40 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["agencement sur mesure", "restauration de meubles", "demander un devis"],
+      "claims": [],
+      "grid": {"section": "Nos deux métiers", "items": ["Agencement sur mesure", "Restauration de meubles"]},
+      "source": null
+    },
+    {
+      "id": "hard-02-cabinet-kine",
+      "file": "hard-02-cabinet-kine.md",
+      "author": "gemini",
+      "locale": "fr_FR",
+      "sector": "health",
+      "traps": ["T1", "T2"],
+      "figures": {
+        "1998": ["en 1998"],
+        "3": ["trois kinésithérapeutes"],
+        "69003": ["69003 Lyon"],
+        "0472000000": ["04 72 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["bilan initial", "prendre rendez-vous"],
+      "claims": [],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-03-cabinet-comptable",
+      "file": "hard-03-cabinet-comptable.md",
+      "author": "gpt",
+      "locale": "fr_FR",
+      "sector": "b2b-service",
+      "traps": ["T3", "T5"],
+      "figures": {
+        "2011": ["en 2011"],
+        "4": ["quatre collaborateurs"],
+        "35000": ["35000 Rennes"],
+        "0299000000": ["02 99 00 00 00"]
+      },
+      "quotes": [],
+      "offers": [],
+      "claims": [],
+      "grid": {"section": "Nos deux missions", "items": ["Tenue comptable", "Conseil de gestion"]},
+      "source": null
+    },
+    {
+      "id": "hard-04-saas-planning",
+      "file": "hard-04-saas-planning.md",
+      "author": "claude",
+      "locale": "en_US",
+      "sector": "saas",
+      "traps": ["T2", "T4"],
+      "figures": {
+        "2019": ["in 2019"],
+        "12": ["twelve people"],
+        "97209": ["Portland, OR 97209"],
+        "555": ["555-0147"],
+        "0147": ["555-0147"]
+      },
+      "quotes": [],
+      "offers": ["free trial", "book a demo"],
+      "claims": [],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-05-association-quartier",
+      "file": "hard-05-association-quartier.md",
+      "author": "gemini",
+      "locale": "fr_FR",
+      "sector": "association",
+      "traps": ["T5", "T6"],
+      "figures": {
+        "2012": ["en 2012"],
+        "31500": ["31500 Toulouse"],
+        "0561000000": ["05 61 00 00 00"]
+      },
+      "quotes": [],
+      "offers": [],
+      "claims": ["une association entièrement bénévole", "ouverte à tous les habitants du quartier", "des rendez-vous tout au long de l'année"],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-06-fromagerie",
+      "file": "hard-06-fromagerie.md",
+      "author": "gpt",
+      "locale": "fr_FR",
+      "sector": "local-shop",
+      "traps": ["T2", "T6"],
+      "figures": {
+        "2009": ["en 2009"],
+        "21000": ["21000 Dijon"],
+        "0380000000": ["03 80 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["plateaux sur commande"],
+      "claims": ["des fromages au lait cru pour l'essentiel", "affinés dans notre propre cave", "achetés directement aux producteurs"],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-07-organisme-formation",
+      "file": "hard-07-organisme-formation.md",
+      "author": "adapted",
+      "locale": "fr_FR",
+      "sector": "training",
+      "traps": ["T1", "T4"],
+      "figures": {
+        "2015": ["en 2015"],
+        "7": ["sept personnes"],
+        "69002": ["69002 Lyon"],
+        "0478000000": ["04 78 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["première conversation gratuite"],
+      "claims": [],
+      "grid": null,
+      "source": "6223/1"
+    },
+    {
+      "id": "hard-08-concession-auto",
+      "file": "hard-08-concession-auto.md",
+      "author": "adapted",
+      "locale": "fr_FR",
+      "sector": "car-dealership",
+      "traps": ["T3", "T6"],
+      "figures": {
+        "1993": ["depuis 1993"],
+        "06800": ["06800 Cagnes-sur-Mer"],
+        "0493000000": ["04 93 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["reprise de votre ancien véhicule", "estimation sans engagement", "rendez-vous pour une estimation"],
+      "claims": ["formations Renault régulières", "une équipe stable", "français, anglais et italien"],
+      "grid": {"section": "Toute la gamme Renault et Dacia neuve", "items": ["Les modèles Renault neufs", "La gamme Dacia neuve"]},
+      "source": "3915/0"
+    },
+    {
+      "id": "hard-09-plomberie",
+      "file": "hard-09-plomberie.md",
+      "author": "claude",
+      "locale": "fr_FR",
+      "sector": "artisan",
+      "traps": ["T4", "T5"],
+      "figures": {
+        "2010": ["en 2010"],
+        "2": ["deux plombiers"],
+        "63000": ["63000 Clermont-Ferrand"],
+        "0473000000": ["04 73 00 00 00"]
+      },
+      "quotes": [],
+      "offers": [],
+      "claims": [],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-10-vet-clinic",
+      "file": "hard-10-vet-clinic.md",
+      "author": "gemini",
+      "locale": "en_US",
+      "sector": "health",
+      "traps": ["T1", "T5"],
+      "figures": {
+        "2004": ["in 2004"],
+        "2": ["two veterinarians"],
+        "05401": ["Burlington, VT 05401"],
+        "555": ["555-0163"],
+        "0163": ["555-0163"]
+      },
+      "quotes": [],
+      "offers": [],
+      "claims": [],
+      "grid": null,
+      "source": null
+    },
+    {
+      "id": "hard-11-infogerance",
+      "file": "hard-11-infogerance.md",
+      "author": "gpt",
+      "locale": "fr_FR",
+      "sector": "b2b-service",
+      "traps": ["T3", "T4"],
+      "figures": {
+        "2013": ["en 2013"],
+        "8": ["huit personnes"],
+        "59000": ["59000 Lille"],
+        "0320000000": ["03 20 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["audit de votre parc"],
+      "claims": [],
+      "grid": {"section": "Nos deux offres", "items": ["Infogérance du parc", "Support aux utilisateurs"]},
+      "source": null
+    },
+    {
+      "id": "hard-12-domaine-viticole",
+      "file": "hard-12-domaine-viticole.md",
+      "author": "adapted",
+      "locale": "fr_FR",
+      "sector": "wine-estate",
+      "traps": ["T2", "T6"],
+      "figures": {
+        "1947": ["depuis 1947"],
+        "2008": ["depuis 2008"],
+        "2004": ["en 2004"],
+        "84160": ["84160 Lourmarin"],
+        "0490000000": ["04 90 00 00 00"]
+      },
+      "quotes": [],
+      "offers": ["visites du domaine", "dégustations commentées", "réserver une visite", "sur rendez-vous pendant l'hiver"],
+      "claims": ["une propriété familiale à taille humaine", "des vendanges entièrement manuelles", "des levures indigènes exclusivement"],
+      "grid": null,
+      "source": "6223/0"
+    }
+  ]
+}

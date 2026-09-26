@@ -1,0 +1,65 @@
+
+model                       runs  stats   cram  stat_txt stat_invent quotes   quote_inv  flagged
+gemini-3.7-flash              78    154      0         7          24     29           0      24%
+gemini-3.6-flash              64     80      0         6           9     16           0      14%
+gpt-5.4                       54    226      0        67          19     32           0      57%
+gpt-5.6-luna                  47    166      5        34          15     25           0      66%
+gemini-3.1-pro-preview        42     50      0         0           2      9           0       5%
+claude-opus-5-5               27     60      0         2           6      6           0      19%
+gemini-3-flash-preview        25     47      0         1           7     19           0      24%
+gpt-5.6-sol                   23     20      0         7           0      7           0      22%
+gpt-5.5                       21     58      0        16           0     19           0      33%
+claude-sonnet-4-6             21     61      0         8           3     23           0      19%
+gpt-5.2                       20     79      6        17           3     11           0      30%
+gemini-3.8-flash              18     40      0         2           9     10           0      28%
+claude-sonnet-5               17     27      0         3           4     13           0      29%
+gpt-6-sol                     17     25      0         5           0      1           0      24%
+gpt-5.6-terra                 13     63      2        16           0      9           0      69%
+gpt-6-luna                    12     47      4        13           3      2           0      67%
+claude-opus-5                 11     38      0         1          10      4           0      45%
+gpt-5.4-mini                   9     21      0         1           7      6           0      44%
+claude-haiku-4-5               3      2      0         1           0      3           0      33%
+
+--- stat_cram
+5906 gpt-5.2: «D'un accès à votre plan de préparation en ligne, mis à jour en temps réel»
+5906 gpt-5.2: «D'une disponibilité par messagerie pour répondre à vos questions au fil de la semaine»
+5906 gpt-5.2: «D'un bilan mensuel pour analyser les progressions et ajuster les objectifs»
+5913 gpt-5.2: «Souhaitent une identité visuelle cohérente»
+5913 gpt-5.2: «Cherchent un prestataire disponible et à l'écoute»
+5915 gpt-5.2: «12 % entre la première et la deuxième saison»
+6177 gpt-5.6-terra: «Un interlocuteur unique, du brief à la livraison.»
+6279 gpt-5.6-terra: «Un interlocuteur unique, du brief à la livraison.»
+
+--- stat_text
+5859 gpt-5.2: «Identité visuelle cohérente»
+5907 gpt-5.2: «Retouche»
+5913 gpt-5.2: «six à huit semaines»
+5913 gpt-5.2: «trois à cinq heures»
+5914 gpt-5.2: «Détection par gaz traceur»
+5920 gpt-5.4: «Naturelle»
+5920 gpt-5.4: «La retouche soignée»
+5983 gpt-5.4: «Journée entière»
+6023 claude-sonnet-4-6: «Contraintes personnelles»
+6027 claude-sonnet-4-6: «Position zéro»
+6177 gpt-5.6-terra: «Dix ans»
+6212 gpt-5.6-terra: «Projets sélectionnés»
+
+--- stat_invented
+5859 gpt-5.2: «01»
+5859 gpt-5.2: «02»
+5859 gpt-5.2: «03»
+5872 gemini-3-flash-preview: «01»
+5872 gemini-3-flash-preview: «02»
+5872 gemini-3-flash-preview: «03»
+5876 gemini-3-flash-preview: «0»
+5877 gemini-3-flash-preview: «87k €»
+5921 gpt-5.4: «01»
+5921 gpt-5.4: «04»
+5921 gpt-5.4: «02»
+5921 gpt-5.4: «05»
+5921 gpt-5.4: «03»
+5921 gpt-5.4: «06»
+5983 gpt-5.4: «6–8 semaines»
+
+--- quote_invented
+

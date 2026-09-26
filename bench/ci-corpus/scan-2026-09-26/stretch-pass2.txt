@@ -1,0 +1,99 @@
+
+model                       runs  stats   cram  stat_txt stat_invent quotes   quote_inv  flagged
+gemini-3.7-flash              78    154      0         7          17     29           0      23%
+gemini-3.6-flash              64     80      0         6           3     16           0      11%
+gpt-5.4                       54    226      0        67           6     32           0      56%
+gpt-5.6-luna                  47    166      5        34          10     25           0      64%
+gemini-3.1-pro-preview        42     50      0         0           1      9           0       2%
+claude-opus-5-5               27     60      0         2           2      6           0      11%
+gemini-3-flash-preview        25     47      0         1           1     19           0       8%
+gpt-5.6-sol                   23     20      0         7           0      7           0      22%
+gpt-5.5                       21     58      0        16           0     19           0      33%
+claude-sonnet-4-6             21     61      0         8           0     23           0      14%
+gpt-5.2                       20     79      6        17           0     11           0      30%
+gemini-3.8-flash              18     40      0         2           2     10           0      22%
+claude-sonnet-5               17     27      0         3           0     13           0      18%
+gpt-6-sol                     17     25      0         5           0      1           0      24%
+gpt-5.6-terra                 13     63      2        16           0      9           0      69%
+gpt-6-luna                    12     47      4        13           3      2           0      67%
+claude-opus-5                 11     38      0         1           2      4           0      27%
+gpt-5.4-mini                   9     21      0         1           2      6           0      33%
+claude-haiku-4-5               3      2      0         1           0      3           0      33%
+
+--- stat_cram
+5906 gpt-5.2: «D'un accès à votre plan de préparation en ligne, mis à jour en temps réel»
+5906 gpt-5.2: «D'une disponibilité par messagerie pour répondre à vos questions au fil de la semaine»
+5906 gpt-5.2: «D'un bilan mensuel pour analyser les progressions et ajuster les objectifs»
+5913 gpt-5.2: «Souhaitent une identité visuelle cohérente»
+5913 gpt-5.2: «Cherchent un prestataire disponible et à l'écoute»
+5915 gpt-5.2: «12 % entre la première et la deuxième saison»
+6177 gpt-5.6-terra: «Un interlocuteur unique, du brief à la livraison.»
+6279 gpt-5.6-terra: «Un interlocuteur unique, du brief à la livraison.»
+
+--- stat_text
+5859 gpt-5.2: «Identité visuelle cohérente»
+5907 gpt-5.2: «Appel»
+5913 gpt-5.2: «six à huit semaines»
+5914 gpt-5.2: «Détection par caméra thermique»
+5920 gpt-5.4: «Une galerie privée en ligne»
+5937 gpt-5.4: «objectifs de composition corporelle»
+6037 claude-sonnet-4-6: «Repas»
+6193 claude-sonnet-5: «Notre histoire»
+6207 gpt-5.6-luna: «sept personnes»
+6211 gpt-5.6-terra: «Trois générations»
+6346 gpt-5.6-terra: «une dizaine»
+6403 gpt-5.6-luna: «Renault»
+
+--- stat_invented
+5877 gemini-3-flash-preview: «87k €»
+5983 gpt-5.4: «6–8 semaines»
+6172 gpt-5.6-luna: «5 ans»
+6196 gemini-3.6-flash: «35k»
+6197 claude-opus-5: «10 ans»
+6207 gpt-5.6-luna: «5 ans»
+6221 gpt-5.6-luna: «3 générations»
+6361 gpt-5.6-luna: «10 pays»
+6394 gpt-5.4-mini: «10 pays»
+6399 gpt-5.4-mini: «3 générations»
+6541 gpt-5.4: «3 expertises»
+6558 gpt-5.4: «10 ans»
+6558 gpt-5.4: «7 personnes»
+6663 gemini-3.6-flash: «3-5 ans»
+6687 gemini-3.7-flash: «15 min»
+6699 gemini-3.7-flash: «15 min»
+6745 gemini-3.7-flash: «1 an»
+6745 gemini-3.7-flash: «3x»
+6745 gemini-3.7-flash: «3 à 5 ans»
+6745 gemini-3.7-flash: «x2 à x3»
+6774 gemini-3.6-flash: «15 min»
+6801 gemini-3.7-flash: «3 à 5 ans»
+6801 gemini-3.7-flash: «2x à 3x»
+6843 gemini-3.7-flash: «15 min»
+6849 gemini-3.7-flash: «1 part»
+6849 gemini-3.7-flash: «1 jour»
+6850 gemini-3.7-flash: «3-4x»
+6891 gpt-5.4: «3 pratiques»
+6893 gpt-5.4: «45 minutes à 1 heure»
+7014 gpt-6-luna: «7 personnes»
+7014 gpt-6-luna: «10 ans»
+7014 gpt-6-luna: «2 interviews»
+7024 gpt-5.6-luna: «3 générations»
+7024 gpt-5.6-luna: «3 générations»
+7024 gpt-5.6-luna: «3 générations»
+7032 gpt-5.6-luna: «3 générations»
+7058 gpt-5.6-luna: «10 pays»
+7062 gpt-5.6-luna: «3 générations»
+7085 claude-opus-5: «10 ans»
+7128 gemini-3.7-flash: «100%»
+7129 gemini-3.7-flash: «10 ans»
+7144 gemini-3.8-flash: «100%»
+7151 gemini-3.7-flash: «100%»
+7173 gemini-3.7-flash: «100%»
+7188 gemini-3.8-flash: «100%»
+7195 gemini-3.7-flash: «100%»
+7201 gemini-3.1-pro-preview: «35k»
+7228 claude-opus-5-5: «3 expertises»
+7250 claude-opus-5-5: «10 ans»
+
+--- quote_invented
+
