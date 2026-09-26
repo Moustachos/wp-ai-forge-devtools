@@ -160,46 +160,76 @@ final class CampaignRunner
     }
 
     /**
-     * Create one batch task for a combo. Returns the root task ID.
+     * Files meta for one batch. A corpus file's id travels as source_filename;
+     * the batch executor copies it onto each child task.
+     *
+     * @param array<int, array{id: ?string, markdown: string}> $sources
+     * @return array<int, array<string, mixed>>
      */
-    public function createCombo(ComboSpec $combo, int $sourceBatchId, int $files, ?string $modelId = null): int
+    public static function filesMeta(array $sources, int $templateId, string $templateName): array
     {
-        $templateId = $this->resolveTemplateId($combo->templateSlug);
-        $template = get_post($templateId);
-        $templateContent = $template->post_content;
+        $meta = [];
 
-        $payloads = [];
-        $filesMeta = [];
-
-        for ($i = 0; $i < $files; $i++) {
-            $markdown = $this->wpdb->get_var($this->wpdb->prepare(
-                "SELECT payload FROM {$this->wpdb->prefix}aiforge_task_payloads
-                 WHERE task_id = %d AND payload_type = %s",
-                $sourceBatchId,
-                "markdown_snapshot_{$i}"
-            ));
-
-            if ($markdown === null) {
-                throw new RuntimeException(
-                    "Batch {$sourceBatchId} has no markdown_snapshot_{$i}; lower --files."
-                );
-            }
-
+        foreach (array_values($sources) as $i => $source) {
             $title = 'Untitled';
-            if (preg_match('/^#\s+(.+)$/m', $markdown, $matches) === 1) {
+
+            if (preg_match('/^#\s+(.+)$/m', $source['markdown'], $matches) === 1) {
                 $title = trim($matches[1]);
             }
 
-            $filesMeta[] = [
+            $row = [
                 'index' => $i,
                 'template_id' => $templateId,
-                'template_name' => $template->post_title,
+                'template_name' => $templateName,
                 'content_title' => $title,
                 'draft_title' => null,
                 'original_format' => 'markdown',
             ];
 
-            $payloads[] = ['type' => "markdown_snapshot_{$i}", 'payload' => $markdown];
+            if ($source['id'] !== null) {
+                $row['source_filename'] = $source['id'];
+            }
+
+            $meta[] = $row;
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Create one batch task for a combo from a source batch's snapshots.
+     */
+    public function createCombo(ComboSpec $combo, int $sourceBatchId, int $files, ?string $modelId = null): int
+    {
+        $sources = [];
+
+        for ($i = 0; $i < $files; $i++) {
+            $markdown = $this->payload($sourceBatchId, "markdown_snapshot_{$i}");
+
+            if ($markdown === null) {
+                throw new RuntimeException("Batch {$sourceBatchId} has no markdown_snapshot_{$i}; lower --files.");
+            }
+
+            $sources[] = ['id' => null, 'markdown' => $markdown];
+        }
+
+        return $this->createComboFromSources($combo, $sources, $modelId);
+    }
+
+    /**
+     * Create one batch task for a combo. Returns the root task ID.
+     *
+     * @param array<int, array{id: ?string, markdown: string}> $sources
+     */
+    public function createComboFromSources(ComboSpec $combo, array $sources, ?string $modelId = null): int
+    {
+        $templateId = $this->resolveTemplateId($combo->templateSlug);
+        $template = get_post($templateId);
+        $templateContent = $template->post_content;
+        $payloads = [];
+
+        foreach (array_values($sources) as $i => $source) {
+            $payloads[] = ['type' => "markdown_snapshot_{$i}", 'payload' => $source['markdown']];
             $payloads[] = ['type' => "template_snapshot_{$i}", 'payload' => $templateContent];
         }
 
@@ -208,9 +238,9 @@ final class CampaignRunner
             'provider' => $combo->provider,
             'preset' => $combo->preset,
             'batch_name' => 'QG campaign ' . $combo->key() . ($modelId !== null ? ' @' . $modelId : ''),
-            'file_count' => $files,
+            'file_count' => \count($sources),
             'create_draft' => false,
-            'files_meta' => wp_json_encode($filesMeta),
+            'files_meta' => wp_json_encode(self::filesMeta($sources, $templateId, $template->post_title)),
             self::CAMPAIGN_META_KEY => '1',
         ];
 
@@ -245,6 +275,56 @@ final class CampaignRunner
         }
 
         return $taskId;
+    }
+
+    public function templateHash(string $slug): string
+    {
+        return sha1((string) get_post($this->resolveTemplateId($slug))->post_content);
+    }
+
+    /**
+     * What a trap check reads for one llm_generate run. Payloads and meta are
+     * fetched in separate queries: joining task_meta with payload longtext
+     * wedged MySQL in Docker.
+     *
+     * @return array{markdown: string, template: string, output: string, plan: string}|null
+     */
+    public function loadRunArtifacts(int $llmTaskId): ?array
+    {
+        $parentId = (int) $this->wpdb->get_var($this->wpdb->prepare(
+            "SELECT parent_id FROM {$this->wpdb->prefix}aiforge_tasks WHERE id = %d",
+            $llmTaskId
+        ));
+
+        if ($parentId === 0) {
+            return null;
+        }
+
+        $markdown = $this->payload($parentId, 'markdown_snapshot');
+        $template = $this->payload($parentId, 'template_snapshot');
+        $output = $this->payload($llmTaskId, 'result_content');
+
+        if ($markdown === null || $template === null || $output === null) {
+            return null;
+        }
+
+        return [
+            'markdown' => $markdown,
+            'template' => $template,
+            'output' => $output,
+            'plan' => $this->payload($llmTaskId, 'integration_plan') ?? '',
+        ];
+    }
+
+    private function payload(int $taskId, string $type): ?string
+    {
+        $value = $this->wpdb->get_var($this->wpdb->prepare(
+            "SELECT payload FROM {$this->wpdb->prefix}aiforge_task_payloads WHERE task_id = %d AND payload_type = %s",
+            $taskId,
+            $type
+        ));
+
+        return $value === null ? null : (string) $value;
     }
 
     public function isRootFinished(int $rootId): bool
@@ -284,7 +364,7 @@ final class CampaignRunner
         foreach ($rootIdsByComboKey as $comboKey => $rootIds) {
             foreach ($rootIds as $rootId) {
                 $rows = $this->wpdb->get_results($this->wpdb->prepare(
-                    "SELECT id, status FROM {$this->wpdb->prefix}aiforge_tasks
+                    "SELECT id, status, parent_id FROM {$this->wpdb->prefix}aiforge_tasks
                      WHERE root_id = %d AND task_type = 'llm_generate' ORDER BY id",
                     $rootId
                 ));
@@ -293,7 +373,9 @@ final class CampaignRunner
                     $results[] = $this->buildRunResult(
                         (int) $row->id,
                         (string) $comboKey,
-                        (string) $row->status !== 'completed'
+                        (string) $row->status !== 'completed',
+                        (int) $rootId,
+                        $this->sourceFileOf((int) $row->parent_id)
                     );
                 }
             }
@@ -302,7 +384,17 @@ final class CampaignRunner
         return $results;
     }
 
-    private function buildRunResult(int $llmId, string $comboKey, bool $failed = false): RunResult
+    private function sourceFileOf(int $parentId): ?string
+    {
+        $value = $this->wpdb->get_var($this->wpdb->prepare(
+            "SELECT meta_value FROM {$this->wpdb->prefix}aiforge_task_meta WHERE task_id = %d AND meta_key = 'source_filename'",
+            $parentId
+        ));
+
+        return ($value === null || $value === '') ? null : (string) $value;
+    }
+
+    private function buildRunResult(int $llmId, string $comboKey, bool $failed = false, ?int $rootId = null, ?string $sourceFile = null): RunResult
     {
         $meta = [];
 
@@ -329,6 +421,8 @@ final class CampaignRunner
             subscores: $subscores,
             cost: (float) ($meta['cost'] ?? 0.0),
             failed: $failed,
+            rootId: $rootId,
+            sourceFile: $sourceFile,
         );
     }
 }

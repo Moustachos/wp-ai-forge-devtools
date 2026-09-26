@@ -73,4 +73,29 @@ class CampaignRunnerTest extends TestCase
         $this->assertSame(3, CampaignRunner::fileCount(0, 3));
         $this->assertSame(3, CampaignRunner::fileCount(-1, 3));
     }
+
+    // --- Files meta ---
+
+    public function testFilesMetaCarriesTheCorpusIdAsSourceFilename(): void
+    {
+        $meta = CampaignRunner::filesMeta([['id' => 'hard-01', 'markdown' => "# Atelier Brun\n\nTexte"]], 2138, 'Page d’atterrissage');
+
+        $this->assertSame([[
+            'index' => 0,
+            'template_id' => 2138,
+            'template_name' => 'Page d’atterrissage',
+            'content_title' => 'Atelier Brun',
+            'draft_title' => null,
+            'original_format' => 'markdown',
+            'source_filename' => 'hard-01',
+        ]], $meta);
+    }
+
+    public function testFilesMetaFromABatchHasNoSourceFilename(): void
+    {
+        $meta = CampaignRunner::filesMeta([['id' => null, 'markdown' => 'no title']], 1, 't');
+
+        $this->assertSame('Untitled', $meta[0]['content_title']);
+        $this->assertArrayNotHasKey('source_filename', $meta[0]);
+    }
 }

@@ -74,6 +74,31 @@ From Git Bash, an absolute `--baseline=/var/www/...` path gets mangled by MSYS
 into `C:/Program Files/Git/var/www/...`. Use a WordPress-root-relative path
 (`wp-content/uploads/...`) or prefix the command with `MSYS_NO_PATHCONV=1`.
 
+### Hard corpus (S17)
+
+```bash
+cd ../.. && npx wp-env run cli -- timeout 6600 wp aiforge-dev qg-campaign --corpus=hard \
+  --combos=gemini:balanced:page-datterrissage,gemini:balanced:page-datterrissage \
+  --label=hard-gemini --timeout=6000
+cd ../.. && npx wp-env run cli -- wp aiforge-dev trap-check --report=wp-content/uploads/aiforge-dev/<report>.json
+cd ../.. && npx wp-env run tests-cli --env-cwd=wp-content/plugins/wp-ai-forge-devtools php bench/ci-corpus/check.php hard
+```
+
+Twelve frozen scarce-content pages in `bench/ci-corpus/hard/`, scored by
+`TrapChecker` against the manifest's ground truth (every figure, quote and
+offer each file states). Listing a combo twice is a repeat. Reports carry
+k/n per check, `n/a` wherever the template lacks the slot, file and template
+hashes and the plugin commit.
+
+- **Set the in-container `timeout` above `--timeout`.** 24 long runs take
+  40-70 minutes. Root ids land in `<label>-<stamp>.roots.json` as they launch;
+  `--collect=<that file>` rebuilds the report after a crash.
+- **Recalibrate offline.** Edit `thresholds` in the manifest, re-run
+  `trap-check`: no generation needed.
+- **`stat_has_figure` measures model + addendum**: the OpenAI addendum
+  endorses short labels in stat-values. It is not a fabrication count.
+- `bench/` is not in the release zip: the corpus runs from a git checkout only.
+
 ### Vision benchmark
 
 ```bash

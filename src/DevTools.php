@@ -11,6 +11,7 @@ use AIForge\Cli\IndexReviewCommand;
 use AIForge\Cli\QgCampaignCommand;
 use AIForge\Cli\SuggestionBenchCommand;
 use AIForge\Cli\SuggestionReviewCommand;
+use AIForge\Cli\TrapCheckCommand;
 use AIForge\Cli\VisionBenchCommand;
 use AIForge\Cli\VisionPickerCommand;
 use AIForge\REST\DemoModeController;
@@ -76,6 +77,7 @@ class DevTools
         }
 
         \WP_CLI::add_command('aiforge-dev qg-campaign', QgCampaignCommand::class);
+        \WP_CLI::add_command('aiforge-dev trap-check', TrapCheckCommand::class);
         \WP_CLI::add_command('aiforge-dev vision-bench', VisionBenchCommand::class);
         \WP_CLI::add_command('aiforge-dev index-coverage', IndexCoverageCommand::class);
         \WP_CLI::add_command('aiforge-dev vision-picker', VisionPickerCommand::class);
