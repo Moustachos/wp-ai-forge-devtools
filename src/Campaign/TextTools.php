@@ -49,6 +49,15 @@ final class TextTools
     }
 
     /**
+     * A crude stem: the folded word cut to five characters, so that a verb
+     * meets its noun and a singular its plural ("estimer", "estimation").
+     */
+    public static function stem(string $word): string
+    {
+        return mb_substr(self::fold($word), 0, 5, 'UTF-8');
+    }
+
+    /**
      * @param string[] $words
      * @param string[] $reference
      */

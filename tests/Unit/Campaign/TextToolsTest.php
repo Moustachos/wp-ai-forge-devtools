@@ -25,6 +25,25 @@ class TextToolsTest extends TestCase
         $this->assertSame(['bois', 'massif'], TextTools::contentWords('Bois massif, bois massif'));
     }
 
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function stemCases(): array
+    {
+        return [
+            'long word truncated' => ['dégustations', 'degus'],
+            'verb and noun share a stem' => ['Estimer', 'estim'],
+            'five letters stay whole' => ['devis', 'devis'],
+            'short word stays whole' => ['parc', 'parc'],
+        ];
+    }
+
+    #[DataProvider('stemCases')]
+    public function testStemIsTheFoldedFiveLetterPrefix(string $word, string $expected): void
+    {
+        $this->assertSame($expected, TextTools::stem($word));
+    }
+
     public function testOverlapIsTheShareOfWordsFound(): void
     {
         $this->assertSame(0.5, TextTools::overlap(['bilan', 'offert'], ['bilan', 'initial']));

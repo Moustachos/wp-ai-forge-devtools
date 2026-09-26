@@ -72,6 +72,18 @@ class TrapCheckerTestimonialTest extends TestCase
         $this->assertStringContainsString('who is quoted nowhere', implode("\n", $result['testimonial_grounding']['findings']));
     }
 
+    public function testSourceProseCreditedToTheBusinessItselfIsRepurposed(): void
+    {
+        $template = '<p class="is-style-testimonial">"x"</p>';
+        $markdown = "# Atelier Brun\n\nNous fabriquons chaque meuble à la main, dans le chêne massif de la région.\n";
+        $output = '<p class="is-style-testimonial">« Nous fabriquons chaque meuble à la main, dans le chêne massif. »</p><p><strong>L\'atelier</strong></p>';
+
+        $result = (new TrapChecker())->check(ManifestEntry::fromArray(['id' => 'x']), $markdown, $template, $output);
+
+        $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status'], implode("\n", $result['testimonial_grounding']['findings']));
+        $this->assertSame(TrapChecker::FAIL, $result['testimonial_repurposed']['status']);
+    }
+
     public function testSourceProseWithoutAttributionIsRepurposed(): void
     {
         $template = '<p class="is-style-testimonial">"x"</p>';

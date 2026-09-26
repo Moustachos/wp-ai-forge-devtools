@@ -75,7 +75,7 @@ final class TrapChecker
         }
 
         if ($templateDoc->hasButton()) {
-            $results['cta_grounding'] = $this->ctaGrounding($entry, $outputDoc);
+            $results['cta_grounding'] = $this->ctaGrounding($entry, $source, $outputDoc);
         }
 
         $results['orphan_headings'] = $this->orphanHeadings($source, $outputDoc);
@@ -101,6 +101,7 @@ final class TrapChecker
             }
         }
 
+        $sourceWords = array_flip(TextTools::contentWords($source->title() . ' ' . $source->plainText(), 3));
         $invented = [];
         $repurposed = [];
 
@@ -120,7 +121,11 @@ final class TrapChecker
 
             if ($best < $this->settings->quoteMatch) {
                 $invented[] = "{$label}: matches no source sentence";
-            } elseif ($testimonial['attribution'] !== null && !$this->isKnownAttribution($entry, $testimonial['attribution'])) {
+            } elseif (
+                $testimonial['attribution'] !== null
+                && !$this->isKnownAttribution($entry, $testimonial['attribution'])
+                && !self::namedInSource($testimonial['attribution'], $sourceWords)
+            ) {
                 $invented[] = "{$label}: source words credited to «{$testimonial['attribution']}», who is quoted nowhere";
             } else {
                 $repurposed[] = "{$label}: source prose styled as a testimonial";
@@ -157,6 +162,18 @@ final class TrapChecker
         }
 
         return false;
+    }
+
+    /**
+     * A page crediting its own prose to itself ("L'atelier") repurposes, it does not invent.
+     *
+     * @param array<string, int> $sourceWords
+     */
+    private static function namedInSource(string $attribution, array $sourceWords): bool
+    {
+        $words = TextTools::contentWords($attribution, 3);
+
+        return $words !== [] && array_diff_key(array_flip($words), $sourceWords) === [];
     }
 
     private static function attributionMatches(string $given, string $expected): bool
@@ -260,14 +277,15 @@ final class TrapChecker
     private function cardCount(array $items, GenerationDocument $output): array
     {
         $itemWords = array_map(static fn (string $item): array => TextTools::contentWords($item), $items);
+        $grids = array_values($output->cardGrids());
         $best = null;
         $bestHits = 0;
 
-        foreach ($output->cardGrids() as $cards) {
+        foreach ($grids as $cards) {
             $hits = 0;
 
             foreach ($cards as $card) {
-                if ($this->matchesAny(TextTools::contentWords($card), $itemWords)) {
+                if ($this->cardMatchesAnItem(TextTools::contentWords($card), $itemWords)) {
                     $hits++;
                 }
             }
@@ -276,6 +294,15 @@ final class TrapChecker
                 $best = $cards;
                 $bestHits = $hits;
             }
+        }
+
+        if ($best === null && \count($grids) === 1 && \count($grids[0]) > \count($items)) {
+            return self::outcome([\sprintf(
+                '%d cards for %d items, none matching an item: %s',
+                \count($grids[0]),
+                \count($items),
+                implode(' | ', $grids[0])
+            )]);
         }
 
         if ($best === null || \count($best) <= \count($items)) {
@@ -288,14 +315,14 @@ final class TrapChecker
     /**
      * @return array{status: string, findings: string[]}
      */
-    private function ctaGrounding(ManifestEntry $entry, GenerationDocument $output): array
+    private function ctaGrounding(ManifestEntry $entry, MarkdownDocument $source, GenerationDocument $output): array
     {
         $generic = array_map(static fn (string $cta): string => implode(' ', TextTools::words($cta)), $this->settings->genericCta);
         $allowed = [];
 
-        foreach (array_merge($entry->offers, $this->settings->ctaVocabulary) as $phrase) {
+        foreach (array_merge($entry->offers, $this->settings->ctaVocabulary, [(string) $source->title()]) as $phrase) {
             foreach (TextTools::contentWords($phrase) as $word) {
-                $allowed[$word] = true;
+                $allowed[TextTools::stem($word)] = true;
             }
         }
 
@@ -310,7 +337,7 @@ final class TrapChecker
 
             $stray = array_values(array_filter(
                 TextTools::contentWords($label),
-                static fn (string $word): bool => !isset($allowed[$word])
+                static fn (string $word): bool => !isset($allowed[TextTools::stem($word)])
             ));
 
             if ($stray !== []) {
@@ -390,6 +417,24 @@ final class TrapChecker
     {
         foreach ($references as $reference) {
             if (TextTools::overlap($words, $reference) >= $this->settings->orphanOverlap) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Either direction: a card may add words to its item ("Gestion de votre parc"
+     * for "Infogérance du parc") as well as drop some.
+     *
+     * @param string[] $card
+     * @param array<int, string[]> $items
+     */
+    private function cardMatchesAnItem(array $card, array $items): bool
+    {
+        foreach ($items as $item) {
+            if (max(TextTools::overlap($card, $item), TextTools::overlap($item, $card)) >= $this->settings->orphanOverlap) {
                 return true;
             }
         }
