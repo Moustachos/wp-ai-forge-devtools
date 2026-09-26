@@ -413,7 +413,7 @@ final class TrapChecker
         }
 
         $navigation = [];
-        $headingStems = [];
+        $landmarkStems = [];
 
         foreach ($this->settings->ctaNavigation as $phrase) {
             foreach (TextTools::words($phrase) as $word) {
@@ -421,9 +421,11 @@ final class TrapChecker
             }
         }
 
-        foreach ($source->headings() as $heading) {
-            foreach (TextTools::contentWords($heading['text']) as $word) {
-                $headingStems[TextTools::stem($word)] = true;
+        $landmarks = array_merge(array_column($source->headings(), 'text'), $source->linkTexts());
+
+        foreach ($landmarks as $landmark) {
+            foreach (TextTools::contentWords($landmark) as $word) {
+                $landmarkStems[TextTools::stem($word)] = true;
             }
         }
 
@@ -444,11 +446,12 @@ final class TrapChecker
                     && !(ctype_digit($word) && $entry->isFigure($word))
             ));
 
-            // A way around the page ("Voir la boutique", "Nos programmes") names
-            // what the page's headings name; a request verb never takes this path.
+            // A way around the page ("Voir la boutique", "Nos revendeurs") names
+            // what the source's headings and links name; a request verb never
+            // takes this path.
             $navigates = array_filter(
                 $content,
-                static fn (string $word): bool => !isset($navigation[$word]) && !isset($headingStems[TextTools::stem($word)])
+                static fn (string $word): bool => !isset($navigation[$word]) && !isset($landmarkStems[TextTools::stem($word)])
             ) === [];
 
             if ($stray !== [] && !$navigates) {

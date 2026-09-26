@@ -124,6 +124,16 @@ final class MarkdownDocument
         return $m[1];
     }
 
+    /**
+     * @return string[]
+     */
+    public function linkTexts(): array
+    {
+        preg_match_all('/(?<!!)\[([^\]]*)\]\(\s*[^)\s]+(?:\s+"[^"]*")?\s*\)/u', implode("\n", $this->lines), $m);
+
+        return $m[1];
+    }
+
     public function plainText(): string
     {
         return self::toPlain(implode("\n", $this->lines));

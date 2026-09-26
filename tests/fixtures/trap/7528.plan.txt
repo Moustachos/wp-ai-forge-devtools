@@ -1,0 +1,23 @@
+ANALYSIS
+domain: wine producer / agriculture
+tone: professional expert
+visual_density: balanced
+
+COMPOSITION
+The page maps 7 markdown sections to the 7 available template slots, creating an exact fit with no overflow or missing sections. We utilize specialized slots like the hero, features, and content-image layouts to maintain a clean editorial flow. The visual rhythm moves smoothly from dark intro to neutral features, light content, dark banner, light testimonial/content, and a final dark call-to-action.
+
+MAPPING
+[intro] → [0] HERO
+Une vigne, une famille, une obsession → [3] CONTENT-IMAGE
+L'histoire du domaine → [3] CONTENT-IMAGE (mirror)
+Nos vins → [2] FEATURES
+Notre façon de travailler la vigne → [4] BANNER
+Au chai → [3] CONTENT-IMAGE
+Vente et visites → [6] CTA
+
+NOTES
+- Ensure the features section for "Nos vins" cleanly splits the 3 sub-sections into the 3 available H3 slots.
+- Use the banner slot effectively for the viticulture section to break up text-heavy blocks.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":3,"label":"Une vigne, une famille, une obsession"},{"slot_id":3,"label":"L'histoire du domaine"},{"slot_id":2,"label":"Nos vins"},{"slot_id":4,"label":"Notre façon de travailler la vigne"},{"slot_id":3,"label":"Au chai"},{"slot_id":6,"label":"Vente et visites"}]}

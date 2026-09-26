@@ -73,6 +73,11 @@ MD;
         $this->assertSame(['https://example.com/contact'], (new MarkdownDocument(self::PAGE))->links());
     }
 
+    public function testLinkTexts(): void
+    {
+        $this->assertSame(['Nous écrire'], (new MarkdownDocument(self::PAGE))->linkTexts());
+    }
+
     public function testPlainTextDropsSyntaxAndUrls(): void
     {
         $plain = (new MarkdownDocument(self::PAGE))->plainText();

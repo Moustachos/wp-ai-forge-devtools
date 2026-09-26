@@ -152,7 +152,7 @@ class TrapCheckerStructureTest extends TestCase
             'navigating to how the business works' => ['Voir notre méthode', [], 'Atelier Brun', TrapChecker::PASS],
             'coming to the shop' => ['Nous rendre visite', [], 'Atelier Brun', TrapChecker::PASS],
             'finding the shop' => ['Nous trouver', [], 'Atelier Brun', TrapChecker::PASS],
-            'requesting what a heading names' => ['Demander une restauration', [], 'Atelier Brun', TrapChecker::FAIL],
+            'requesting what a heading names' =>['Demander une restauration', [], 'Atelier Brun', TrapChecker::FAIL],
             'navigating to a resource the page lacks' => ['Découvrir le guide', [], 'Atelier Brun', TrapChecker::FAIL],
             'navigating to an invented visit' => ['Voir les visites', [], 'Atelier Brun', TrapChecker::FAIL],
         ];
@@ -245,6 +245,7 @@ class TrapCheckerStructureTest extends TestCase
         return [
             '«Voir la méthode» on 7477' => ['7477', 'hard-11-infogerance'],
             '«Call 555-0163» on 7400' => ['7400', 'hard-10-vet-clinic'],
+            "«Nos revendeurs», the source's own link, on 7528" => ['7528', 'hard-12-domaine-viticole'],
         ];
     }
 
@@ -261,6 +262,29 @@ class TrapCheckerStructureTest extends TestCase
         );
 
         $this->assertSame(TrapChecker::PASS, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function linkTextCtaCases(): array
+    {
+        return [
+            'navigating to what a source link names' => ['Voir nos revendeurs →', TrapChecker::PASS],
+            'requesting what a source link names' => ['Demander un revendeur', TrapChecker::FAIL],
+        ];
+    }
+
+    #[DataProvider('linkTextCtaCases')]
+    public function testCtaNavigatesToWhatTheSourceLinksName(string $label, string $expected): void
+    {
+        $settings = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard')->settings;
+        $source = "# Domaine Brun\n\n## Vente\n\nNos vins se trouvent chez des cavistes : [Nos revendeurs](https://example.com/revendeurs).\n";
+        $output = "<div class=\"wp-block-button\"><a class=\"wp-block-button__link\">{$label}</a></div>";
+
+        $result = (new TrapChecker($settings))->check($this->entry(), $source, self::GRID_TEMPLATE, $output);
+
+        $this->assertSame($expected, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
     }
 
     public function testCtaNeedsAButtonInTheTemplate(): void
