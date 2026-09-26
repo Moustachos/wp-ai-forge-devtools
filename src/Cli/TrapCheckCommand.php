@@ -56,6 +56,10 @@ final class TrapCheckCommand
             return;
         }
 
+        if ($manifest->errors() !== []) {
+            WP_CLI::error("Corpus {$manifest->name} is invalid:\n  " . implode("\n  ", $manifest->errors()));
+        }
+
         $then = (array) ($report['provenance']['files'] ?? []);
         $now = $manifest->hashes();
         $changed = array_keys(array_diff_assoc($now, $then) + array_diff_assoc($then, $now));

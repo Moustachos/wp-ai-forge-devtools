@@ -11,7 +11,6 @@ use AIForge\Campaign\ComboSpec;
 use AIForge\Campaign\CorpusManifest;
 use AIForge\Campaign\ManifestEntry;
 use AIForge\Campaign\PluginCommit;
-use AIForge\Campaign\RunResult;
 use AIForge\Campaign\TrapEvaluation;
 use InvalidArgumentException;
 use RuntimeException;
@@ -31,8 +30,9 @@ final class QgCampaignCommand
      *
      * ## OPTIONS
      *
-     * --combos=<combos>
-     * : Comma-separated list of provider:preset:template-slug.
+     * [--combos=<combos>]
+     * : Comma-separated list of provider:preset:template-slug. Required unless
+     *   --collect is set.
      *
      * [--source-batch=<id>]
      * : Batch task to pull markdown snapshots from. Defaults to the most recent
@@ -141,7 +141,7 @@ final class QgCampaignCommand
             WP_CLI::log("Root ids are saved to {$rootsPath} as they launch.");
         }
 
-        $onLaunch = $this->makeOnLaunch($rootsPath, $label, $provenance);
+        $onLaunch = $this->makeOnLaunch($rootsPath, $label, $sourceBatch, $files, $provenance);
         $rootIdsByCombo = $this->launchAndWait($runner, $combos, $create, $timeout, $onLaunch);
 
         $this->finish($runner, $assoc, $stamp, $label, $sourceBatch, $files, $manifest, $provenance, $rootIdsByCombo);
@@ -160,18 +160,33 @@ final class QgCampaignCommand
             return;
         }
 
+        $this->warnIgnoredCollectFlags($assoc);
+
         $label = (string) ($data['label'] ?? 'campaign');
         $provenance = \is_array($data['provenance'] ?? null) ? $data['provenance'] : [];
         $corpusName = $data['corpus'] ?? ($provenance['corpus'] ?? null);
         $manifest = null;
 
-        try {
-            if ($corpusName !== null) {
+        if ($corpusName !== null) {
+            try {
                 $manifest = CorpusManifest::fromName(AIFORGE_DEV_PATH . 'bench/ci-corpus', (string) $corpusName);
+            } catch (Throwable $e) {
+                WP_CLI::error($e->getMessage());
+                return;
             }
-        } catch (Throwable $e) {
-            WP_CLI::error($e->getMessage());
-            return;
+
+            if ($manifest->errors() !== []) {
+                WP_CLI::error("Corpus {$manifest->name} is invalid:\n  " . implode("\n  ", $manifest->errors()));
+            }
+        }
+
+        if (\array_key_exists('files', $data) && \array_key_exists('source_batch', $data)) {
+            $files = (int) $data['files'];
+            $sourceBatch = $data['source_batch'] !== null ? (int) $data['source_batch'] : null;
+        } else {
+            WP_CLI::warning("'{$path}' predates file-count tracking; using files=0 and no source batch in the report.");
+            $files = 0;
+            $sourceBatch = null;
         }
 
         $rootIdsByCombo = [];
@@ -195,7 +210,27 @@ final class QgCampaignCommand
         }, $rootIdsByCombo);
 
         $stamp = gmdate('Ymd-His');
-        $this->finish($runner, $assoc, $stamp, $label, null, null, $manifest, $provenance, $rootIdsByCombo);
+        $this->finish($runner, $assoc, $stamp, $label, $sourceBatch, $files, $manifest, $provenance, $rootIdsByCombo);
+    }
+
+    /**
+     * @param array<string, string> $assoc
+     */
+    private function warnIgnoredCollectFlags(array $assoc): void
+    {
+        $ignored = array_values(array_intersect(
+            ['corpus', 'source-batch', 'combos', 'files', 'model', 'label'],
+            array_keys($assoc)
+        ));
+
+        if ($ignored === []) {
+            return;
+        }
+
+        WP_CLI::warning(\sprintf(
+            '--collect ignores --%s: the roots file already fixes the label and launch setup.',
+            implode(', --', $ignored)
+        ));
     }
 
     /**
@@ -287,16 +322,27 @@ final class QgCampaignCommand
      * @param array<string, mixed> $provenance
      * @return callable(array<string, int[]>): void
      */
-    private function makeOnLaunch(?string $rootsPath, string $label, array $provenance): callable
+    private function makeOnLaunch(?string $rootsPath, string $label, ?int $sourceBatch, int $files, array $provenance): callable
     {
-        return static function (array $roots) use ($rootsPath, $label, $provenance): void {
-            if ($rootsPath !== null) {
-                file_put_contents($rootsPath, wp_json_encode([
-                    'label' => $label,
-                    'corpus' => $provenance['corpus'] ?? null,
-                    'provenance' => $provenance,
-                    'root_ids_by_combo' => $roots,
-                ], JSON_PRETTY_PRINT));
+        $warned = false;
+
+        return static function (array $roots) use ($rootsPath, $label, $sourceBatch, $files, $provenance, &$warned): void {
+            if ($rootsPath === null) {
+                return;
+            }
+
+            $written = file_put_contents($rootsPath, wp_json_encode([
+                'label' => $label,
+                'corpus' => $provenance['corpus'] ?? null,
+                'source_batch' => $sourceBatch,
+                'files' => $files,
+                'provenance' => $provenance,
+                'root_ids_by_combo' => $roots,
+            ], JSON_PRETTY_PRINT));
+
+            if ($written === false && !$warned) {
+                WP_CLI::warning("Could not write {$rootsPath}.");
+                $warned = true;
             }
         };
     }
@@ -385,7 +431,7 @@ final class QgCampaignCommand
         string $stamp,
         string $label,
         ?int $sourceBatch,
-        ?int $files,
+        int $files,
         ?CorpusManifest $manifest,
         array $provenance,
         array $rootIdsByCombo
@@ -397,7 +443,7 @@ final class QgCampaignCommand
             static fn (int $taskId): ?array => $runner->loadRunArtifacts($taskId)
         );
 
-        $report = new CampaignReport($label, $sourceBatch, $files ?? $this->filesPerCombo($runs), $runs, $manifest?->name, $provenance, $traps);
+        $report = new CampaignReport($label, $sourceBatch, $files, $runs, $manifest?->name, $provenance, $traps);
 
         WP_CLI::log('');
         WP_CLI::log($report->toMarkdown());
@@ -405,23 +451,6 @@ final class QgCampaignCommand
         $this->maybeCompare($assoc, $report);
         $this->writeReport($label, $stamp, $report);
         $this->printAuditHint($report);
-    }
-
-    /**
-     * Best-effort file count when it was not known up front, as with
-     * --collect: the number of llm_generate runs sharing one root.
-     *
-     * @param RunResult[] $runs
-     */
-    private function filesPerCombo(array $runs): int
-    {
-        if ($runs === []) {
-            return 0;
-        }
-
-        $firstRoot = $runs[0]->rootId;
-
-        return \count(array_filter($runs, static fn (RunResult $r): bool => $r->rootId === $firstRoot));
     }
 
     /**
