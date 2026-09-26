@@ -1,0 +1,25 @@
+ANALYSIS
+domain: automotive dealership / used car sales
+tone: trustworthy, professional, customer-focused
+visual_density: balanced
+
+COMPOSITION
+The content contains an intro, 5 thematic sections (one dense section split into two logical parts), and an FAQ block, matching the 7 template slots. We map the dense multi-brand/agent section across features and content-image, use the banner for the transition/trade-in advice, and reuse slots cleanly while preserving dark/neutral/light visual rhythm. Specialized slots like stats and testimonial without direct textual matches are adapted to structured editorial presentations (reprise process and customer assurance).
+
+MAPPING
+[intro] → [0] hero
+Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2] → [2] features
+Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2] → [3] content-image
+Votre besoin avant tout : un conseil d'achat vraiment personnalisé → [1] stats (overflow)
+La reprise de votre ancien véhicule : simple, rapide et honnête → [4] banner
+Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule → [5] testimonial
+Vous hésitez entre neuf et occasion ? → [3] content-image (reuse) (mirror)
+Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes → [6] cta
+
+NOTES
+- Split "Un stock VO..." before the H3s into features ([2]) and content-image ([3]) to highlight the multi-brand vs official agent distinction.
+- Repurposed slot [1] (stats neutral layout) for the structured customer-first advice section, and [5] for trust/transparency.
+- FAQ is consolidated in the final dark section [6].
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":2,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2]"},{"slot_id":3,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2]"},{"slot_id":1,"label":"Votre besoin avant tout : un conseil d'achat vraiment personnalisé"},{"slot_id":4,"label":"La reprise de votre ancien véhicule : simple, rapide et honnête"},{"slot_id":5,"label":"Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule"},{"slot_id":3,"label":"Vous hésitez entre neuf et occasion ?"},{"slot_id":6,"label":"Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes"}]}

@@ -1,0 +1,26 @@
+ANALYSIS
+domain: permaculture and square-foot gardening
+tone: conversational friendly, instructional
+visual_density: balanced
+
+COMPOSITION
+The markdown has 9 distinct sections against a 6-slot blueprint, requiring careful reuse of generic and visual sections without back-to-back index collisions. Section 2 ("Pourquoi choisir les carrés pour débuter ?") contains specific quantitative metrics (dimensions, duration, family output) well-suited for the stats slot. We will cycle through content-image (with mirroring) and gallery sections to preserve visual diversity and maintain the rhythmic alternation of dark, neutral, and light containers.
+
+MAPPING
+[intro] → [0] hero
+Comprendre la philosophie de la permaculture → [1] content
+Pourquoi choisir les carrés pour débuter ? → [2] stats
+Construire ses premiers carrés → [3] content-image
+Préparer un sol vivant et fertile → [4] gallery
+Planifier les associations et les rotations → [3] content-image (reuse) (mirror)
+Gérer l'eau intelligemment → [1] content (reuse)
+Gérer les ravageurs naturellement → [4] gallery (reuse)
+Vos premiers légumes faciles → [5] cta
+
+NOTES
+- "Pourquoi choisir les carrés pour débuter ?" extracts key figures (1,20m x 1,20m, 16 cases, 15 min/jour, 4 personnes) into the stats layout.
+- Alternated between [3] content-image, [4] gallery, and [1] content to avoid repeating layouts or consecutive index usage.
+- The final section "Vos premiers légumes faciles" smoothly bridges encouraging advice into the closing CTA container.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Comprendre la philosophie de la permaculture"},{"slot_id":2,"label":"Pourquoi choisir les carrés pour débuter ?"},{"slot_id":3,"label":"Construire ses premiers carrés"},{"slot_id":4,"label":"Préparer un sol vivant et fertile"},{"slot_id":3,"label":"Planifier les associations et les rotations"},{"slot_id":1,"label":"Gérer l'eau intelligemment"},{"slot_id":4,"label":"Gérer les ravageurs naturellement"},{"slot_id":5,"label":"Vos premiers légumes faciles"}]}

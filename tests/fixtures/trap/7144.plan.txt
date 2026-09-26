@@ -1,0 +1,25 @@
+ANALYSIS
+domain: automotive dealership and repair services
+tone: professional expert, trustworthy, reassuring
+visual_density: balanced
+
+COMPOSITION
+The content has 7 sections (including intro and FAQ), matching closely with the 7-slot blueprint. The dense section on the VO stock splits cleanly before the H3s into a features breakdown, allowing optimal use of the 3-column feature section. The banner slot hosts the quick transitional comparison ("neuf et occasion"), while the final CTA elegantly encapsulates the FAQ context or prompts garage contact.
+
+MAPPING
+[intro] → [0] hero
+Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2] → [1] stats (overflow)
+Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2] → [2] features
+Votre besoin avant tout : un conseil d'achat vraiment personnalisé → [3] content-image
+La reprise de votre ancien véhicule : simple, rapide et honnête → [3] content-image (reuse) (mirror)
+Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule → [5] testimonial
+Vous hésitez entre neuf et occasion ? → [4] banner
+Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes → [6] cta
+
+NOTES
+- Part 1 of the dense VO stock section leverages [1] stats (overflow) to highlight the "30+ years" experience and garage background before leading into the stock types.
+- The two sub-headings in Part 2 map directly into the structured 3-column features block [2].
+- Repurposed [5] testimonial slot into an editorial spotlight for "Fiabilité et transparence" to respect the light background rhythm without requiring a literal quote.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2]"},{"slot_id":2,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2]"},{"slot_id":3,"label":"Votre besoin avant tout : un conseil d'achat vraiment personnalisé"},{"slot_id":3,"label":"La reprise de votre ancien véhicule : simple, rapide et honnête"},{"slot_id":5,"label":"Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule"},{"slot_id":4,"label":"Vous hésitez entre neuf et occasion ?"},{"slot_id":6,"label":"Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes"}]}

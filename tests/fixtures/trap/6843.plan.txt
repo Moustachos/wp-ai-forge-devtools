@@ -1,0 +1,26 @@
+ANALYSIS
+domain: gardening / permaculture
+tone: conversational friendly
+visual_density: balanced
+
+COMPOSITION
+The markdown contains 9 sections (intro + 8 H2s) needing integration into a 7-section template blueprint. The 3 ethics of permaculture fit the 3-column features slot, and key square-foot gardening dimensions/figures fit the stats slot. We reuse content-image with alternating mirrored layouts alongside the banner and cta to maintain dynamic visual rhythm across all gardening advice.
+
+MAPPING
+[intro] → [0] hero
+Comprendre la philosophie de la permaculture → [2] features
+Pourquoi choisir les carrés pour débuter ? → [1] stats (overflow)
+Construire ses premiers carrés → [3] content-image
+Préparer un sol vivant et fertile → [4] banner
+Planifier les associations et les rotations → [3] content-image (reuse) (mirror)
+Gérer l'eau intelligemment → [3] content-image (reuse)
+Gérer les ravageurs naturellement → [3] content-image (reuse) (mirror)
+Vos premiers légumes faciles → [6] cta
+
+NOTES
+- Testimonial slot [5] omitted due to lack of attributed quote content in the markdown.
+- Stats slot [1] utilized with (overflow) to capture the 1,20m x 1,20m dimension figures and rotation logic while preserving narrative flow.
+- Repurposed section [3] content-image multiple times with alternating `(mirror)` to ensure balanced visual flow across practical guide steps.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":2,"label":"Comprendre la philosophie de la permaculture"},{"slot_id":1,"label":"Pourquoi choisir les carrés pour débuter ?"},{"slot_id":3,"label":"Construire ses premiers carrés"},{"slot_id":4,"label":"Préparer un sol vivant et fertile"},{"slot_id":3,"label":"Planifier les associations et les rotations"},{"slot_id":3,"label":"Gérer l'eau intelligemment"},{"slot_id":3,"label":"Gérer les ravageurs naturellement"},{"slot_id":6,"label":"Vos premiers légumes faciles"}]}

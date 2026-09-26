@@ -1,0 +1,26 @@
+ANALYSIS
+domain: gardening & sustainable living
+tone: conversational friendly, instructional
+visual_density: balanced
+
+COMPOSITION
+The markdown contains 9 sections (intro + 8 H2s) whereas the blueprint has 7 slots, requiring section reuse and omission of non-applicable slots (testimonial is omitted as no quotes exist). The visual rhythm flows from dark Hero through neutral and light informational blocks, alternating between content-image (with mirroring) and structured banner/features to keep reader engagement high.
+
+MAPPING
+[intro] → [0] hero
+Comprendre la philosophie de la permaculture → [2] features
+Pourquoi choisir les carrés pour débuter ? → [1] stats (overflow)
+Construire ses premiers carrés → [3] content-image
+Préparer un sol vivant et fertile → [4] banner
+Planifier les associations et les rotations → [3] content-image (reuse) (mirror)
+Gérer l'eau intelligemment → [1] stats (reuse) (overflow)
+Gérer les ravageurs naturellement → [3] content-image (reuse)
+Vos premiers légumes faciles → [6] cta
+
+NOTES
+- [5] testimonial omitted due to lack of direct quotes.
+- [1] stats is leveraged for sections with clear quantitative and practical metrics (dimensions, volumes, liters/cost).
+- [3] content-image is reused with mirrored column alignment to break monotony.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":2,"label":"Comprendre la philosophie de la permaculture"},{"slot_id":1,"label":"Pourquoi choisir les carrés pour débuter ?"},{"slot_id":3,"label":"Construire ses premiers carrés"},{"slot_id":4,"label":"Préparer un sol vivant et fertile"},{"slot_id":3,"label":"Planifier les associations et les rotations"},{"slot_id":1,"label":"Gérer l'eau intelligemment"},{"slot_id":3,"label":"Gérer les ravageurs naturellement"},{"slot_id":6,"label":"Vos premiers légumes faciles"}]}

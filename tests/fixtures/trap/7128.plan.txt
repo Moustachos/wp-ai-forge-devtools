@@ -1,0 +1,24 @@
+ANALYSIS
+domain: viticulture / natural wine estate
+tone: authentic artisan, confident, grounded
+visual_density: balanced
+
+COMPOSITION
+The template offers 7 slots covering hero, features, stats, content-image, and CTA layouts across a balanced dark/neutral/light progression. The markdown content maps naturally across these slots: key domain metrics fit the stats blocks, the 3-item wine overview maps cleanly to the 3-column stats/cards layout, and the viticulture principles fit the features list structure. The closing commercial and visiting details lead seamlessly into the final CTA section.
+
+MAPPING
+[intro] → [0] hero
+Une vigne, une famille, une obsession → [1] features
+L'histoire du domaine → [2] stats
+Nos vins → [3] content-image
+Notre façon de travailler la vigne → [4] stats
+Vente et visites → [5] content-image
+[cta] → [6] cta
+
+NOTES
+- Map key domain figures (11 hectares, 35 000 bottles, 2008/2017 certifications) into the stats styling where appropriate.
+- Section [3] handles the three wine categories (blancs, rouges, rosés) alongside the media container.
+- Section [5] uses the media-right layout for visit information, naturally driving toward the final booking CTA in [6].
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Une vigne, une famille, une obsession"},{"slot_id":2,"label":"L'histoire du domaine"},{"slot_id":3,"label":"Nos vins"},{"slot_id":4,"label":"Notre façon de travailler la vigne"},{"slot_id":5,"label":"Vente et visites"},{"slot_id":6,"label":"[cta]"}]}

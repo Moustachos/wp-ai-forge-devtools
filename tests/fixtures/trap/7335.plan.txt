@@ -1,0 +1,25 @@
+ANALYSIS
+domain: communication and branding agency
+tone: professional expert
+visual_density: balanced
+
+COMPOSITION
+The page follows a narrative arc from philosophy to history, then services and proof. I will use the [4] GALLERY section to showcase the "Missions récentes" to break the text flow, and split the dense "Ce que nous faisons" section to maintain visual rhythm. The layout alternates between dark and neutral/light sections to preserve the template's intended contrast.
+
+MAPPING
+[intro] → [0] HERO
+Ce que nous faisons, et pourquoi ça change tout → [1] CONTENT
+Notre histoire → [2] STATS
+Ce que nous faisons [part 1/2] → [3] CONTENT-IMAGE
+Ce que nous faisons [part 2/2] → [4] GALLERY
+Notre façon de travailler → [3] CONTENT-IMAGE (reuse) (mirror)
+Quelques missions récentes → [4] GALLERY (reuse)
+Travailler avec nous → [5] CTA
+
+NOTES
+- Section "Notre histoire" is mapped to STATS to highlight the founders' distinct backgrounds and the "10 years / 7 people" data points as key figures.
+- "Ce que nous faisons" is split: Part 1 (Strategy) uses the standard content-image, while Part 2 (Editorial/Corporate) uses the Gallery layout to provide visual relief.
+- "Quelques missions récentes" uses the Gallery [4] to present the portfolio items in a structured, visual-rich grid.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Ce que nous faisons, et pourquoi ça change tout"},{"slot_id":2,"label":"Notre histoire"},{"slot_id":3,"label":"Ce que nous faisons [part 1/2]"},{"slot_id":4,"label":"Ce que nous faisons [part 2/2]"},{"slot_id":3,"label":"Notre façon de travailler"},{"slot_id":4,"label":"Quelques missions récentes"},{"slot_id":5,"label":"Travailler avec nous"}]}

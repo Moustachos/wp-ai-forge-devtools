@@ -1,0 +1,25 @@
+ANALYSIS
+domain: automotive dealership and repair services
+tone: trustworthy, professional expert, client-oriented
+visual_density: balanced
+
+COMPOSITION
+The page contains an intro, 5 thematic sections, and an FAQ block. With 7 available template slots (Hero, Stats, Features, Content-Image, Banner, Testimonial, CTA), we map the intro to Hero, repurpose Stats for quantitative key facts (30+ years, multibrand inspection), use Features and Content-Image for core selling propositions, place the transition to new cars in Banner, and adapt Testimonial/CTA for credibility and the final FAQ/contact close. Splitting the dense multibrand VO section allows clean distribution across Stats and Features while maintaining structural and visual rhythm.
+
+MAPPING
+[intro] → [0] hero
+Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2] → [1] stats (overflow)
+Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2] → [2] features
+Votre besoin avant tout : un conseil d'achat vraiment personnalisé → [3] content-image
+La reprise de votre ancien véhicule : simple, rapide et honnête → [3] content-image (reuse) (mirror)
+Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule → [5] testimonial
+Vous hésitez entre neuf et occasion ? → [4] banner
+Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes → [6] cta
+
+NOTES
+- Split "Un stock VO..." before the H3s: part 1 highlights garage heritage and metrics in [1] stats (overflow), while the two H3s ("Renault et Dacia", "Toutes les autres marques") integrate seamlessly into [2] features columns.
+- Reused [3] content-image with `(mirror)` on the trade-in section to balance layout direction.
+- [5] testimonial is adapted into an editorial quality commitment/transparency spotlight before the CTA and FAQ.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 1/2]"},{"slot_id":2,"label":"Un stock VO toutes marques sélectionné par des mécaniciens [part 2/2]"},{"slot_id":3,"label":"Votre besoin avant tout : un conseil d'achat vraiment personnalisé"},{"slot_id":3,"label":"La reprise de votre ancien véhicule : simple, rapide et honnête"},{"slot_id":5,"label":"Fiabilité et transparence : ce qui se passe avant que vous voyiez le véhicule"},{"slot_id":4,"label":"Vous hésitez entre neuf et occasion ?"},{"slot_id":6,"label":"Questions fréquentes sur l'achat d'une voiture d'occasion à Antibes"}]}

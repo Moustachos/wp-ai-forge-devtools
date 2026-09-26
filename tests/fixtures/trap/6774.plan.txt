@@ -1,0 +1,26 @@
+ANALYSIS
+domain: gardening / permaculture
+tone: professional friendly
+visual_density: balanced
+
+COMPOSITION
+The 9 markdown sections map sequentially across the template's slots, making full use of dark, neutral, and light alternating rhythms. Quantitative dimensions and maintenance timing in "Pourquoi choisir les carrés pour débuter ?" map directly to the stats section, while structured items in "Construire ses premiers carrés" fit the features layout. Unused single-quote slots like testimonial are skipped, while generic content-image and banner sections are reused with column mirroring to prevent repetition.
+
+MAPPING
+[intro] → [0] HERO
+Comprendre la philosophie de la permaculture → [3] CONTENT-IMAGE
+Pourquoi choisir les carrés pour débuter ? → [1] STATS
+Construire ses premiers carrés → [2] FEATURES
+Préparer un sol vivant et fertile → [3] CONTENT-IMAGE (reuse, mirror)
+Planifier les associations et les rotations → [4] BANNER
+Gérer l'eau intelligemment → [3] CONTENT-IMAGE (reuse)
+Gérer les ravageurs naturally → [4] BANNER (reuse)
+Vos premiers légumes faciles → [6] CTA
+
+NOTES
+- Testimonial slot omitted as content lacks individual quotes.
+- Section 3 ("Pourquoi choisir les carrés") leverages STATS layout for key metrics (1.20m x 1.20m, 16 cases, 15 min/day, 4 persons).
+- Content-image alternating uses `(mirror)` to maintain visual variety across repeated light sections.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":3,"label":"Comprendre la philosophie de la permaculture"},{"slot_id":1,"label":"Pourquoi choisir les carrés pour débuter ?"},{"slot_id":2,"label":"Construire ses premiers carrés"},{"slot_id":3,"label":"Préparer un sol vivant et fertile"},{"slot_id":4,"label":"Planifier les associations et les rotations"},{"slot_id":3,"label":"Gérer l'eau intelligemment"},{"slot_id":4,"label":"Gérer les ravageurs naturellement"},{"slot_id":6,"label":"Vos premiers légumes faciles"}]}

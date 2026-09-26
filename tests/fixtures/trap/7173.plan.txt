@@ -1,0 +1,24 @@
+ANALYSIS
+domain: agence de communication
+tone: professional direct
+visual_density: balanced
+
+COMPOSITION
+The markdown contains 6 core sections plus the intro heading, mapping neatly onto the 7 available template slots. We utilize the specialized `features` slot for the three core service offerings and adapt the `stats` slots for narrative principles and case missions while keeping the narrative rhythm from dark hero through neutral/light bodies to the final CTA.
+
+MAPPING
+[intro] → [0] hero
+Ce que nous faisons, et pourquoi ça change tout → [1] features
+Notre histoire → [3] content-image
+Ce que nous faisons → [2] stats
+Notre façon de travailler → [4] stats
+Quelques missions récentes → [5] content-image
+Travailler avec nous → [6] cta
+
+NOTES
+- "Ce que nous faisons" (3 sub-sections) maps effectively to the equal-3 column stats/cards layout in slot [2].
+- "Quelques missions récentes" provides portfolio context for the media-right layout in slot [5].
+- Slot [6] cleanly accommodates the closing contact pitch and CTA button.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Ce que nous faisons, et pourquoi ça change tout"},{"slot_id":3,"label":"Notre histoire"},{"slot_id":2,"label":"Ce que nous faisons"},{"slot_id":4,"label":"Notre façon de travailler"},{"slot_id":5,"label":"Quelques missions récentes"},{"slot_id":6,"label":"Travailler avec nous"}]}

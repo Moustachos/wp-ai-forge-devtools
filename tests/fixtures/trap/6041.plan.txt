@@ -1,0 +1,26 @@
+ANALYSIS
+domain: consumer electronics / premium audio product
+tone: professional aspirational with conversational energy
+visual_density: balanced
+
+COMPOSITION
+The markdown has 8 logical sections (including intro) against 7 template slots, so one reuse is needed; the dense "Un son d'exception" section (268 words, 2 H3 groups) will be split across slots [1] and [2] to fill the two consecutive content-image slots naturally. Specialized slots are well-matched: [3] stats fits "Caractéristiques techniques" perfectly, [5] testimonial fits "Ce que disent les experts" exactly, and [6] hero closes with "FAQ" as a compact CTA-style ending. The remaining sections ("Connectivité avancée," "Application mobile," "Prix et disponibilité") distribute across the mid-page slots [4] and reused content-image, preserving the dark → dark → dark → neutral → light → neutral visual rhythm of the template.
+
+MAPPING
+[intro] → [0] hero
+Un son d'exception. Un confort absolu. [part 1/2] → [1] content-image
+Un son d'exception. Un confort absolu. [part 2/2] → [2] content-image
+Caractéristiques techniques → [3] stats
+Connectivité avancée → [4] hero
+Application mobile → [5] testimonial
+Ce que disent les experts → [5] testimonial (reuse)
+Prix et disponibilité → [6] hero
+FAQ → [6] hero (reuse)
+
+NOTES
+1. "Un son d'exception [part 1/2]" covers the intro paragraph + "Pourquoi 47 000 clients nous font confiance" H3 group (audio quality + ANC sections); "part 2/2" starts at the "Confort exceptionnel" H3 with its image and sub-sections — split falls cleanly on an H3 boundary.
+2. "Ce que disent les experts" is a natural fit for slot [5] testimonial (three attributed expert quotes); "Application mobile" should be routed to a content-image reuse before it — revise: Application mobile → [4] hero (reuse with list), Ce que disent les experts → [5] testimonial, Prix et disponibilité → [6] hero, FAQ condensed into [6] as a secondary content block.
+3. The stats slot [3] should render the specification table rows as stat-value/caption pairs (spec name as caption, value as stat-value); the "Autonomie record" H3 prose renders as overflow continuation text below the stats grid.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Un son d'exception. Un confort absolu. [part 1/2]"},{"slot_id":2,"label":"Un son d'exception. Un confort absolu. [part 2/2]"},{"slot_id":3,"label":"Caractéristiques techniques"},{"slot_id":4,"label":"Connectivité avancée"},{"slot_id":5,"label":"Application mobile"},{"slot_id":5,"label":"Ce que disent les experts"},{"slot_id":6,"label":"Prix et disponibilité"},{"slot_id":6,"label":"FAQ"}]}

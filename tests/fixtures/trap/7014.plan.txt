@@ -1,0 +1,23 @@
+ANALYSIS
+domain: agence de communication, stratégie de marque et conception éditoriale
+tone: professionnel, affirmé et stratégique
+visual_density: balanced
+
+COMPOSITION
+Les sept unités éditoriales correspondent aux sept sections du template, avec des slots réutilisés pour les sections génériques et les données des missions. La page alterne hero sombre, formats neutres, contenu-image clair et CTA sombre ; les services se prêtent aux features, tandis que les missions récentes fournissent des données réelles pour les stats. La section dense sur les services reste groupée pour préserver ses trois offres parallèles dans un seul bloc de features.
+
+MAPPING
+[intro] → [0] hero
+Ce que nous faisons, et pourquoi ça change tout → [3] content-image
+Notre histoire → [1] stats (overflow)
+Ce que nous faisons → [2] features
+Notre façon de travailler → [3] content-image (reuse)
+Quelques missions récentes → [1] stats (reuse)
+Travailler avec nous → [6] cta
+
+NOTES
+Pour « Notre histoire », afficher en stats « 2015 » (fondation), « 7 personnes » et « 10 ans » ; réserver le récit des fondateurs et leur parcours au bloc de continuation, sans répéter ces données.
+Pour « Quelques missions récentes », afficher les données des projets dans les stats : 15 000 exemplaires, 18 mois, 2 interviews et 2 400 collaborateurs. Omettre les slots testimonial et banner, faute de contenu correspondant.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":3,"label":"Ce que nous faisons, et pourquoi ça change tout"},{"slot_id":1,"label":"Notre histoire"},{"slot_id":2,"label":"Ce que nous faisons"},{"slot_id":3,"label":"Notre façon de travailler"},{"slot_id":1,"label":"Quelques missions récentes"},{"slot_id":6,"label":"Travailler avec nous"}]}

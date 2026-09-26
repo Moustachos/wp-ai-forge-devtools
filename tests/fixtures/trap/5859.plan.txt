@@ -1,0 +1,24 @@
+ANALYSIS
+domain: photographie de mariage (service professionnel)
+tone: professionnel, chaleureux, orienté storytelling
+visual_density: balanced
+
+COMPOSITION
+Le contenu comporte 7 sections H2, ce qui correspond exactement aux 7 slots du template : aucun overflow et pas de slot inutilisé. On exploite les sections spécialisées (features pour les “prestations”, stats pour “quelques chiffres”) et on garde le rythme dark → neutral → light → neutral → dark → neutral → dark tel que prévu. La section “Les prestations” est dense mais tient dans le slot FEATURES (structure H3 + liste), donc pas de split nécessaire.
+
+MAPPING
+Votre mariage dure un jour. Vos photos, toute une vie. → [0] hero
+Mon approche : documentaire et discrète → [3] content-image
+Les prestations → [1] features
+Ce qui est inclus dans chaque formule → [2] stats (overflow)
+Pour les couples qui cherchent quelque chose de précis → [4] stats (overflow)
+Quelques chiffres → [5] content-image
+Votre date est encore disponible ? → [6] cta
+
+NOTES
+- [0] HERO : utiliser le H1 du markdown comme titre principal, et reprendre 2 paragraphes max depuis “Votre mariage…” ; bouton = “Vérifier la disponibilité”.
+- [2] STATS (overflow) : transformer 3 éléments clés de la liste “inclus” en 3 stats/tuiles (titres courts), puis rendre le reste en texte continu sous la grille.
+- [4] STATS (overflow) : utiliser 2–3 “profil couple” en valeurs/accroches (style stat-value) + conserver le paragraphe de disqualification/qualification en continuation (peut être stylé “testimonial” sans attribution).
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"Votre mariage dure un jour. Vos photos, toute une vie."},{"slot_id":3,"label":"Mon approche : documentaire et discrète"},{"slot_id":1,"label":"Les prestations"},{"slot_id":2,"label":"Ce qui est inclus dans chaque formule"},{"slot_id":4,"label":"Pour les couples qui cherchent quelque chose de précis"},{"slot_id":5,"label":"Quelques chiffres"},{"slot_id":6,"label":"Votre date est encore disponible ?"}]}
