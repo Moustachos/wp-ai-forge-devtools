@@ -90,17 +90,7 @@ final class TrapChecker
      */
     private function testimonials(ManifestEntry $entry, MarkdownDocument $source, GenerationDocument $output): array
     {
-        $sentences = $source->sentences();
-        $candidates = [];
-
-        foreach ($sentences as $i => $sentence) {
-            $candidates[] = TextTools::contentWords($sentence);
-
-            if (isset($sentences[$i + 1])) {
-                $candidates[] = TextTools::contentWords($sentence . ' ' . $sentences[$i + 1]);
-            }
-        }
-
+        $sentences = array_map(static fn (string $s): array => TextTools::contentWords($s), $source->sentences());
         $titleWords = array_flip(TextTools::contentWords((string) $source->title(), 3));
         $invented = [];
         $repurposed = [];
@@ -113,13 +103,8 @@ final class TrapChecker
             }
 
             $label = '«' . mb_strimwidth($testimonial['quote'], 0, 60, '…') . '»';
-            $best = 0.0;
 
-            foreach ($candidates as $candidate) {
-                $best = max($best, TextTools::overlap($words, $candidate));
-            }
-
-            if ($best < $this->settings->quoteMatch) {
+            if (self::bestWindowOverlap($words, $sentences, self::sentenceCount($testimonial['quote']) + 1) < $this->settings->quoteMatch) {
                 $invented[] = "{$label}: matches no source sentence";
             } elseif (
                 $testimonial['attribution'] !== null
@@ -133,6 +118,36 @@ final class TrapChecker
         }
 
         return [self::outcome($invented), self::outcome($repurposed)];
+    }
+
+    /**
+     * Best overlap with a run of consecutive source sentences. The run grows
+     * with the quote, one sentence past its own count, so a paragraph lifted
+     * whole is matched while a short quote is still held to one or two sentences.
+     *
+     * @param string[] $words
+     * @param array<int, string[]> $sentences content words of each source sentence
+     */
+    private static function bestWindowOverlap(array $words, array $sentences, int $span): float
+    {
+        $best = 0.0;
+        $span = max(2, $span);
+
+        foreach (array_keys($sentences) as $i) {
+            $window = [];
+
+            for ($j = $i; $j < $i + $span && isset($sentences[$j]); $j++) {
+                $window = array_merge($window, $sentences[$j]);
+                $best = max($best, TextTools::overlap($words, $window));
+            }
+        }
+
+        return $best;
+    }
+
+    private static function sentenceCount(string $text): int
+    {
+        return \count(preg_split('/(?<=[.!?…])\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [$text]);
     }
 
     /**

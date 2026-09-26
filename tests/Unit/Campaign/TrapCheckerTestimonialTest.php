@@ -134,6 +134,25 @@ class TrapCheckerTestimonialTest extends TestCase
         $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status']);
     }
 
+    public function testAFourSentenceQuoteOfSourceProseIsRepurposedOnARealRun(): void
+    {
+        $result = $this->check(ManifestEntry::fromArray(['id' => '7472']), '7472');
+
+        $this->assertSame(TrapChecker::PASS, $result['testimonial_grounding']['status'], implode("\n", $result['testimonial_grounding']['findings']));
+        $this->assertStringContainsString('«Le métier de fromager', implode("\n", $result['testimonial_repurposed']['findings']));
+    }
+
+    public function testAnInventedQuoteSpanningSeveralSentencesStillFails(): void
+    {
+        $template = '<p class="is-style-testimonial">"x"</p>';
+        $markdown = "# T\n\nLe chantier a duré trois semaines. Tout était propre chaque soir. Les menuisiers sont venus à l'heure. La facture correspondait au devis.\n";
+        $output = '<p class="is-style-testimonial">« Une équipe formidable. Je recommande vivement ce professionnel à mes voisins. Merci encore pour votre gentillesse. »</p>';
+
+        $result = (new TrapChecker())->check(ManifestEntry::fromArray(['id' => 'x']), $markdown, $template, $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['testimonial_grounding']['status']);
+    }
+
     public function testAnAttributionWithARoleStillMatches(): void
     {
         $template = '<p class="is-style-testimonial">"x"</p>';

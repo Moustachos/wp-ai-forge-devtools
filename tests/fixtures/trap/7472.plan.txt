@@ -1,0 +1,25 @@
+ANALYSIS
+domain: artisan food retail (cheese shop / fromagerie)
+tone: warm professional, artisanal and sincere
+visual_density: visual-rich
+
+COMPOSITION
+This is a local artisan shop page with 7 H2 sections plus intro, mapping cleanly onto the 7-slot blueprint with one section requiring reuse. Since none of the content has verbatim quotes or measurable stats, the testimonial and stats slots are repurposed as generic content sections to preserve visual rhythm (dark/neutral/light flow) while keeping variety through content-image mirroring and a features slot for the "Ce que vous trouverez" section with its two parallel H3s. The banner slot suits the "Plateaux sur commande" call-to-order section nicely given its dark/CTA-style framing, and the final "Venir à la boutique" practical info closes naturally into the CTA slot.
+
+MAPPING
+[intro] → [0] hero
+Une fromagerie de quartier à Dijon → [1] stats (repurposed as intro content)
+Notre manière de travailler → [2] features (repurposed, no H3s but thematic fit skipped — see notes)
+Ce que vous trouverez à la boutique → [3] content-image
+Plateaux sur commande → [4] banner
+Une relation directe avec les produits → [5] testimonial (repurposed as content)
+Pour les repas du quotidien comme pour les occasions → [3] content-image (reuse, mirror)
+Venir à la boutique → [6] cta
+
+NOTES
+- Slots [1] stats and [5] testimonial have no numeric data or attributed quotes in the source, so they are repurposed as styled prose/continuation blocks rather than literal stat-value or quote renderings — generator should treat them as content containers using the slot's visual styling (neutral/light backgrounds) without forcing stat numbers or quote marks.
+- "Notre manière de travailler" lacks 3+ parallel H3 items, so slot [2] features should render it as a single flowing H2+paragraphs block using the 3-column visual frame loosely, or fall back to a simple centered content layout since forcing three cards would fragment the prose unnaturally.
+- Gallery slot does not exist in this blueprint, so visual variety is achieved via content-image mirroring and the banner/CTA dark accents instead.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Une fromagerie de quartier à Dijon"},{"slot_id":2,"label":"Notre manière de travailler"},{"slot_id":3,"label":"Ce que vous trouverez à la boutique"},{"slot_id":4,"label":"Plateaux sur commande"},{"slot_id":5,"label":"Une relation directe avec les produits"},{"slot_id":3,"label":"Pour les repas du quotidien comme pour les occasions"},{"slot_id":6,"label":"Venir à la boutique"}]}
