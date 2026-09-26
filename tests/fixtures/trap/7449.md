@@ -1,0 +1,75 @@
+# Plomberie Aubrac, plombier chauffagiste à Clermont-Ferrand
+
+Plomberie Aubrac s'occupe de l'eau et du chauffage dans les maisons et les appartements de Clermont-Ferrand et des communes autour. Robinets qui gouttent, chasses d'eau qui coulent en continu, ballons d'eau chaude fatigués, radiateurs froids en bas et brûlants en haut, chaudières qui se mettent en sécurité dès les froids de l'automne : c'est notre quotidien, et nous l'aimons bien.
+
+Sur cette page, nous expliquons qui nous sommes, ce que nous faisons et surtout comment se déroule une intervention chez vous, parce que c'est souvent ce que l'on sait le moins quand on n'a jamais fait venir de plombier chez soi.
+
+## Qui nous sommes
+
+L'entreprise a été créée en 2010 à Clermont-Ferrand. Nous sommes deux plombiers, et nous le resterons sans doute : c'est une taille qui nous permet de connaître les installations de nos clients, de nous souvenir de ce que nous avons fait chez eux et de repasser derrière nos propres travaux plutôt que derrière ceux d'un collègue que l'on n'a jamais vu.
+
+Nous avons tous les deux commencé par la plomberie sanitaire avant d'ajouter le chauffage, la chaudière gaz et les pompes à chaleur à notre métier. Cette polyvalence compte dans une maison : une fuite sur un circuit de chauffage, un ballon qui entartre ou une pression qui chute ne se règlent pas de la même façon selon que l'on regarde seulement le tuyau ou l'installation entière.
+
+Nous travaillons avec un véhicule chacun, un stock de pièces courantes et des fournisseurs locaux que nous connaissons depuis longtemps.
+
+## Ce que nous faisons
+
+Nous intervenons sur la plomberie sanitaire : robinetterie, évacuations, WC, chasses d'eau, alimentation en eau, remplacement de tuyauteries anciennes en plomb ou en acier galvanisé, pose de réducteurs de pression et d'adoucisseurs.
+
+Nous intervenons aussi sur la production d'eau chaude et le chauffage : chauffe-eau électriques et thermodynamiques, chaudières gaz, radiateurs, planchers chauffants à eau, désembouage des circuits, entretien des chaudières, et pompes à chaleur air-eau pour les maisons qui s'y prêtent.
+
+Enfin, nous refaisons des salles de bains, surtout quand il s'agit de remplacer une baignoire par une douche plus accessible. Pour le carrelage et l'électricité, nous travaillons avec des artisans du secteur que nous connaissons bien, et nous coordonnons le chantier pour que vous n'ayez qu'un interlocuteur.
+
+## Comment se passe une intervention
+
+Une intervention de plomberie ne commence pas avec la clé à molette. Elle commence par une question simple, souvent posée au téléphone : qu'est-ce que vous voyez, et depuis quand ? Une tache au plafond, un bruit dans les tuyaux la nuit, une eau tiède au lieu de chaude, un compteur qui tourne alors que tout est fermé. Ces détails nous disent déjà où chercher et quelles pièces emporter, ce qui évite souvent un aller-retour inutile.
+
+Sur place, nous commençons par le diagnostic. Nous regardons l'installation dans son ensemble avant de toucher à quoi que ce soit : l'arrivée d'eau, le compteur, la pression, l'état des raccords visibles, l'âge et le type de la chaudière ou du ballon. Une fuite qui apparaît dans une cuisine peut venir d'une salle de bains à l'étage, et un radiateur froid peut tenir à une vanne mal réglée à l'autre bout de la maison. Nous prenons le temps de remonter à la cause, parce que réparer seulement le symptôme revient à nous faire revenir, ce que personne ne souhaite.
+
+Quand la cause est trouvée, nous vous l'expliquons avec des mots simples, en vous montrant ce que nous avons vu. Si plusieurs solutions existent, nous les décrivons honnêtement : réparer une pièce ou la remplacer, garder un équipement encore quelques hivers ou envisager de le changer, traiter tout de suite ou surveiller. Nous vous disons ce que nous ferions chez nous, mais la décision vous appartient, et nous ne commençons rien sans votre accord.
+
+Avant d'ouvrir un circuit, nous préparons les lieux. Nous coupons l'eau ou le chauffage au bon endroit et vous prévenons de ce qui sera indisponible pendant le travail. Nous posons des protections au sol entre la porte et la zone d'intervention, nous dégageons ce qui doit l'être en vous demandant votre avis, et nous plaçons des bâches et des récipients là où de l'eau peut s'écouler. Dans un appartement, nous pensons aussi aux voisins du dessous et aux parties communes.
+
+Vient ensuite la réparation elle-même. Nous utilisons des pièces de qualité et, autant que possible, compatibles avec ce qui est déjà en place, pour que la prochaine personne qui ouvrira ce placard comprenne l'installation. Sur les raccords, nous préférons les solutions durables aux réparations de fortune ; quand une solution provisoire est la seule possible dans l'immédiat, nous vous le disons clairement et nous notons ce qui reste à faire. Sur une chaudière, nous suivons les consignes du fabricant et nous vérifions la combustion et les sécurités avant de la remettre en route.
+
+Une fois le travail terminé, nous testons. Nous remettons en eau progressivement, nous purgeons l'air, nous contrôlons chaque raccord touché et nous laissons tourner l'installation le temps de voir si tout se comporte normalement. Pour le chauffage, nous vérifions que chaque radiateur chauffe de façon homogène et que la pression se stabilise. Pour une évacuation, nous faisons couler de l'eau en quantité, pas seulement un filet. Si quelque chose ne nous convient pas, nous reprenons, même si le problème de départ semble réglé.
+
+Nous vous montrons ensuite ce qui a été fait. Nous vous indiquons où se trouvent les vannes d'arrêt, comment couper l'eau en cas de souci et, pour une chaudière, comment lire la pression et quels gestes simples sont sans risque. Nous laissons une trace écrite de l'intervention, avec les pièces remplacées et les points à surveiller, que vous pourrez garder avec les papiers de la maison.
+
+Reste le chantier. Nous retirons nos protections, nous ramassons les chutes de tuyau, les emballages et les anciennes pièces, et nous emportons ce qui doit l'être en déchetterie ou chez notre fournisseur pour recyclage. Nous essuyons les traces d'eau et de joint, nous remettons en place ce que nous avons déplacé et nous passons un coup d'aspirateur si nous avons percé ou découpé. Un bon travail de plomberie se voit peu une fois fini ; ce que vous devez remarquer, c'est surtout que tout fonctionne et que la pièce est comme avant.
+
+## Notre façon de travailler
+
+Nous préférons une installation simple et bien faite à une installation impressionnante. Quand un équipement peut encore servir, nous le disons. Quand il arrive en fin de vie, nous le disons aussi, avec les raisons, pour que vous puissiez anticiper plutôt que subir.
+
+Nous sommes attentifs à la propreté, au respect des horaires annoncés et à la parole donnée. Si un imprévu nous retarde, vous êtes prévenu. Si une pièce doit être commandée, nous vous disons pourquoi et nous revenons la poser nous-mêmes.
+
+Nous faisons aussi attention à l'eau : une chasse qui fuit ou un groupe de sécurité qui goutte en permanence gaspillent beaucoup sans que personne ne s'en aperçoive. Nous le signalons quand nous le voyons, même si ce n'est pas la raison de notre venue.
+
+## Les logements que nous connaissons
+
+Clermont-Ferrand mélange des immeubles anciens du centre, en pierre de Volvic, des pavillons des années d'après-guerre et des lotissements plus récents en périphérie. Chaque époque a ses habitudes de plomberie. Dans l'ancien, on trouve encore des colonnes en plomb, des évacuations en fonte qui ont bien vécu et des installations modifiées au fil des propriétaires, sans toujours de logique d'ensemble. Dans les maisons plus récentes, ce sont plutôt des raccords sertis, des chauffe-eau placés dans des combles difficiles d'accès et des planchers chauffants dont personne n'a gardé le plan.
+
+L'eau du secteur est plutôt douce, ce qui ménage les ballons et la robinetterie, mais certaines communes voisines sont alimentées différemment. Nous en tenons compte avant de recommander un adoucisseur, qui n'est pas utile partout.
+
+Connaître ces particularités nous fait gagner du temps sur le diagnostic, et vous évite des travaux qui ne correspondent pas à votre logement.
+
+## Réparer ou remplacer
+
+C'est la question que l'on nous pose le plus souvent, et il n'y a pas de réponse toute faite. Un chauffe-eau qui fuit par la cuve ne se répare pas. Un mitigeur qui goutte se répare presque toujours avec une cartouche. Entre ces cas, tout dépend de l'état général de l'équipement, de la disponibilité des pièces et de la façon dont vous utilisez votre logement.
+
+Nous regardons avec vous ces éléments-là, sans pousser au remplacement. Une chaudière bien entretenue peut encore rendre de bons services longtemps ; une autre, plus récente mais mal adaptée à la maison, peut coûter plus cher à garder qu'à changer. Nous vous donnons notre lecture, et vous choisissez.
+
+## Entretenir son installation
+
+Une grande partie des pannes que nous rencontrons pourrait être évitée par un peu d'entretien. Purger les radiateurs à l'automne, manœuvrer de temps en temps les vannes d'arrêt pour qu'elles ne se grippent pas, surveiller la pression de la chaudière, détartrer les mousseurs : ce sont des gestes simples, à la portée de tous.
+
+Nous avons rassemblé quelques conseils sur des sujets qui reviennent souvent. D'abord la chaudière : [Entretenir sa chaudière](https://example.com/conseils/chaudiere). Ensuite, les bons réflexes quand l'eau se met à couler où elle ne devrait pas : [Que faire en cas de fuite](https://example.com/conseils/fuite).
+
+## Où nous trouver
+
+Plomberie Aubrac est installée à 63000 Clermont-Ferrand et travaille dans la ville et les communes voisines.
+
+Téléphone : 04 73 00 00 00
+
+Plomberie Aubrac, 63000 Clermont-Ferrand

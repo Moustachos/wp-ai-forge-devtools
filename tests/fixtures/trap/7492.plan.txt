@@ -1,0 +1,25 @@
+ANALYSIS
+domain: healthcare / physiotherapy services
+tone: professional formal, warm and reassuring
+visual_density: balanced
+
+COMPOSITION
+The template offers 7 slots but the markdown yields 6 H2 sections, two of which are marked [DENSE] and warrant splitting for balance, bringing the effective count to 8. "Domaines d'intervention" with its 5 parallel sub-disciplines is a natural fit for the features slot, while "Notre approche" (2 H3s, dense) splits across content-image and a reused content slot. No verifiable named quote exists, so the testimonial slot is skipped in favor of reusing content-image for the practical info closing section, preserving the dark→neutral→neutral→light→dark→light→dark rhythm as closely as possible.
+
+MAPPING
+[intro] → [0] hero
+Notre approche et nos engagements [part 1/2] → [3] content-image
+Notre approche et nos engagements [part 2/2] → [1] stats (overflow)
+Domaines d'intervention [part 1/2] → [2] features
+Domaines d'intervention [part 2/2] → [3] content-image (reuse) (mirror)
+Organisation des soins et déroulement des séances → [4] banner
+Le cabinet et son espace de rééducation → [5] testimonial (repurposed as descriptive content)
+Informations pratiques et coordonnées → [6] cta
+
+NOTES
+- Testimonial slot [5] is repurposed for "Le cabinet et son espace" since no named quote exists in the source; render as descriptive prose with image, dropping the quote-mark styling.
+- Stats slot [1] does not contain literal numeric data from "Notre approche," so it is used with (overflow) — bilan initial's four bullet actions rendered as short stat-style callouts (e.g., "4 étapes du bilan") with remaining prose as continuation text.
+- Gallery slot is absent from this blueprint, so no gallery mapping was possible; visual variety is achieved via features, stats(overflow), banner, and mirrored content-image instead.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":3,"label":"Notre approche et nos engagements [part 1/2]"},{"slot_id":1,"label":"Notre approche et nos engagements [part 2/2]"},{"slot_id":2,"label":"Domaines d'intervention [part 1/2]"},{"slot_id":3,"label":"Domaines d'intervention [part 2/2]"},{"slot_id":4,"label":"Organisation des soins et déroulement des séances"},{"slot_id":5,"label":"Le cabinet et son espace de rééducation"},{"slot_id":6,"label":"Informations pratiques et coordonnées"}]}

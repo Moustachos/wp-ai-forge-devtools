@@ -1,0 +1,27 @@
+ANALYSIS
+domain: services de plomberie et chauffage résidentiels
+tone: professionnel rassurant
+visual_density: balanced
+
+COMPOSITION
+Le contenu compte 9 sections logiques pour 7 slots, donc il faut réutiliser des sections génériques et scinder la section dense sur le déroulé d’intervention en 2 parties. J’utilise les slots spécialisés là où ils correspondent vraiment: le hero pour l’intro, les features pour les prestations, le testimonial est repurposé en bloc de confiance/présence locale faute de vraie citation, et le stats est utilisé en overflow pour extraire les repères factuels de l’entreprise tout en gardant le contexte. Le rythme visuel suit bien la structure sombre → neutre → neutre → clair → sombre → clair → sombre, avec alternance via réutilisation de content-image et banner pour éviter une page monotone.
+
+MAPPING
+[intro] → [0] hero
+Qui nous sommes → [1] stats (overflow)
+Ce que nous faisons → [2] features
+Comment se passe une intervention [part 1/2] → [3] content-image
+Comment se passe une intervention [part 2/2] → [4] banner
+Notre façon de travailler → [3] content-image (reuse) (mirror)
+Les logements que nous connaissons → [4] banner (reuse)
+Réparer ou remplacer → [3] content-image (reuse)
+Entretenir son installation → [6] cta
+Où nous trouver → [5] testimonial
+
+NOTES
+Slot [1] STATS (overflow): rendre en stat-values les faits mesurables “créée en 2010”, “2 plombiers”, “1 véhicule chacun / stock de pièces courantes / fournisseurs locaux”; garder le reste du texte de présentation en continuation prose sous les stats, sans répéter ces éléments.
+La section dense “Comment se passe une intervention” doit être coupée après le 4e paragraphe: part 1 = appel, diagnostic, explication des solutions, préparation des lieux; part 2 = réparation, tests, explications au client, remise en état du chantier.
+Le slot [5] testimonial n’a pas de vraie citation: le générateur doit le traiter comme un bloc de confiance/contact avec mise en avant de l’ancrage local et des coordonnées, sans inventer de verbatim.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Qui nous sommes"},{"slot_id":2,"label":"Ce que nous faisons"},{"slot_id":3,"label":"Comment se passe une intervention [part 1/2]"},{"slot_id":4,"label":"Comment se passe une intervention [part 2/2]"},{"slot_id":3,"label":"Notre façon de travailler"},{"slot_id":4,"label":"Les logements que nous connaissons"},{"slot_id":3,"label":"Réparer ou remplacer"},{"slot_id":6,"label":"Entretenir son installation"},{"slot_id":5,"label":"Où nous trouver"}]}

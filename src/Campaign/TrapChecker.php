@@ -63,7 +63,7 @@ final class TrapChecker
 
         $results = array_fill_keys(self::CHECKS, self::na());
         $results['stat_grounding'] = $hasStats ? $this->statGrounding($entry, $outputDoc) : self::na();
-        $results['stat_has_figure'] = $hasStats ? $this->statHasFigure($outputDoc) : self::na();
+        $results['stat_has_figure'] = $hasStats ? $this->statHasFigure($entry, $outputDoc) : self::na();
         $results['stat_cram'] = $hasStats ? $this->statCram($outputDoc) : self::na();
 
         $source = new MarkdownDocument($markdown);
@@ -214,9 +214,11 @@ final class TrapChecker
     private function statGrounding(ManifestEntry $entry, GenerationDocument $output): array
     {
         $findings = [];
+        $values = $output->statValues();
+        $steps = self::stepSequence($values);
 
-        foreach ($output->statValues() as $value) {
-            if (preg_match(self::STEP_NUMBER, trim($value)) === 1) {
+        foreach ($values as $i => $value) {
+            if (preg_match(self::STEP_NUMBER, trim($value)) === 1 || isset($steps[$i])) {
                 continue;
             }
 
@@ -235,17 +237,71 @@ final class TrapChecker
     /**
      * @return array{status: string, findings: string[]}
      */
-    private function statHasFigure(GenerationDocument $output): array
+    private function statHasFigure(ManifestEntry $entry, GenerationDocument $output): array
     {
         $findings = [];
 
         foreach ($output->statValues() as $value) {
-            if (preg_match(self::STEP_NUMBER, trim($value)) !== 1 && TextTools::numbers($value) === []) {
+            if (
+                preg_match(self::STEP_NUMBER, trim($value)) !== 1
+                && TextTools::numbers($value) === []
+                && !self::statesAFigurePhrase($entry, $value)
+            ) {
                 $findings[] = "«{$value}» holds no figure";
             }
         }
 
         return self::outcome($findings);
+    }
+
+    /**
+     * "Deux plombiers" holds a figure when the manifest records "deux plombiers"
+     * as the phrase that states it: a lookup, not a number-word parser.
+     */
+    private static function statesAFigurePhrase(ManifestEntry $entry, string $value): bool
+    {
+        $folded = TextTools::fold($value);
+
+        foreach ($entry->figures as $phrases) {
+            foreach ($phrases as $phrase) {
+                if ($phrase !== '' && str_contains($folded, TextTools::fold($phrase))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Indices of stat-values numbered 1, 2, 3… in a run of at least three:
+     * steps without the zero padding, not figures.
+     *
+     * @param string[] $values
+     * @return array<int, true>
+     */
+    private static function stepSequence(array $values): array
+    {
+        $steps = [];
+        $values = array_values(array_map('trim', $values));
+
+        foreach ($values as $start => $value) {
+            if ($value !== '1') {
+                continue;
+            }
+
+            $end = $start;
+
+            while (isset($values[$end + 1]) && $values[$end + 1] === (string) ($end + 2 - $start)) {
+                $end++;
+            }
+
+            if ($end - $start >= 2) {
+                $steps += array_fill_keys(range($start, $end), true);
+            }
+        }
+
+        return $steps;
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AIForge\DevTools\Tests\Unit\Campaign;
 
+use AIForge\Campaign\CorpusManifest;
 use AIForge\Campaign\ManifestEntry;
 use AIForge\Campaign\MarkdownDocument;
 use AIForge\Campaign\TextTools;
@@ -99,6 +100,39 @@ class TrapCheckerStatsTest extends TestCase
             $this->assertFalse(self::mentions($result['stat_grounding'], $step));
             $this->assertFalse(self::mentions($result['stat_has_figure'], $step));
         }
+    }
+
+    public function testAnUnpaddedStepSequenceIsExemptOnARealRun(): void
+    {
+        // 7492 numbers the four steps of the initial assessment 1, 2, 3, 4.
+        $result = $this->checkRun('7492', ['1998' => ['en 1998'], '3' => ['trois kinésithérapeutes'], '69003' => ['69003 Lyon'], '0472000000' => ['04 72 00 00 00']]);
+
+        $this->assertSame(TrapChecker::PASS, $result['stat_grounding']['status'], implode("\n", $result['stat_grounding']['findings']));
+    }
+
+    public function testALoneOneIsNotAStep(): void
+    {
+        $template = '<p class="is-style-stat-value">240+</p>';
+        $output = '<p class="is-style-stat-value">2019</p><p class="is-style-stat-value">12</p><p class="is-style-stat-value">1</p>'
+            . '<p class="is-style-stat-value">1</p><p class="is-style-stat-value">2</p>';
+        $entry = ManifestEntry::fromArray(['id' => 'x', 'figures' => ['2019' => ['in 2019'], '12' => ['twelve people']]]);
+
+        $result = (new TrapChecker())->check($entry, "# T\n", $template, $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['stat_grounding']['status']);
+        $this->assertCount(3, $result['stat_grounding']['findings']);
+    }
+
+    public function testAFigureSpelledAsTheManifestStatesItHoldsAFigureOnARealRun(): void
+    {
+        // 7449: «Deux plombiers» and «1 véhicule chacun», from "deux plombiers" and "un véhicule chacun".
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $entry = $manifest->entry('hard-09-plomberie');
+
+        $result = (new TrapChecker($manifest->settings))->check($entry, $this->fixture('7449.md'), $this->fixture('7449.tpl.html'), $this->fixture('7449.html'));
+
+        $this->assertSame(TrapChecker::PASS, $result['stat_grounding']['status'], implode("\n", $result['stat_grounding']['findings']));
+        $this->assertSame(TrapChecker::PASS, $result['stat_has_figure']['status'], implode("\n", $result['stat_has_figure']['findings']));
     }
 
     public function testALabelInStatStyleIsReportedApartFromFabrication(): void
