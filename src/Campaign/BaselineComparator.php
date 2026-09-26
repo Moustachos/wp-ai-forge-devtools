@@ -9,6 +9,9 @@ namespace AIForge\Campaign;
  *
  * A drop in publishable rate always outranks a rise in mean score: a higher
  * mean with fewer publishable runs means the failures got worse, not better.
+ *
+ * Refuses reports from different corpora: comparing combo keys across two
+ * corpora would diff unrelated pages.
  */
 final class BaselineComparator
 {
@@ -28,6 +31,14 @@ final class BaselineComparator
      */
     public static function compare(array $baseline, array $current): array
     {
+        if (($baseline['corpus'] ?? null) !== ($current['corpus'] ?? null)) {
+            throw new \InvalidArgumentException(\sprintf(
+                'Cannot compare a report on %s with one on %s.',
+                self::describe($baseline),
+                self::describe($current)
+            ));
+        }
+
         $baseCombos = \is_array($baseline['combos'] ?? null) ? $baseline['combos'] : [];
         $currCombos = \is_array($current['combos'] ?? null) ? $current['combos'] : [];
 
@@ -98,6 +109,16 @@ final class BaselineComparator
         }
 
         return self::STATUS_STABLE;
+    }
+
+    /**
+     * @param array<string, mixed> $report
+     */
+    private static function describe(array $report): string
+    {
+        return isset($report['corpus'])
+            ? 'corpus ' . $report['corpus']
+            : 'source batch ' . ($report['source_batch'] ?? '?');
     }
 
     /**

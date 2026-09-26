@@ -153,4 +153,17 @@ class BaselineComparatorTest extends TestCase
         $this->assertStringContainsString('regression', $markdown);
         $this->assertStringContainsString('-15.0', $markdown);
     }
+
+    public function testRefusesToCompareDifferentCorpora(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('corpus hard with one on source batch 6223');
+
+        BaselineComparator::compare(['corpus' => 'hard', 'combos' => []], ['corpus' => null, 'source_batch' => 6223, 'combos' => []]);
+    }
+
+    public function testComparesTwoReportsOnTheSameCorpus(): void
+    {
+        $this->assertSame([], BaselineComparator::compare(['corpus' => 'hard', 'combos' => []], ['corpus' => 'hard', 'combos' => []]));
+    }
 }

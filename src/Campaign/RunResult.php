@@ -19,6 +19,8 @@ final class RunResult
      *                     Such a run carries no verdict and must stay out of
      *                     every average: scoring it as zero makes an outage
      *                     look like a model collapsing.
+     * @param ?int $rootId The batch root: one per repeat.
+     * @param ?string $sourceFile Corpus file id, from the parent task's source_filename meta.
      */
     public function __construct(
         public readonly int $taskId,
@@ -29,6 +31,8 @@ final class RunResult
         public readonly array $subscores,
         public readonly float $cost,
         public readonly bool $failed = false,
+        public readonly ?int $rootId = null,
+        public readonly ?string $sourceFile = null,
     ) {
     }
 
@@ -65,6 +69,16 @@ final class RunResult
 
         foreach (self::AXES as $axis) {
             $array[$axis] = $this->subscore($axis);
+        }
+
+        $array['failed'] = $this->failed;
+
+        if ($this->rootId !== null) {
+            $array['root_id'] = $this->rootId;
+        }
+
+        if ($this->sourceFile !== null) {
+            $array['file'] = $this->sourceFile;
         }
 
         return $array;

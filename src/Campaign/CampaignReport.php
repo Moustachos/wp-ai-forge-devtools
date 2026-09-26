@@ -14,12 +14,16 @@ final class CampaignReport
 {
     /**
      * @param RunResult[] $runs
+     * @param array<string, mixed> $provenance Corpus hashes, template hashes, plugin commit.
      */
     public function __construct(
         public readonly string $label,
-        public readonly int $sourceBatchId,
+        public readonly ?int $sourceBatchId,
         public readonly int $filesPerCombo,
         public readonly array $runs,
+        public readonly ?string $corpus = null,
+        public readonly array $provenance = [],
+        public readonly ?TrapReport $traps = null,
     ) {
     }
 
@@ -116,9 +120,12 @@ final class CampaignReport
         return [
             'label' => $this->label,
             'source_batch' => $this->sourceBatchId,
+            'corpus' => $this->corpus,
+            'provenance' => $this->provenance,
             'files_per_combo' => $this->filesPerCombo,
             'combos' => $combos,
             'totals' => $this->totals(),
+            'traps' => $this->traps?->toArray(),
         ];
     }
 
@@ -128,8 +135,8 @@ final class CampaignReport
         $lines[] = '## QG campaign — ' . $this->label;
         $lines[] = '';
         $lines[] = \sprintf(
-            'Source batch %d, %d file(s) per combo, %d run(s)%s.',
-            $this->sourceBatchId,
+            '%s, %d file(s) per combo, %d run(s)%s.',
+            $this->corpus !== null ? "Corpus {$this->corpus}" : "Source batch {$this->sourceBatchId}",
             $this->filesPerCombo,
             \count($this->runs),
             $this->totals()['failed'] > 0
@@ -196,6 +203,11 @@ final class CampaignReport
             $totals['mean_signature'],
             $totals['total_cost']
         );
+
+        if ($this->traps !== null) {
+            $lines[] = '';
+            $lines[] = rtrim($this->traps->toMarkdown());
+        }
 
         return implode("\n", $lines) . "\n";
     }

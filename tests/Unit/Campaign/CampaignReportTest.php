@@ -287,4 +287,27 @@ class CampaignReportTest extends TestCase
         $this->assertStringContainsString('fail', $markdown);
         $this->assertStringContainsString('TOTAL', $markdown);
     }
+
+    public function testACorpusReportCarriesItsCorpusProvenanceAndTraps(): void
+    {
+        $traps = new \AIForge\Campaign\TrapReport([]);
+        $report = new CampaignReport('hard', null, 12, [], 'hard', ['plugin_commit' => 'abc'], $traps);
+
+        $array = $report->toArray();
+
+        $this->assertNull($array['source_batch']);
+        $this->assertSame('hard', $array['corpus']);
+        $this->assertSame(['plugin_commit' => 'abc'], $array['provenance']);
+        $this->assertSame($traps->toArray(), $array['traps']);
+        $this->assertStringContainsString('Corpus hard, 12 file(s) per combo', $report->toMarkdown());
+    }
+
+    public function testABatchReportKeepsItsShape(): void
+    {
+        $array = (new CampaignReport('b', 6223, 2, []))->toArray();
+
+        $this->assertSame(6223, $array['source_batch']);
+        $this->assertNull($array['corpus']);
+        $this->assertNull($array['traps']);
+    }
 }
