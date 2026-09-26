@@ -18,6 +18,9 @@ final class CheckSettings
      * @param string[] $genericCta Whole labels that pass whatever the source offers.
      * @param string[] $ctaVocabulary Words a label may use besides the offers': verbs
      *                                and function words, never an offer noun.
+     * @param string[] $ctaNavigation Words that make a label a way around the page
+     *                                ("voir", "méthode"): such a label may also name
+     *                                what the source's headings name.
      */
     public function __construct(
         public readonly float $orphanOverlap = 0.5,
@@ -26,6 +29,7 @@ final class CheckSettings
         public readonly int $cramChars = 40,
         public readonly array $genericCta = self::DEFAULT_GENERIC_CTA,
         public readonly array $ctaVocabulary = [],
+        public readonly array $ctaNavigation = [],
     ) {
     }
 
@@ -43,6 +47,7 @@ final class CheckSettings
             (int) ($thresholds['cram_chars'] ?? 40),
             self::strings($manifest['generic_cta'] ?? self::DEFAULT_GENERIC_CTA),
             self::strings($manifest['cta_vocabulary'] ?? []),
+            self::strings($manifest['cta_navigation'] ?? []),
         );
     }
 

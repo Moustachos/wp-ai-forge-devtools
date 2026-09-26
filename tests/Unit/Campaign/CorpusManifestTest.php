@@ -148,6 +148,7 @@ class CorpusManifestTest extends TestCase
         $data = $this->validData();
         $data['thresholds'] = ['retention' => 0.75];
         $data['cta_vocabulary'] = ['réserver'];
+        $data['cta_navigation'] = ['voir'];
         $this->write($data);
 
         $settings = CorpusManifest::load($this->dir)->settings;
@@ -155,6 +156,7 @@ class CorpusManifestTest extends TestCase
         $this->assertSame(0.75, $settings->retention);
         $this->assertSame(0.5, $settings->orphanOverlap);
         $this->assertSame(['réserver'], $settings->ctaVocabulary);
+        $this->assertSame(['voir'], $settings->ctaNavigation);
         $this->assertSame(['nous contacter'], $settings->genericCta);
     }
 

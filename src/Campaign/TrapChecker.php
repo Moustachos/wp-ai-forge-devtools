@@ -412,6 +412,21 @@ final class TrapChecker
             }
         }
 
+        $navigation = [];
+        $headingStems = [];
+
+        foreach ($this->settings->ctaNavigation as $phrase) {
+            foreach (TextTools::words($phrase) as $word) {
+                $navigation[$word] = true;
+            }
+        }
+
+        foreach ($source->headings() as $heading) {
+            foreach (TextTools::contentWords($heading['text']) as $word) {
+                $headingStems[TextTools::stem($word)] = true;
+            }
+        }
+
         $findings = [];
 
         foreach ($output->buttons() as $label) {
@@ -421,12 +436,22 @@ final class TrapChecker
                 continue;
             }
 
+            $content = TextTools::contentWords($label);
             $stray = array_values(array_filter(
-                TextTools::contentWords($label),
-                static fn (string $word): bool => !isset($vocabulary[$word]) && !isset($groundedStems[TextTools::stem($word)])
+                $content,
+                static fn (string $word): bool => !isset($vocabulary[$word])
+                    && !isset($groundedStems[TextTools::stem($word)])
+                    && !(ctype_digit($word) && $entry->isFigure($word))
             ));
 
-            if ($stray !== []) {
+            // A way around the page ("Voir la boutique", "Nos programmes") names
+            // what the page's headings name; a request verb never takes this path.
+            $navigates = array_filter(
+                $content,
+                static fn (string $word): bool => !isset($navigation[$word]) && !isset($headingStems[TextTools::stem($word)])
+            ) === [];
+
+            if ($stray !== [] && !$navigates) {
                 $findings[] = "«{$label}»: " . implode(', ', $stray) . ' named in no offer';
             }
         }

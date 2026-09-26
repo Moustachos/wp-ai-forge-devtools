@@ -1,0 +1,23 @@
+ANALYSIS
+domain: veterinary clinic / animal healthcare
+tone: professional informative
+visual_density: balanced
+
+COMPOSITION
+The content has 5 sections including an intro and a dense medical services section (~650 words, 5 H3s), which will be split into two parts across the structured features and content-image slots. Specialized slots without matching content (stats, testimonial) are skipped to maintain editorial integrity, flowing naturally from hero to overview banner, structured service blocks, environment details, and a concluding contact CTA.
+
+MAPPING
+[intro] → [0] hero
+General Overview → [4] banner
+Core Veterinary Medical Services [part 1/2] → [2] features
+Core Veterinary Medical Services [part 2/2] → [3] content-image
+Practice Environment and Low-Stress Handling → [3] content-image (mirror)
+Location and Contact → [6] cta
+
+NOTES
+- Split "Core Veterinary Medical Services" into Part 1 (Preventive, Diagnostic, Surgical) in features and Part 2 (Oral Health, Senior Care) in content-image.
+- Skipped [1] stats (no measurable KPI/spec data) and [5] testimonial (no direct quotes).
+- Mirrored the reused [3] content-image section for "Practice Environment and Low-Stress Handling" to create alternating layout balance.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":4,"label":"General Overview"},{"slot_id":2,"label":"Core Veterinary Medical Services [part 1/2]"},{"slot_id":3,"label":"Core Veterinary Medical Services [part 2/2]"},{"slot_id":3,"label":"Practice Environment and Low-Stress Handling"},{"slot_id":6,"label":"Location and Contact"}]}

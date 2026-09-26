@@ -13,6 +13,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class TrapCheckerStructureTest extends TestCase
 {
+    use TrapFixtures;
+
     private const GRID_TEMPLATE = '<div class="wp-block-columns"><div class="wp-block-column"><h3>A</h3></div><div class="wp-block-column"><h3>B</h3></div><div class="wp-block-column"><h3>C</h3></div></div>'
         . '<div class="wp-block-buttons"><div class="wp-block-button"><a class="wp-block-button__link">Go</a></div></div>';
 
@@ -144,6 +146,15 @@ class TrapCheckerStructureTest extends TestCase
             'invented English trial' => ['Book a free trial', [], 'Atelier Brun', TrapChecker::FAIL],
             'invented consultation beside an offered trial' => ['Free consultation', ['free trial'], 'Shiftloom: staff scheduling for teams that work in shifts', TrapChecker::FAIL],
             "the title's own business word" => ['Schedule a call', ['free trial', 'book a demo'], 'Shiftloom: staff scheduling for teams that work in shifts', TrapChecker::PASS],
+            'starting an offered trial' => ['Start a free trial →', ['free trial', 'book a demo'], 'Shiftloom: staff scheduling for teams that work in shifts', TrapChecker::PASS],
+            'navigating to a section the page names' => ['Voir la restauration', [], 'Atelier Brun', TrapChecker::PASS],
+            'a section name alone' => ['Nos ateliers →', [], 'Atelier Brun', TrapChecker::PASS],
+            'navigating to how the business works' => ['Voir notre méthode', [], 'Atelier Brun', TrapChecker::PASS],
+            'coming to the shop' => ['Nous rendre visite', [], 'Atelier Brun', TrapChecker::PASS],
+            'finding the shop' => ['Nous trouver', [], 'Atelier Brun', TrapChecker::PASS],
+            'requesting what a heading names' => ['Demander une restauration', [], 'Atelier Brun', TrapChecker::FAIL],
+            'navigating to a resource the page lacks' => ['Découvrir le guide', [], 'Atelier Brun', TrapChecker::FAIL],
+            'navigating to an invented visit' => ['Voir les visites', [], 'Atelier Brun', TrapChecker::FAIL],
         ];
     }
 
@@ -162,6 +173,13 @@ class TrapCheckerStructureTest extends TestCase
         'Réserver votre rencontre',
         'Demander un échange',
         'Demander un échantillon',
+        "Découvrir l'essai gratuit",
+        'Voir les tarifs',
+        'Découvrir la consultation',
+        'Voir nos rendez-vous',
+        'See a free demo',
+        'Discover our booking',
+        'Voir le devis',
     ];
 
     /**
@@ -217,6 +235,32 @@ class TrapCheckerStructureTest extends TestCase
         $result = (new TrapChecker($settings))->check($this->entry(['offers' => $offers]), $source, self::GRID_TEMPLATE, $output);
 
         $this->assertSame($expected, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function navigationLabelRuns(): array
+    {
+        return [
+            '«Voir la méthode» on 7477' => ['7477', 'hard-11-infogerance'],
+            '«Call 555-0163» on 7400' => ['7400', 'hard-10-vet-clinic'],
+        ];
+    }
+
+    #[DataProvider('navigationLabelRuns')]
+    public function testNavigationLabelsPassOnARealRun(string $id, string $entryId): void
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+
+        $result = (new TrapChecker($manifest->settings))->check(
+            $manifest->entry($entryId),
+            $this->fixture("{$id}.md"),
+            $this->fixture("{$id}.tpl.html"),
+            $this->fixture("{$id}.html")
+        );
+
+        $this->assertSame(TrapChecker::PASS, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
     }
 
     public function testCtaNeedsAButtonInTheTemplate(): void

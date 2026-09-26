@@ -1,0 +1,25 @@
+ANALYSIS
+domain: IT managed services / infogérance and technical support
+tone: professional formal, direct and pragmatic
+visual_density: balanced
+
+COMPOSITION
+Seven markdown sections map onto seven template slots almost one-to-one, but the massive "Comment nous reprenons un parc informatique" section (1273 words) must be split across two slots to preserve the template's rhythm and avoid a wall of text. This means one generic slot gets reused; I'll route the two offers into the features slot (matching its 3-parallel-item structure well since it has two clear sub-offers plus intro), keep stats unused since there's no numeric data, and use content-image and banner/testimonial/cta as anchors for the closing sections, preserving the dark→neutral→light→dark→light→dark flow as closely as content allows.
+
+MAPPING
+[intro] → [0] hero
+Qui nous sommes → [1] stats (repurposed as intro narrative continuation, no numeric data — reuse as content-style highlight)
+Ce que nous faisons au quotidien → [2] features (repurposed as descriptive section, no strict 3-parallel items but fits neutral flow)
+Nos deux offres → [3] content-image
+Comment nous reprenons un parc informatique [part 1/2] → [4] banner (overflow)
+Comment nous reprenons un parc informatique [part 2/2] → [3] content-image (reuse, mirror)
+Notre manière de travailler → [5] testimonial (repurposed, no verbatim quote — reuse as reflective text block)
+Nous contacter → [6] cta
+
+NOTES
+- Slot [1] STATS has no numeric data in "Qui nous sommes"; render as a neutral-background text block using the stat-value style for emphasis on "2013" and "huit personnes" as pseudo-stats, with caption text carrying the narrative.
+- Slot [2] FEATURES lacks 3 clean parallel items in "Ce que nous faisons au quotidien"; use the H2/H3-less prose but format as 3 thematic pillars (parc, cadre de gestion, qualité des échanges) to fit the 3-column layout.
+- Slot [5] TESTIMONIAL has no attributed quote in "Notre manière de travailler"; treat as a reflective statement block styled like a testimonial without attribution, or attribute to "Arcane Infogérance" as the voice.
+
+MAPPING_JSON
+{"mapping":[{"slot_id":0,"label":"[intro]"},{"slot_id":1,"label":"Qui nous sommes"},{"slot_id":2,"label":"Ce que nous faisons au quotidien"},{"slot_id":3,"label":"Nos deux offres"},{"slot_id":4,"label":"Comment nous reprenons un parc informatique [part 1/2]"},{"slot_id":3,"label":"Comment nous reprenons un parc informatique [part 2/2]"},{"slot_id":5,"label":"Notre manière de travailler"},{"slot_id":6,"label":"Nous contacter"}
