@@ -61,31 +61,38 @@ final class TrapEvaluation
     }
 
     /**
+     * A run missing its root_id or file is kept but never evaluated; only a
+     * report where no run carries both is refused.
+     *
      * @param array<string, mixed> $report
      * @return array<int, array{task_id: int, root_id: int, combo: string, file: ?string, scored: bool}>
      */
-    public static function runsFromReport(array $report): array
+    public static function runsFromReport(array $report, string $name = 'this report'): array
     {
         $runs = [];
+        $complete = false;
 
         foreach ((array) ($report['combos'] ?? []) as $combo => $data) {
             foreach ((array) ($data['runs'] ?? []) as $run) {
-                $taskId = (int) ($run['task_id'] ?? 0);
-
-                if (!isset($run['root_id'], $run['file'])) {
-                    throw new InvalidArgumentException(
-                        "Run of task {$taskId} carries no root_id or file: this report predates corpus campaigns."
-                    );
-                }
+                $identified = isset($run['root_id'], $run['file']);
+                $complete = $complete || $identified;
 
                 $runs[] = [
-                    'task_id' => $taskId,
-                    'root_id' => (int) $run['root_id'],
+                    'task_id' => (int) ($run['task_id'] ?? 0),
+                    'root_id' => $identified ? (int) $run['root_id'] : 0,
                     'combo' => (string) $combo,
-                    'file' => (string) $run['file'],
+                    'file' => $identified ? (string) $run['file'] : null,
                     'scored' => empty($run['failed']) && ($run['verdict'] ?? 'unknown') !== 'unknown',
                 ];
             }
+        }
+
+        if ($runs !== [] && !$complete) {
+            throw new InvalidArgumentException(\sprintf(
+                'No run in %s carries a root_id and a file (%s): it predates corpus campaigns.',
+                $name,
+                implode(', ', array_map(static fn (int $id): string => "task {$id}", array_column($runs, 'task_id')))
+            ));
         }
 
         return $runs;

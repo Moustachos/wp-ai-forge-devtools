@@ -126,6 +126,23 @@ class CorpusManifestTest extends TestCase
         $this->assertContains('hard-06-page: figure key beaucoup is not a number', $errors);
     }
 
+    public function testCramCharsMustBeAPositiveInteger(): void
+    {
+        foreach ([0, -3, 12.5, 'forty'] as $value) {
+            $data = $this->validData();
+            $data['thresholds'] = ['cram_chars' => $value];
+            $this->write($data);
+
+            $this->assertContains('threshold cram_chars must be a positive integer', CorpusManifest::load($this->dir)->errors(), var_export($value, true));
+        }
+
+        $data = $this->validData();
+        $data['thresholds'] = ['cram_chars' => 40];
+        $this->write($data);
+
+        $this->assertSame([], CorpusManifest::load($this->dir)->errors());
+    }
+
     public function testThresholdsAndVocabularyFeedTheSettings(): void
     {
         $data = $this->validData();

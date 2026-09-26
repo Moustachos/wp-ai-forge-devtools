@@ -110,4 +110,41 @@ class TrapEvaluationTest extends TestCase
 
         TrapEvaluation::runsFromReport(['combos' => ['g:b:l' => ['runs' => [['task_id' => 5, 'verdict' => 'pass']]]]]);
     }
+
+    public function testTheRefusalNamesTheReport(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('old.json');
+
+        TrapEvaluation::runsFromReport(['combos' => ['c' => ['runs' => [['task_id' => 5, 'verdict' => 'pass']]]]], 'old.json');
+    }
+
+    public function testAMixedReportKeepsItsIncompleteRunsAsNotEvaluated(): void
+    {
+        $report = ['combos' => ['g:b:l' => ['runs' => [
+            ['task_id' => 5, 'root_id' => 1, 'file' => 'hard-01', 'verdict' => 'pass', 'failed' => false],
+            ['task_id' => 6, 'root_id' => 1, 'verdict' => 'pass', 'failed' => false],
+            ['task_id' => 7, 'file' => 'hard-01', 'verdict' => 'pass', 'failed' => false],
+        ]]]];
+
+        $runs = TrapEvaluation::runsFromReport($report);
+
+        $this->assertSame([5, 6, 7], array_column($runs, 'task_id'));
+        $this->assertSame([null, 0], [$runs[1]['file'], $runs[1]['root_id']]);
+        $this->assertSame([null, 0], [$runs[2]['file'], $runs[2]['root_id']]);
+
+        $loaded = [];
+        $traps = TrapEvaluation::evaluate(CorpusManifest::load($this->dir), $runs, static function (int $id) use (&$loaded): array {
+            $loaded[] = $id;
+            return self::artifacts();
+        });
+
+        $this->assertSame([5], $loaded);
+        $this->assertSame([6, 7], $traps->notEvaluated());
+    }
+
+    public function testAnEmptyReportHasNoRuns(): void
+    {
+        $this->assertSame([], TrapEvaluation::runsFromReport(['combos' => []]));
+    }
 }

@@ -132,6 +132,12 @@ final class CorpusManifest
             }
         }
 
+        $cram = $data['thresholds']['cram_chars'] ?? null;
+
+        if ($cram !== null && (!\is_int($cram) || $cram <= 0)) {
+            $errors[] = 'threshold cram_chars must be a positive integer';
+        }
+
         $seen = [];
         $trapCounts = array_fill_keys(ManifestEntry::TRAPS, 0);
 

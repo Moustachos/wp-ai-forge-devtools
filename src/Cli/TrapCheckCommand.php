@@ -50,7 +50,7 @@ final class TrapCheckCommand
 
         try {
             $manifest = CorpusManifest::fromName(AIFORGE_DEV_PATH . 'bench/ci-corpus', (string) $report['corpus']);
-            $runs = TrapEvaluation::runsFromReport($report);
+            $runs = TrapEvaluation::runsFromReport($report, $path);
         } catch (Throwable $e) {
             WP_CLI::error($e->getMessage());
             return;
