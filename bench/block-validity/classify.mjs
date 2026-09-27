@@ -1,7 +1,7 @@
 // Classifies the blocks the real editor rejects, from the validateBlock()
 // diffs editor.mjs stores in out/editor.jsonl.
 //
-//   node classify.mjs [--since=2026-08-01] [--verbose]
+//   node classify.mjs [--since=2026-08-01] [--verbose] [--dir=out/repaired]
 
 import { readFileSync } from 'node:fs';
 
@@ -45,7 +45,7 @@ function classify(reason) {
 
 const families = new Map();
 let docs = 0;
-for (const r of read('out/editor.jsonl')) {
+for (const r of read(`${args.dir ?? 'out'}/editor.jsonl`)) {
     if (r.kind !== 'generation' || r.created_at < since || !r.invalid.length) continue;
     docs++;
     for (const item of r.invalid) {

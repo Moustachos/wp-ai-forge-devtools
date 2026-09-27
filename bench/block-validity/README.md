@@ -39,7 +39,28 @@ blocks were left to Gutenberg, and that the Site Editor does not get the draft f
 The posts are deleted in a `finally`. Exit 0 when every check passes; screenshots in
 `out/net-check/`.
 
+## Repair replay (spec S18 Phase B)
+
+```bash
+npx wp-env run cli -- timeout 900 wp eval-file wp-content/plugins/wp-ai-forge-devtools/bench/block-validity/repair.php   # from wp-lab
+node editor.mjs --dir=out/repaired
+node compare.mjs --since=2026-08-01
+npx wp-env run cli -- timeout 900 wp eval-file wp-content/plugins/wp-ai-forge-devtools/bench/qg-replay/signature-repair.php   # from wp-lab
+```
+
+`repair.php` applies the plugin's final repair pass alone to the exported corpus
+and checks it is idempotent. `compare.mjs` fails when a valid document or template
+was changed, or when a document has more invalid blocks of a kind after the pass
+than before. `signature-repair.php` replays the Quality Gate's signature score on
+every changed generation. Record: `repair-2026-09.md`.
+
 ## Things that will mislead you
+
+- **A block that differs from its current `save()` can still be valid.** A
+  deprecated save with narrower supports accepts a paragraph, heading or plain
+  group whose margin (paragraph: colour too) is in the JSON only, and a
+  paragraph or quote missing its preset classes. `getSaveContent()` is not the
+  oracle; `parse()`'s `isValid` is. See `repair-2026-09.md`, calibration.
 
 - **Read `isValid` after `parse()`, never re-validate every block.** Markup
   the editor accepts through a deprecation (list without `wp-block-list`,

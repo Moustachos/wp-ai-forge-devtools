@@ -3,12 +3,15 @@
 // isValid === false, and keeps validateBlock()'s diff for each of them.
 // Runs on the host with the smoke harness's Playwright. Writes out/editor.jsonl.
 //
-//   node editor.mjs
+//   node editor.mjs [--dir=out/repaired]
 
 import { createReadStream, createWriteStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { chromium } from '../../smoke/node_modules/playwright/index.mjs';
 import { ADMIN_PASSWORD, ADMIN_USER, BASE_URL } from '../../smoke/lib/config.js';
+
+const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')));
+const dir = args.dir ?? 'out';
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -23,7 +26,7 @@ await page.goto(`${BASE_URL}/wp-admin/post-new.php?post_type=page`);
 await page.waitForFunction(() => window.wp?.blocks?.getBlockTypes?.().length > 50, null, { timeout: 60000 });
 process.stderr.write(`editor ready: ${await page.evaluate(() => window.wp.blocks.getBlockTypes().length)} block types\n`);
 
-const sink = createWriteStream('out/editor.jsonl');
+const sink = createWriteStream(`${dir}/editor.jsonl`);
 
 async function run(file, kind) {
     const lines = createInterface({ input: createReadStream(file), crlfDelay: Infinity });
@@ -76,8 +79,8 @@ async function run(file, kind) {
     return n;
 }
 
-const t = await run('out/templates.jsonl', 'template');
-const g = await run('out/generations.jsonl', 'generation');
+const t = await run(`${dir}/templates.jsonl`, 'template');
+const g = await run(`${dir}/generations.jsonl`, 'generation');
 sink.end();
 await browser.close();
 process.stderr.write(`done: ${t} templates, ${g} generations\n`);
