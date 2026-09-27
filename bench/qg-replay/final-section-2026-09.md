@@ -63,3 +63,12 @@ Blocking them is right; the new reason is simply the first one to catch them.
 5 runs currently stored as `warnings` (6289, 7470, 7475, 7494, 7499) would have been `fail`;
 no stored `pass` run is affected. The 8 older hits carry no Quality Gate verdict. Stored
 verdicts are not recomputed: the rule applies to new generations only.
+
+## Re-run after the separator fix (plugin `4a04481`)
+
+`lostFinalSection()` now puts a space at `<br>` and at the closing tags of `p`, `li`, `td`,
+`th`, `h1`-`h6`, `div`, `figcaption` and `blockquote` before stripping tags, so adjacent cells
+or list items no longer glue into one word. Both windows were replayed again with the
+commands above: 1321 scanned / 62 warnings / 13 lost, and 537 / 27 / 5, with the same 13 task
+ids and headings as before. Nothing changed: no stored hit depended on a glued boundary, and no
+table or list final section was wrongly flagged in the corpus.

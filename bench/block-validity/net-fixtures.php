@@ -14,6 +14,10 @@ global $wpdb;
 
 const NET_CHECK_TASKS = [6363, 6379, 7059];
 
+// Invalid (the saved markup lacks alignfull, as in stored generation 4202) but
+// safely rebuildable: the rebuild only adds that class.
+const NET_CHECK_LEAF = "<!-- wp:group {\"align\":\"full\"} -->\n<div class=\"wp-block-group\"><!-- wp:paragraph -->\n<p>net-check %s leaf</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->";
+
 // Without a user, kses strips every inline style on insert.
 wp_set_current_user(1);
 
@@ -69,6 +73,22 @@ switch ($args[0] ?? '') {
         }
 
         $result['plain'] = $insert('net-check plain', (string) $payload(NET_CHECK_TASKS[0], 'result_content'));
+
+        // The dark group the net must refuse, with a rebuildable block inside it
+        // and another after it.
+        $content = (string) $payload(NET_CHECK_TASKS[0], 'result_content');
+        $dark = strpos($content, 'background-color:#18181b');
+        $open = $dark === false ? false : strpos($content, '>', $dark);
+
+        if ($open === false) {
+            WP_CLI::error('Task ' . NET_CHECK_TASKS[0] . ' has no dark group.');
+        }
+
+        $content = substr($content, 0, $open + 1) . "\n" . sprintf(NET_CHECK_LEAF, 'child') . "\n\n"
+            . substr($content, $open + 1) . "\n\n" . sprintf(NET_CHECK_LEAF, 'sibling');
+        $postId = $insert('net-check mixed', $content);
+        update_post_meta($postId, '_aiforge_task_id', $rootOf(NET_CHECK_TASKS[0]));
+        $result['mixed'] = $postId;
         break;
 
     case 'state':

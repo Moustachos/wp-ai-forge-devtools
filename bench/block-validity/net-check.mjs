@@ -75,7 +75,7 @@ const check = (name, ok, detail = '') => {
 };
 
 const created = await fixtures('create');
-const allIds = [...created.ai.map((a) => a.post), created.plain];
+const allIds = [...created.ai.map((a) => a.post), created.plain, created.mixed];
 const browser = await chromium.launch();
 
 try {
@@ -94,6 +94,30 @@ try {
         check(`AI draft ${task}: flag set`, state.flag === true);
         check(`AI draft ${task}: dark background kept`, state.found > 0 && state.kept === state.found, `${state.kept}/${state.found}`);
     }
+
+    // A refused container holding a rebuildable block, with another after it:
+    // the refused subtree stays as parsed, and the edited content still carries
+    // the container's original markup.
+    await openEditor(page, created.mixed);
+    const mixed = await editorState(page);
+    const leaves = await page.evaluate((dark) => {
+        const holds = (b, text) => (b.innerBlocks ?? []).some((p) => (p.attributes?.content?.toString?.() ?? '').includes(text));
+        const find = (list, text) => list.reduce((hit, b) => hit
+            ?? (b.name === 'core/group' && holds(b, text) ? b : find(b.innerBlocks ?? [], text)), null);
+        const blocks = window.wp.data.select('core/block-editor').getBlocks();
+        return {
+            sibling: find(blocks, 'net-check sibling leaf')?.isValid,
+            child: find(blocks, 'net-check child leaf')?.isValid,
+            edited: window.wp.data.select('core/editor').getEditedPostContent().includes(dark),
+            dirty: window.wp.data.select('core/editor').isEditedPostDirty(),
+        };
+    }, DARK);
+    await page.screenshot({ path: path.join(OUT, 'mixed.png') });
+    check('mixed draft: flag set', mixed.flag === true);
+    check('mixed draft: sibling leaf recovered', leaves.sibling === true);
+    check('mixed draft: refused group left whole, child included', leaves.child === false);
+    check('mixed draft: dark background kept', mixed.found > 0 && mixed.kept === mixed.found, `${mixed.kept}/${mixed.found}`);
+    check('mixed draft: edited content keeps the dark background', leaves.edited === true, `dirty: ${leaves.dirty}`);
 
     await openEditor(page, created.plain);
     const plain = await editorState(page);
