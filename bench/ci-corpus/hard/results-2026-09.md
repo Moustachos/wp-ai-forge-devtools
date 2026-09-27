@@ -3,7 +3,7 @@
 Spec S17 (`wp-ai-forge/docs/specs/2026-09-hard-ci-corpus.md`), criteria 3 to 5. Template: the landing
 (`page-datterrissage`), Balanced preset, 12 files x 2 repeats per model. Plugin on
 `feat/model-refresh-2026-09`. Every table below comes from the offline `trap-check` re-run on the
-calibrated checks (devtools `f360100`), not from the campaign's own evaluation: the Gemini report
+calibrated checks (devtools `d825577`, after review fix round 1), not from the campaign's own evaluation: the Gemini report
 was evaluated by code older than `e2ea901`, and the manifest changed during the campaigns (its sha1
 differs between the four reports).
 
@@ -13,10 +13,10 @@ All in `wp-content/uploads/aiforge-dev/`.
 
 | model | campaign report | final re-check | runs scored | cost | wall time |
 |---|---|---|---|---|---|
-| gemini-3.7-flash | `hard-balanced-gemini-20260926-162340.json` (recovered with `--collect`) | `…-trapcheck-20260926-181909.json` | 24 | $1.09 | 20 min |
-| gpt-5.4 | `hard-balanced-openai-20260926-162102.json` | `…-trapcheck-20260926-181915.json` | 24 | $3.78 | 25 min |
-| claude-sonnet-5 | `hard-balanced-anthropic-20260926-164631.json` | `…-trapcheck-20260926-181921.json` | 24 | $4.48 | 45 min |
-| gemini-3.5-flash-lite (control) | `hard-control-flash-lite-20260926-173152.json` | `…-trapcheck-20260926-181928.json` | 15 (9 not evaluated) | $0.39 | 21 min |
+| gemini-3.7-flash | `hard-balanced-gemini-20260926-162340.json` (recovered with `--collect`) | `…-trapcheck-20260927-071931.json` | 24 | $1.09 | 20 min |
+| gpt-5.4 | `hard-balanced-openai-20260926-162102.json` | `…-trapcheck-20260927-071938.json` | 24 | $3.78 | 25 min |
+| claude-sonnet-5 | `hard-balanced-anthropic-20260926-164631.json` | `…-trapcheck-20260927-071944.json` | 24 | $4.48 | 45 min |
+| gemini-3.5-flash-lite (control) | `hard-control-flash-lite-20260926-173152.json` | `…-trapcheck-20260927-071950.json` | 15 (9 not evaluated) | $0.39 | 21 min |
 
 Wall time is first root created to last root finished. Quality Gate publishable rate: 100 %, 100 %,
 91.7 %, 73.3 % (control, on the 15 that generated).
@@ -33,9 +33,9 @@ fabrication.
 
 | model | stat_g | stat_fig | cram | testi_g | testi_rep | cards | cta | orphan | retention | links |
 |---|---|---|---|---|---|---|---|---|---|---|
-| gemini-3.7-flash | 19/24 | 23/24 | 24/24 | 22/24 | 20/24 | 8/8 | 20/24 | 24/24 | 24/24 | 24/24 |
+| gemini-3.7-flash | 19/24 | 23/24 | 24/24 | 22/24 | 20/24 | 8/8 | 19/24 | 24/24 | 24/24 | 24/24 |
 | gpt-5.4 | 24/24 | 7/24 | 22/24 | 20/24 | 13/24 | 7/8 | 13/24 | 24/24 | 22/24 | 23/24 |
-| claude-sonnet-5 | 22/24 | 22/24 | 24/24 | 22/24 | 17/24 | 8/8 | 20/24 | 24/24 | 20/24 | 22/24 |
+| claude-sonnet-5 | 21/24 | 22/24 | 24/24 | 22/24 | 17/24 | 8/8 | 18/24 | 24/24 | 20/24 | 22/24 |
 | control | 11/15 | 8/15 | 15/15 | 11/15 | 7/15 | 5/5 | 9/15 | 15/15 | 1/15 | 13/15 |
 
 ### On each trap's own files
@@ -45,9 +45,9 @@ T4 content_retention.
 
 | model | T1 stat_g | T6 stat_fig | T2 testi_g | T3 cards | T5 cta | T4 retention |
 |---|---|---|---|---|---|---|
-| gemini-3.7-flash | 8/8 | 7/8 | 8/8 | 8/8 | 5/8 | 8/8 |
+| gemini-3.7-flash | 8/8 | 7/8 | 8/8 | 8/8 | 4/8 | 8/8 |
 | gpt-5.4 | 8/8 | 2/8 | 6/8 | 7/8 | 2/8 | 7/8 |
-| claude-sonnet-5 | 8/8 | 7/8 | 7/8 | 8/8 | 6/8 | 4/8 |
+| claude-sonnet-5 | 7/8 | 7/8 | 7/8 | 8/8 | 4/8 | 4/8 |
 | control | 3/6 | 2/5 | 7/8 | 5/5 | 0/2 | 0/4 |
 
 ### By repeat
@@ -55,11 +55,11 @@ T4 content_retention.
 | model, root | stat_g | stat_fig | cram | testi_g | testi_rep | cards | cta | orphan | retention | links |
 |---|---|---|---|---|---|---|---|---|---|---|
 | gemini #7353 | 10/12 | 12/12 | 12/12 | 11/12 | 11/12 | 4/4 | 9/12 | 12/12 | 12/12 | 12/12 |
-| gemini #7354 | 9/12 | 11/12 | 12/12 | 11/12 | 9/12 | 4/4 | 11/12 | 12/12 | 12/12 | 12/12 |
+| gemini #7354 | 9/12 | 11/12 | 12/12 | 11/12 | 9/12 | 4/4 | 10/12 | 12/12 | 12/12 | 12/12 |
 | gpt-5.4 #7403 | 12/12 | 4/12 | 12/12 | 10/12 | 7/12 | 3/4 | 7/12 | 12/12 | 12/12 | 12/12 |
 | gpt-5.4 #7404 | 12/12 | 3/12 | 10/12 | 10/12 | 6/12 | 4/4 | 6/12 | 12/12 | 10/12 | 11/12 |
-| sonnet-5 #7453 | 11/12 | 11/12 | 12/12 | 11/12 | 9/12 | 4/4 | 9/12 | 12/12 | 10/12 | 12/12 |
-| sonnet-5 #7454 | 11/12 | 11/12 | 12/12 | 11/12 | 8/12 | 4/4 | 11/12 | 12/12 | 10/12 | 10/12 |
+| sonnet-5 #7453 | 11/12 | 11/12 | 12/12 | 11/12 | 9/12 | 4/4 | 8/12 | 12/12 | 10/12 | 12/12 |
+| sonnet-5 #7454 | 10/12 | 11/12 | 12/12 | 11/12 | 8/12 | 4/4 | 10/12 | 12/12 | 10/12 | 10/12 |
 | control #7503 | 4/8 | 5/8 | 8/8 | 7/8 | 4/8 | 3/3 | 6/8 | 8/8 | 1/8 | 8/8 |
 | control #7504 | 7/7 | 3/7 | 7/7 | 4/7 | 3/7 | 2/2 | 3/7 | 7/7 | 0/7 | 5/7 |
 
@@ -68,7 +68,7 @@ T4 content_retention.
 | model | author | stat_g | stat_fig | cram | testi_g | testi_rep | cards | cta | orphan | retention | links |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | gemini | claude | 5/6 | 6/6 | 6/6 | 6/6 | 4/6 | 2/2 | 4/6 | 6/6 | 6/6 | 6/6 |
-| gemini | gemini | 6/6 | 6/6 | 6/6 | 6/6 | 6/6 | n/a | 5/6 | 6/6 | 6/6 | 6/6 |
+| gemini | gemini | 6/6 | 6/6 | 6/6 | 6/6 | 6/6 | n/a | 4/6 | 6/6 | 6/6 | 6/6 |
 | gemini | gpt | 4/6 | 6/6 | 6/6 | 6/6 | 4/6 | 4/4 | 6/6 | 6/6 | 6/6 | 6/6 |
 | gemini | adapted | 4/6 | 5/6 | 6/6 | 4/6 | 6/6 | 2/2 | 5/6 | 6/6 | 6/6 | 6/6 |
 | gpt-5.4 | claude | 6/6 | 3/6 | 6/6 | 4/6 | 2/6 | 1/2 | 1/6 | 6/6 | 5/6 | 6/6 |
@@ -76,7 +76,7 @@ T4 content_retention.
 | gpt-5.4 | gpt | 6/6 | 3/6 | 6/6 | 5/6 | 2/6 | 4/4 | 5/6 | 6/6 | 6/6 | 6/6 |
 | gpt-5.4 | adapted | 6/6 | 1/6 | 6/6 | 5/6 | 3/6 | 2/2 | 5/6 | 6/6 | 6/6 | 6/6 |
 | sonnet-5 | claude | 5/6 | 6/6 | 6/6 | 5/6 | 3/6 | 2/2 | 5/6 | 6/6 | 2/6 | 5/6 |
-| sonnet-5 | gemini | 6/6 | 6/6 | 6/6 | 6/6 | 5/6 | n/a | 4/6 | 6/6 | 6/6 | 6/6 |
+| sonnet-5 | gemini | 5/6 | 6/6 | 6/6 | 6/6 | 5/6 | n/a | 2/6 | 6/6 | 6/6 | 6/6 |
 | sonnet-5 | gpt | 6/6 | 4/6 | 6/6 | 6/6 | 3/6 | 4/4 | 6/6 | 6/6 | 6/6 | 6/6 |
 | sonnet-5 | adapted | 5/6 | 6/6 | 6/6 | 5/6 | 6/6 | 2/2 | 5/6 | 6/6 | 6/6 | 5/6 |
 | control | claude | 3/4 | 3/4 | 4/4 | 4/4 | 1/4 | 2/2 | 4/4 | 4/4 | 0/4 | 4/4 |
@@ -97,27 +97,34 @@ source and plan. 184 failures, plus 6 that moved from `testimonial_grounding` to
 
 | class | pairs | meaning |
 |---|---|---|
-| **check, fixed** | 57 | the check was wrong; fixed with a regression test on the run's fixture |
-| **check, documented** | 19 | the check is wrong but fixing it would open a false pass; left as a known false loss |
+| **check, fixed** | 53 | the check was wrong; fixed with a regression test on the run's fixture |
+| **check, documented** | 23 | the check is wrong but fixing it would open a false pass; left as a known false loss |
 | **model** | 114 | a real stretch, invention, loss or reported behaviour |
 | **gate** | 0 | no check failure was caused by the Quality Gate; one gate artifact was found on the verdicts, below |
 
 ### Check errors fixed
 
-| commit | error class | runs (fixture in bold) |
+The first calibration (commits `0c3b24a` to `f360100`) was reviewed by probing it on the frozen
+manifest; three of its changes opened reproducible false passes. Fix round 1 (`58a32d1` to
+`d825577`) closed them. The table gives the state that holds now.
+
+| commits | error class | runs (fixture in bold) |
 |---|---|---|
-| `0c3b24a` | A testimonial of several sentences was matched against one or two source sentences, so a paragraph lifted whole read as an invented quote. The window now grows with the quote (its sentence count + 1). | gemini 7372; gpt 7423, 7425; sonnet **7472** |
+| `0c3b24a`, `7c056aa` | A testimonial of several sentences was matched against one or two source sentences as a whole, so a paragraph lifted whole read as an invented quote. Each sentence of the testimonial is now held to its own best source sentence or consecutive pair, and grounding fails if any sentence falls below `quote_match`. (The first version grew one window with the quote; review measured it passing N source sentences plus one invented endorsement.) | gemini 7372; gpt 7423, 7425; sonnet **7472** |
 | `b8fa74b` | The attribution was the first bold text anywhere after the quote, so a bold phrase in continuation prose stood in for the name (7374 blamed «formations Renault régulières» instead of Laurent Ferrand; verdict unchanged, finding corrected). Only a bold that leads its block is a name line now. And the business's team («Shiftloom Team», «L'équipe du cabinet») credits its own prose. | gemini **7374**, 7398, **7394**; gpt 7424; control 7542, 7544 |
-| `02c261d` | Unpadded step numbers 1, 2, 3, 4 (a run of three or more from 1) were read as figures; a figure spelled as the manifest records it («Deux plombiers») was read as a label; hard-09 states "un véhicule chacun" and the manifest had missed it. | sonnet **7492**; gpt 7425, **7449** |
-| `28cb63e` | 71 runs, 125 labels. A navigation label («Voir la boutique», «Nos programmes», «Voir la méthode», «Senior cat care») is not an offer. New manifest list `cta_navigation`: a label made only of navigation words and words of the source's headings passes; a request verb never takes that path. Also: `start`/`started` (the verb of an offered trial), a phone number the manifest records («Call 555-0163»), generic «nous rendre visite», «venez nous voir», «lire la suite», «see how it works», portfolio noun «références». | 12 gemini, 12 gpt, 15 sonnet, 5 control runs; fixtures **7477**, **7400** |
-| `f360100` | The navigation path also reads the source's link texts: «Nos revendeurs» repeats hard-12's own link text. | control **7528**, 7552 |
+| `02c261d`, `58a32d1`, `ad60dbb` | A stat-value that is exactly a manifest phrase («Deux plombiers») was read as a label; hard-09 states "un véhicule chacun" and the manifest had missed it. The phrase must now be the whole value («Deux plombiers, trois apprentis» fails). An exemption for unpadded steps 1, 2, 3 was added then reverted: the spec exempts only 01-09, and it let invented 1, 2, 3 pass on T1 files. | gpt 7425, **7449** |
+| `28cb63e`, `f360100`, `d825577` | 71 runs, 125 labels. A navigation label («Voir la boutique», «Nos programmes», «Nos revendeurs») is not an offer. Manifest list `cta_navigation` (verbs and possessives: voir, découvrir, lire, see, read, nos, our…): a label holding a navigation word, whose other content words are words of the source's headings or link texts **as written, plural aside**, passes; a request verb never takes that path. Whole labels the campaign used for "how we work" («Voir la méthode», «Voir l'approche», «See the process», «Get started»…) are closed `generic_cta` entries. Also: `start`/`started` (the verb of an offered trial), a phone number the manifest records («Call 555-0163»), generic «nous rendre visite», «venez nous voir», «lire la suite», «see how it works», portfolio noun «références». (The first version stemmed heading and link words at five letters, against the ruling that only offers and the title are stemmed, and admitted «Voir nos travaux» from "travailler" or «Voir les transports» from "transparente".) | 11 gemini, 12 gpt, 13 sonnet, 7 control runs; fixtures **7477**, **7400**, **7528** |
 
 What stays closed, with tests: every label of the invented-offer list fails on all four T5 files
 without offers (21 labels, including navigation-verb forms «Découvrir l'essai gratuit», «Voir les
-tarifs», «Voir nos rendez-vous», «Discover our booking», «Voir le devis»); a request verb before a
-heading's word («Demander une restauration») fails; a navigation label naming a resource the page
-lacks («Découvrir le guide») fails; «L'équipe de Julie Roche» is still an invented attribution; an
-invented multi-sentence quote still fails; a lone «1» next to real figures still fails.
+tarifs», «Voir nos rendez-vous», «Discover our booking», «Voir le devis»); the eleven labels the
+review built from five-letter collisions fail on their files («Voir l'entretien» and «Entretien de
+gestion» on hard-03; «Entretien de chaudière», «Remplacement de chaudière», «Réparation de fuite»,
+«Voir nos travaux», «Voir les commentaires», «Commencer» on hard-09; «Voir les transports» on
+hard-05; «Chronic care management», «Managed care» on hard-10); a request verb before a heading's
+word («Demander une restauration») fails; a navigation label naming a resource the page lacks
+(«Découvrir le guide») fails; «L'équipe de Julie Roche» is still an invented attribution; source
+sentences with one invented endorsement appended fail; invented «1», «2», «3» fail on T1 files.
 
 ### Check errors left documented (false losses kept on purpose)
 
@@ -126,6 +133,9 @@ invented multi-sentence quote still fails; a lone «1» next to real figures sti
 | Navigation label whose noun is only in the source's body or URLs: «Lire/Voir les conseils» (hard-09 links its advice under `/conseils/`), «Read the guide» / «See care tips» (hard-10 links `/guides/senior-cats`), «Nos cuvées», «Découvrir la gamme», «See integrations», «Follow the cycle», «Voir l'organisation», «Voir notre secteur», «Voir la reprise», «Voir nos spécialités», «Voir le calendrier» | gemini 7375, 7378; gpt 7420, 7426, 7444, 7445, 7449, 7450, 7451; sonnet 7468, 7471, 7478, 7499 | Grounding on the body would admit «Voir les réservations» on hard-05, whose body says "réservation"; a URL path is not text the reader sees. |
 | Non-person text in the name slot credited as an attribution: a source sentence (7422), the business phone (7449, role line "Plomberie Aubrac"), topic labels «Schedule flow» / «Data ownership» (7444), a source step label «Filling open shifts» (7494), a service heading «Conseil de gestion» (control 7543, role line the business) | gpt 7422, 7444, 7449; sonnet 7494; control 7543 | Admitting headings, bold leads or source sentences as "not a person" would admit person names the corpus sets in bold (hard-12: «Laure et Thomas Rimbert»). |
 | Self-credit to a business name the body gives but the title does not: «Ferrand Automobiles» | control 7524 | Ruling of Task 16a: only the title names the business. |
+| «Découvrir l'association» on hard-05 (the business is an association; its headings say "vie associative") | gemini 7371, 7395; gpt 7445; sonnet 7471, 7495 | Matching "association" to "associative" needs the prefix stem the ruling forbids. |
+| «Senior cat care» on hard-10, a bare section name as a button | sonnet 7476 | Without a navigation word, «Chronic care management» would pass too. |
+| Steps numbered 1, 2, 3, 4 without zero padding | sonnet 7492 | The spec exempts only 01-09; unpadded runs pass invented counts on T1 files. |
 
 ### Model findings
 
@@ -179,8 +189,8 @@ No threshold moved; the evidence supports the starting values.
 - `quote_match` 0.60 and `cram_chars` 40 unchanged; no finding depended on them.
 
 Manifest changes (`bench/ci-corpus/hard/manifest.json`): hard-09 figure `"1": ["un véhicule
-chacun"]`; `generic_cta` + 4; `cta_vocabulary` + `start`, `started`, `références`; new
-`cta_navigation`.
+chacun"]`; `generic_cta` + 17 whole labels; `cta_vocabulary` + `start`, `started`, `références`;
+new `cta_navigation` (navigation verbs and possessives only, no nouns).
 
 ## Criterion 5: separation of the control
 
@@ -191,7 +201,7 @@ when |control pass/n (both repeats) − model pass/n (both repeats)| > spread.
 |---|---|---|---|---|---|---|---|---|
 | stat_grounding | 11/15 | gemini | 10/12 | 9/12 | 0.08 | 19/24 | 0.06 | no |
 | | | gpt-5.4 | 12/12 | 12/12 | 0.00 | 24/24 | 0.27 | yes |
-| | | sonnet-5 | 11/12 | 11/12 | 0.00 | 22/24 | 0.18 | yes |
+| | | sonnet-5 | 11/12 | 10/12 | 0.08 | 21/24 | 0.14 | yes |
 | stat_has_figure | 8/15 | gemini | 12/12 | 11/12 | 0.08 | 23/24 | 0.43 | yes |
 | | | gpt-5.4 | 4/12 | 3/12 | 0.08 | 7/24 | 0.24 | yes (control better) |
 | | | sonnet-5 | 11/12 | 11/12 | 0.00 | 22/24 | 0.38 | yes |
@@ -207,9 +217,9 @@ when |control pass/n (both repeats) − model pass/n (both repeats)| > spread.
 | card_count | 5/5 | gemini | 4/4 | 4/4 | 0.00 | 8/8 | 0.00 | no |
 | | | gpt-5.4 | 3/4 | 4/4 | 0.25 | 7/8 | 0.12 | no |
 | | | sonnet-5 | 4/4 | 4/4 | 0.00 | 8/8 | 0.00 | no |
-| cta_grounding | 9/15 | gemini | 9/12 | 11/12 | 0.17 | 20/24 | 0.23 | yes |
+| cta_grounding | 9/15 | gemini | 9/12 | 10/12 | 0.08 | 19/24 | 0.19 | yes |
 | | | gpt-5.4 | 7/12 | 6/12 | 0.08 | 13/24 | 0.06 | no |
-| | | sonnet-5 | 9/12 | 11/12 | 0.17 | 20/24 | 0.23 | yes |
+| | | sonnet-5 | 8/12 | 10/12 | 0.17 | 18/24 | 0.15 | no |
 | orphan_headings | 15/15 | all three | 12/12 | 12/12 | 0.00 | 24/24 | 0.00 | no |
 | content_retention | 1/15 | gemini | 12/12 | 12/12 | 0.00 | 24/24 | 0.93 | **yes** |
 | | | gpt-5.4 | 12/12 | 10/12 | 0.17 | 22/24 | 0.85 | **yes** |
@@ -221,7 +231,8 @@ when |control pass/n (both repeats) − model pass/n (both repeats)| > spread.
 **Verdict: criterion 5 holds.** Every Balanced model is separated from the control on
 `content_retention` by 0.77 to 0.93 against a spread of at most 0.17: the control drops sections,
 the Balanced models almost never do, which is the defect the control was chosen for (11/18
-publishable, drops sections). The other "yes" rows are real but thin: margins of 0.10-0.27 on n=15
+publishable, drops sections). The verdict did not move with review fix round 1 (only Sonnet 5's
+`cta_grounding` row flipped to "no"). The other "yes" rows are real but thin: margins of 0.10-0.27 on n=15
 against n=24, and `stat_has_figure` separates gpt-5.4 in the wrong direction (its addendum puts
 labels in stat style more often than the control does).
 
