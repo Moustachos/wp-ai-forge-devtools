@@ -254,15 +254,16 @@ final class TrapChecker
 
     /**
      * "Deux plombiers" holds a figure when the manifest records "deux plombiers"
-     * as the phrase that states it: a lookup, not a number-word parser.
+     * as the phrase that states it: a lookup, not a number-word parser. The whole
+     * value must be the phrase, so "Deux plombiers, trois apprentis" is not excused.
      */
     private static function statesAFigurePhrase(ManifestEntry $entry, string $value): bool
     {
-        $folded = TextTools::fold($value);
+        $words = implode(' ', TextTools::words($value));
 
         foreach ($entry->figures as $phrases) {
             foreach ($phrases as $phrase) {
-                if ($phrase !== '' && str_contains($folded, TextTools::fold($phrase))) {
+                if ($words !== '' && $words === implode(' ', TextTools::words($phrase))) {
                     return true;
                 }
             }

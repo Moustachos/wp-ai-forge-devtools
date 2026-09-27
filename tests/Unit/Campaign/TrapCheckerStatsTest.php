@@ -148,6 +148,17 @@ class TrapCheckerStatsTest extends TestCase
         $this->assertSame(TrapChecker::PASS, $result['stat_has_figure']['status'], implode("\n", $result['stat_has_figure']['findings']));
     }
 
+    public function testAManifestPhraseInsideALongerValueDoesNotExcuseIt(): void
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $entry = $manifest->entry('hard-09-plomberie');
+        $template = '<p class="is-style-stat-value">240+</p>';
+
+        $result = (new TrapChecker($manifest->settings))->check($entry, (string) $manifest->markdown($entry), $template, '<p class="is-style-stat-value">Deux plombiers, trois apprentis</p>');
+
+        $this->assertSame(TrapChecker::FAIL, $result['stat_has_figure']['status']);
+    }
+
     public function testALabelInStatStyleIsReportedApartFromFabrication(): void
     {
         $template = '<p class="is-style-stat-value">240+</p>';
