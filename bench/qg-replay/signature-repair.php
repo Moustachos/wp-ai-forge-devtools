@@ -62,14 +62,17 @@ foreach ($ids as $id) {
     $after = $score->invoke($gate, parse_blocks((new BlockValidityRepairer())->repair($output)), $blueprint, $mapping)[0];
     $replayed++;
 
-    if ($before === null || $after === null) {
+    if ($before === null) {
         WP_CLI::log("{$id}  n/a (template has no signature)");
         continue;
     }
 
-    $drop = $after < $before;
+    $drop = $after === null || $after < $before;
     $lost += $drop ? 1 : 0;
-    WP_CLI::log(sprintf('%d  %6.1f -> %6.1f%s', $id, $before, $after, $drop ? '  LOST' : ''));
+    WP_CLI::log(sprintf('%d  %6.1f -> %s%s', $id, $before, $after === null ? '   n/a' : sprintf('%6.1f', $after), $drop ? '  LOST' : ''));
 }
 
 WP_CLI::log(sprintf('%d runs replayed, %d lost signature points', $replayed, $lost));
+if ($lost > 0) {
+    WP_CLI::error("{$lost} runs lost signature points.");
+}

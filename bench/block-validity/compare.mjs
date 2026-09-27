@@ -2,7 +2,7 @@
 // the final repair pass. Fails when a valid document or template was changed,
 // or when a document has more invalid blocks of a kind after than before.
 //
-//   node compare.mjs [--since=2026-08-01]
+//   node compare.mjs [--since=2026-08-01] [--repaired=out/repaired]
 //
 // Needs out/editor.jsonl (before), out/repaired/editor.jsonl (after) and
 // out/repaired/changed.json (from repair.php).
@@ -22,9 +22,10 @@ const load = (file) => {
     return rows;
 };
 
+const repaired = args.repaired ?? 'out/repaired';
 const before = load('out/editor.jsonl');
-const after = load('out/repaired/editor.jsonl');
-const changed = JSON.parse(readFileSync('out/repaired/changed.json', 'utf8'));
+const after = load(`${repaired}/editor.jsonl`);
+const changed = JSON.parse(readFileSync(`${repaired}/changed.json`, 'utf8'));
 const changedKeys = new Set([
     ...changed.templates.map((h) => `template:${h}`),
     ...changed.generations.map((id) => `generation:${id}`),
@@ -44,10 +45,10 @@ for (const [key, r] of before) {
 
 // Block level: per document, invalid blocks of each kind after <= before.
 const tally = (list) => list.reduce((m, x) => m.set(x.block, (m.get(x.block) ?? 0) + 1), new Map());
-for (const [key, a] of after) {
-    const b = before.get(key);
-    if (!b) {
-        fail(`${key} is missing from the baseline`);
+for (const [key, b] of before) {
+    const a = after.get(key);
+    if (!a) {
+        fail(`${key} is missing from the repaired verdicts`);
         continue;
     }
     const was = tally(b.invalid);
@@ -62,7 +63,8 @@ for (const r of invalidSince) {
     const a = after.get(`generation:${r.id}`);
     const ok = a !== undefined && a.invalid.length === 0;
     if (ok) fixed++;
-    console.log(`${ok ? 'valid  ' : 'invalid'}  ${r.id}  ${r.model_id ?? ''}  ${ok ? '' : a.invalid.map((x) => x.block).join(', ')}`);
+    const blocks = a === undefined ? 'missing from the repaired verdicts' : a.invalid.map((x) => x.block).join(', ');
+    console.log(`${ok ? 'valid  ' : 'invalid'}  ${r.id}  ${r.model_id ?? ''}  ${ok ? '' : blocks}`);
 }
 
 const count = (rows) => [...rows.values()].filter((r) => r.kind === 'generation' && r.invalid.length).length;
