@@ -16,13 +16,28 @@ Then, from this directory:
 
 ```bash
 node editor.mjs                                  # verdict + validateBlock() diff per rejected block
-node classify.mjs --since=2026-08-01 --verbose   # failure families
+node classify.mjs --since=2026-08-01 --verbose=1   # failure families
 node recovery.mjs --since=2026-08-01             # replay createBlock() recovery, diff the root element
 ```
+
+The bare `--verbose` flag parses as undefined and silently caps each family at 4 lines; always pass `--verbose=1`.
 
 The scripts reuse the smoke harness's Playwright and credentials (`../../smoke`),
 so `smoke/npm install` must have run once. The verdict comes from the lab
 site's own editor: its exact Gutenberg, and every block the site registers.
+
+## Net check (spec S18 Phase A)
+
+```bash
+node net-check.mjs
+```
+
+Creates three AI Forge drafts from generations 6363, 6379 and 7059 plus one non-AI
+draft, opens each in the lab editor, and checks that nothing was saved on open,
+that the dark section kept its `background-color`, that the non-AI draft's invalid
+blocks were left to Gutenberg, and that the Site Editor does not get the draft flag.
+The posts are deleted in a `finally`. Exit 0 when every check passes; screenshots in
+`out/net-check/`.
 
 ## Things that will mislead you
 
