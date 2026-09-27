@@ -102,25 +102,38 @@ class TrapCheckerStatsTest extends TestCase
         }
     }
 
-    public function testAnUnpaddedStepSequenceIsExemptOnARealRun(): void
+    public function testOnlyZeroPaddedStepsAreExemptSo7492IsAKnownFalseLoss(): void
     {
-        // 7492 numbers the four steps of the initial assessment 1, 2, 3, 4.
+        // 7492 numbers the four steps of the initial assessment 1, 2, 3, 4. The spec exempts
+        // only 01-09: an unpadded run cannot be told apart from invented counts.
         $result = $this->checkRun('7492', ['1998' => ['en 1998'], '3' => ['trois kinésithérapeutes'], '69003' => ['69003 Lyon'], '0472000000' => ['04 72 00 00 00']]);
 
-        $this->assertSame(TrapChecker::PASS, $result['stat_grounding']['status'], implode("\n", $result['stat_grounding']['findings']));
+        $this->assertSame(TrapChecker::FAIL, $result['stat_grounding']['status']);
+        $this->assertTrue(self::mentions($result['stat_grounding'], '«1»'));
     }
 
-    public function testALoneOneIsNotAStep(): void
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function t1FilesWithoutSmallFigures(): array
     {
-        $template = '<p class="is-style-stat-value">240+</p>';
-        $output = '<p class="is-style-stat-value">2019</p><p class="is-style-stat-value">12</p><p class="is-style-stat-value">1</p>'
-            . '<p class="is-style-stat-value">1</p><p class="is-style-stat-value">2</p>';
-        $entry = ManifestEntry::fromArray(['id' => 'x', 'figures' => ['2019' => ['in 2019'], '12' => ['twelve people']]]);
+        return ['hard-01' => ['hard-01-menuiserie-atelier'], 'hard-10' => ['hard-10-vet-clinic'], 'hard-07' => ['hard-07-organisme-formation']];
+    }
 
-        $result = (new TrapChecker())->check($entry, "# T\n", $template, $output);
+    #[DataProvider('t1FilesWithoutSmallFigures')]
+    public function testInventedOneTwoThreeFailOnAT1File(string $entryId): void
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $entry = $manifest->entry($entryId);
+        $template = '<p class="is-style-stat-value">240+</p>';
+        $year = array_key_first($entry->figures);
+        $output = "<p class=\"is-style-stat-value\">{$year}</p><p class=\"is-style-stat-value\">1</p>"
+            . '<p class="is-style-stat-value">2</p><p class="is-style-stat-value">3</p>';
+
+        $result = (new TrapChecker($manifest->settings))->check($entry, (string) $manifest->markdown($entry), $template, $output);
 
         $this->assertSame(TrapChecker::FAIL, $result['stat_grounding']['status']);
-        $this->assertCount(3, $result['stat_grounding']['findings']);
+        $this->assertTrue(self::mentions($result['stat_grounding'], '«1»'));
     }
 
     public function testAFigureSpelledAsTheManifestStatesItHoldsAFigureOnARealRun(): void

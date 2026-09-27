@@ -214,11 +214,9 @@ final class TrapChecker
     private function statGrounding(ManifestEntry $entry, GenerationDocument $output): array
     {
         $findings = [];
-        $values = $output->statValues();
-        $steps = self::stepSequence($values);
 
-        foreach ($values as $i => $value) {
-            if (preg_match(self::STEP_NUMBER, trim($value)) === 1 || isset($steps[$i])) {
+        foreach ($output->statValues() as $value) {
+            if (preg_match(self::STEP_NUMBER, trim($value)) === 1) {
                 continue;
             }
 
@@ -271,37 +269,6 @@ final class TrapChecker
         }
 
         return false;
-    }
-
-    /**
-     * Indices of stat-values numbered 1, 2, 3… in a run of at least three:
-     * steps without the zero padding, not figures.
-     *
-     * @param string[] $values
-     * @return array<int, true>
-     */
-    private static function stepSequence(array $values): array
-    {
-        $steps = [];
-        $values = array_values(array_map('trim', $values));
-
-        foreach ($values as $start => $value) {
-            if ($value !== '1') {
-                continue;
-            }
-
-            $end = $start;
-
-            while (isset($values[$end + 1]) && $values[$end + 1] === (string) ($end + 2 - $start)) {
-                $end++;
-            }
-
-            if ($end - $start >= 2) {
-                $steps += array_fill_keys(range($start, $end), true);
-            }
-        }
-
-        return $steps;
     }
 
     /**
