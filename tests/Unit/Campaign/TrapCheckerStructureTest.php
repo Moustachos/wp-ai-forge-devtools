@@ -287,6 +287,42 @@ class TrapCheckerStructureTest extends TestCase
         $this->assertSame($expected, $result['cta_grounding']['status'], implode("\n", $result['cta_grounding']['findings']));
     }
 
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function landmarkCollisions(): array
+    {
+        return [
+            "«Voir l'entretien» @ hard-03" => ["Voir l'entretien", 'hard-03-cabinet-comptable'],
+            '«Entretien de gestion» @ hard-03' => ['Entretien de gestion', 'hard-03-cabinet-comptable'],
+            '«Entretien de chaudière» @ hard-09' => ['Entretien de chaudière', 'hard-09-plomberie'],
+            '«Remplacement de chaudière» @ hard-09' => ['Remplacement de chaudière', 'hard-09-plomberie'],
+            '«Réparation de fuite» @ hard-09' => ['Réparation de fuite', 'hard-09-plomberie'],
+            '«Voir nos travaux» @ hard-09' => ['Voir nos travaux', 'hard-09-plomberie'],
+            '«Voir les commentaires» @ hard-09' => ['Voir les commentaires', 'hard-09-plomberie'],
+            '«Commencer» @ hard-09' => ['Commencer', 'hard-09-plomberie'],
+            '«Voir les transports» @ hard-05' => ['Voir les transports', 'hard-05-association-quartier'],
+            '«Chronic care management» @ hard-10' => ['Chronic care management', 'hard-10-vet-clinic'],
+            '«Managed care» @ hard-10' => ['Managed care', 'hard-10-vet-clinic'],
+        ];
+    }
+
+    /**
+     * A heading or link word admits a label only as written (plural aside) and only
+     * behind a navigation word: no prefix stem, and no bare service name as a button.
+     */
+    #[DataProvider('landmarkCollisions')]
+    public function testALabelOnlyNearAHeadingWordFails(string $label, string $entryId): void
+    {
+        $manifest = CorpusManifest::fromName(\dirname(__DIR__, 3) . '/bench/ci-corpus', 'hard');
+        $entry = $manifest->entry($entryId);
+        $output = "<div class=\"wp-block-button\"><a class=\"wp-block-button__link\">{$label}</a></div>";
+
+        $result = (new TrapChecker($manifest->settings))->check($entry, (string) $manifest->markdown($entry), self::GRID_TEMPLATE, $output);
+
+        $this->assertSame(TrapChecker::FAIL, $result['cta_grounding']['status']);
+    }
+
     public function testCtaNeedsAButtonInTheTemplate(): void
     {
         $result = $this->checker()->check($this->entry(), self::SOURCE, '<p>x</p>', '<a class="wp-block-button__link">Essai gratuit</a>');

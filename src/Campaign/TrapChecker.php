@@ -393,7 +393,7 @@ final class TrapChecker
         }
 
         $navigation = [];
-        $landmarkStems = [];
+        $landmarks = [];
 
         foreach ($this->settings->ctaNavigation as $phrase) {
             foreach (TextTools::words($phrase) as $word) {
@@ -401,11 +401,9 @@ final class TrapChecker
             }
         }
 
-        $landmarks = array_merge(array_column($source->headings(), 'text'), $source->linkTexts());
-
-        foreach ($landmarks as $landmark) {
+        foreach (array_merge(array_column($source->headings(), 'text'), $source->linkTexts()) as $landmark) {
             foreach (TextTools::contentWords($landmark) as $word) {
-                $landmarkStems[TextTools::stem($word)] = true;
+                $landmarks[self::singular($word)] = true;
             }
         }
 
@@ -427,12 +425,14 @@ final class TrapChecker
             ));
 
             // A way around the page ("Voir la boutique", "Nos revendeurs") names
-            // what the source's headings and links name; a request verb never
-            // takes this path.
-            $navigates = array_filter(
-                $content,
-                static fn (string $word): bool => !isset($navigation[$word]) && !isset($landmarkStems[TextTools::stem($word)])
-            ) === [];
+            // what the source's headings and links name, word for word (plural
+            // aside, no stem), behind a navigation word; a request verb never
+            // takes this path, and a bare service name is not a way around.
+            $navigates = array_intersect_key($navigation, array_flip($words)) !== []
+                && array_filter(
+                    $content,
+                    static fn (string $word): bool => !isset($navigation[$word]) && !isset($landmarks[self::singular($word)])
+                ) === [];
 
             if ($stray !== [] && !$navigates) {
                 $findings[] = "«{$label}»: " . implode(', ', $stray) . ' named in no offer';
@@ -440,6 +440,15 @@ final class TrapChecker
         }
 
         return self::outcome($findings);
+    }
+
+    /**
+     * A folded word without its plural mark: "programmes" meets "programme",
+     * "travaux" does not meet "travailler".
+     */
+    private static function singular(string $word): string
+    {
+        return \strlen($word) > 4 && \in_array(substr($word, -1), ['s', 'x'], true) ? substr($word, 0, -1) : $word;
     }
 
     /**
