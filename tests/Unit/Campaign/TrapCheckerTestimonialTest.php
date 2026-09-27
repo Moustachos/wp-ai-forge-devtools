@@ -159,6 +159,20 @@ class TrapCheckerTestimonialTest extends TestCase
         $this->assertStringContainsString('«Shiftloom was founded', implode("\n", $result['testimonial_repurposed']['findings']));
     }
 
+    public function testSourceSentencesWithAnAppendedEndorsementFail(): void
+    {
+        $html = $this->fixture('7472.html');
+        $lifted = "Nous savons d'où viennent les fromages que nous proposons, comment ils ont été fabriqués, et dans quel état nous souhaitons les présenter.";
+        $this->assertStringContainsString($lifted, $html);
+
+        $tampered = str_replace($lifted, $lifted . ' Une adresse que je recommande les yeux fermés à tous mes amis gourmets.', $html);
+        $result = $this->check(ManifestEntry::fromArray(['id' => '7472']), '7472', $tampered);
+
+        $this->assertSame(TrapChecker::FAIL, $result['testimonial_grounding']['status']);
+        $this->assertStringContainsString('«Une adresse que je recommande', implode("
+", $result['testimonial_grounding']['findings']));
+    }
+
     public function testAnInventedQuoteSpanningSeveralSentencesStillFails(): void
     {
         $template = '<p class="is-style-testimonial">"x"</p>';

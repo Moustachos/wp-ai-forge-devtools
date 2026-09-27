@@ -107,8 +107,13 @@ final class TrapChecker
 
             $label = '«' . mb_strimwidth($testimonial['quote'], 0, 60, '…') . '»';
 
-            if (self::bestWindowOverlap($words, $sentences, self::sentenceCount($testimonial['quote']) + 1) < $this->settings->quoteMatch) {
-                $invented[] = "{$label}: matches no source sentence";
+            $unmatched = $this->unmatchedSentences($testimonial['quote'], $sentences);
+
+            if ($unmatched !== []) {
+                $invented[] = "{$label}: " . implode(', ', array_map(
+                    static fn (string $s): string => '«' . mb_strimwidth($s, 0, 60, '…') . '»',
+                    $unmatched
+                )) . ' matches no source sentence';
             } elseif (
                 $testimonial['attribution'] !== null
                 && !$this->isKnownAttribution($entry, $testimonial['attribution'])
@@ -124,33 +129,40 @@ final class TrapChecker
     }
 
     /**
-     * Best overlap with a run of consecutive source sentences. The run grows
-     * with the quote, one sentence past its own count, so a paragraph lifted
-     * whole is matched while a short quote is still held to one or two sentences.
+     * Sentences of the quote that match no source sentence or consecutive pair.
+     * Each sentence is held to the source on its own, so a paragraph lifted whole
+     * passes while one invented sentence appended to it does not.
      *
-     * @param string[] $words
      * @param array<int, string[]> $sentences content words of each source sentence
+     * @return string[]
      */
-    private static function bestWindowOverlap(array $words, array $sentences, int $span): float
+    private function unmatchedSentences(string $quote, array $sentences): array
     {
-        $best = 0.0;
-        $span = max(2, $span);
+        $unmatched = [];
 
-        foreach (array_keys($sentences) as $i) {
-            $window = [];
+        foreach (preg_split('/(?<=[.!?…])\s+/u', trim($quote), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $sentence) {
+            $words = TextTools::contentWords($sentence);
 
-            for ($j = $i; $j < $i + $span && isset($sentences[$j]); $j++) {
-                $window = array_merge($window, $sentences[$j]);
-                $best = max($best, TextTools::overlap($words, $window));
+            if ($words === []) {
+                continue;
+            }
+
+            $best = 0.0;
+
+            foreach ($sentences as $i => $candidate) {
+                $best = max($best, TextTools::overlap($words, $candidate));
+
+                if (isset($sentences[$i + 1])) {
+                    $best = max($best, TextTools::overlap($words, array_merge($candidate, $sentences[$i + 1])));
+                }
+            }
+
+            if ($best < $this->settings->quoteMatch) {
+                $unmatched[] = $sentence;
             }
         }
 
-        return $best;
-    }
-
-    private static function sentenceCount(string $text): int
-    {
-        return \count(preg_split('/(?<=[.!?…])\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [$text]);
+        return $unmatched;
     }
 
     /**
